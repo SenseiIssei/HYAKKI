@@ -79,6 +79,8 @@ function hydrate(b: SaveBlob): GameState {
     purchases: (b.purchases as Record<string, number>) ?? {},
     vows: Array.isArray(b.vows) ? (b.vows as string[]) : [],
     silencedTicks: 0,
+    // transient combat state — drawn fresh, never serialised
+    abilityCd: {},
 
     keys: typeof b.keys === 'number' ? b.keys : 1,
     layerNames: n('layerNames'),
@@ -92,6 +94,8 @@ function hydrate(b: SaveBlob): GameState {
     rules: (b.rules as Record<string, number>) ?? {},
     myriadFelled: !!b.myriadFelled,
     fragments: Array.isArray(b.fragments) ? (b.fragments as number[]) : [],
+    snuffed: Array.isArray(b.snuffed) ? (b.snuffed as number[]) : [],
+    hundredth: !!b.hundredth,
     observations: Array.isArray(b.observations) ? (b.observations as string[]) : [],
     authored: (b.authored as GameState['authored']) ?? null,
 
@@ -100,6 +104,10 @@ function hydrate(b: SaveBlob): GameState {
     slotBonus: n('slotBonus'),
     ghosts: Array.isArray(b.ghosts) ? (b.ghosts as GameState['ghosts']) : [],
     echoes: n('echoes'),
+    kegare: n('kegare'),
+    ofuda: Array.isArray(b.ofuda) ? (b.ofuda as string[]) : [],
+    ofudaCharges: (b.ofudaCharges as Record<string, number>) ?? {},
+    ofudaOwned: Array.isArray(b.ofudaOwned) ? (b.ofudaOwned as string[]) : [],
 
     totalTicks: n('totalTicks'),
     totalKills: n('totalKills'),

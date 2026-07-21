@@ -1,12 +1,26 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Decimal from 'break_infinity.js'
 import { BALANCE as B } from '../content/balance'
 import { CLASS_BY_ID } from '../content/classes'
 import { WARDEN_BY_ID } from '../content/wardens'
 import { currentTarget } from '../sim/enemies'
-import { Backdrop } from './Backdrop'
-import { PixelWalker, PixelYokai } from './PixelActor'
-import { game, getFloaters, getLog, stats, useUI } from '../store/gameStore'
+import { SPECIES_BY_ID } from '../pixel/species'
+import { Backdrop, regionFor } from './Backdrop'
+import { setAmbience } from '../audio/engine'
+import { PixelCorpse, PixelWalker, PixelYokai } from './PixelActor'
+import {
+  game,
+  getCasts,
+  getDeaths,
+  getFloaters,
+  getImpact,
+  getLog,
+  stats,
+  useUI,
+  type Floater,
+} from '../store/gameStore'
+import { AbilityVfx } from './AbilityVfx'
+import { AbilityBar } from './AbilityBar'
 import { fmt, fmtInt } from '../format'
 
 function pct(cur: Decimal, max: Decimal): number {
@@ -106,15 +120,74 @@ export function Column() {
     prevSoldierHp.current = g.soldier.hp
   })
 
+  // the sound of where you are follows the region under your feet
+  const region = regionFor(g.rank)
+  useEffect(() => {
+    setAmbience(region.id)
+  }, [region.id])
+
+  const species = target.speciesId ? SPECIES_BY_ID[target.speciesId] : null
   const floaters = getFloaters()
+  const deaths = getDeaths()
+  const casts = getCasts()
   const resolveThreshold = 100
   const bracing = g.sigKind === 'brace'
+
+  // ── impact: a shake on a kill, a bigger one on a Warden, hit-stop on a crit ──
+  const shake = useUI((s) => s.screenShake)
+  const impact = getImpact()
+  const prevImpact = useRef(impact)
+  const [jolt, setJolt] = useState<'' | 'shake' | 'shake-hard' | 'stop'>('')
+  useEffect(() => {
+    if (!shake) {
+      prevImpact.current = impact
+      return
+    }
+    let next: '' | 'shake' | 'shake-hard' | 'stop' = ''
+    // an ability shakes by its tier; the ultimate rocks the whole frame
+    if (impact.cast !== prevImpact.current.cast)
+      next = impact.castTier >= 3 ? 'shake-hard' : impact.castTier >= 2 ? 'shake' : 'stop'
+    else if (impact.warden !== prevImpact.current.warden) next = 'shake-hard'
+    else if (impact.kill !== prevImpact.current.kill) next = 'shake'
+    else if (impact.crit !== prevImpact.current.crit) next = 'stop'
+    prevImpact.current = impact
+    if (!next) return
+    setJolt(next)
+    const id = window.setTimeout(() => setJolt(''), next === 'shake-hard' ? 300 : 150)
+    return () => window.clearTimeout(id)
+  }, [impact.kill, impact.crit, impact.warden, impact.cast, impact.castTier, shake])
+
+  // ── the actual fighting: the walker lunges on a swing, the struck side recoils ──
+  const [lunge, setLunge] = useState(false)
+  const prevSwing = useRef(impact.swing)
+  useEffect(() => {
+    if (impact.swing === prevSwing.current) return
+    prevSwing.current = impact.swing
+    setLunge(true)
+    const id = window.setTimeout(() => setLunge(false), 160)
+    return () => window.clearTimeout(id)
+  }, [impact.swing])
+
+  const [recoil, setRecoil] = useState<'' | 'enemy' | 'soldier'>('')
+  const prevSwingR = useRef(impact.swing)
+  const prevStruck = useRef(impact.struck)
+  useEffect(() => {
+    let who: '' | 'enemy' | 'soldier' = ''
+    if (impact.swing !== prevSwingR.current) who = 'enemy' // your hit knocks it back
+    else if (impact.struck !== prevStruck.current) who = 'soldier' // its hit knocks you
+    prevSwingR.current = impact.swing
+    prevStruck.current = impact.struck
+    if (!who) return
+    setRecoil(who)
+    const id = window.setTimeout(() => setRecoil(''), 130)
+    return () => window.clearTimeout(id)
+  }, [impact.swing, impact.struck])
 
   if (numbersOnly) return <NumbersOnly />
 
   return (
     <main className="column">
-      <Backdrop ri={g.rank} still={g.dead} />
+      <Backdrop ri={g.rank} still={g.dead} kegare={g.kegare} />
       <div className="rank-block">
         <span className="kanji-watermark" aria-hidden="true">
           里
@@ -123,8 +196,13 @@ export function Column() {
         <div className="rank-number">{fmtInt(g.rank)}</div>
         <div className="rank-rule" />
         <div className={`enemy-name ${target.ghost ? 'returned' : ''}`}>
+          {species && <span className="kanji enemy-kanji">{species.kanji}</span>}
           {target.name || <span className="unnamed">（ ）</span>}
         </div>
+        {/* the Register's one line on it — the first time you meet each */}
+        {species && (
+          <div className="enemy-lore">{species.lore}</div>
+        )}
         {/* The whole thesis of the game, stated quietly. */}
         {target.ghost && (
           <div className="returned-note">
@@ -137,22 +215,23 @@ export function Column() {
 
       <StandBanner />
 
-      <div className="arena">
-        <div className="combatant">
+      <div className={`arena ${jolt}`}>
+        {/* the art overlays, drawn over the whole arena */}
+        {casts.map((c) => (
+          <AbilityVfx key={c.id} cast={c} />
+        ))}
+        <div className={`combatant ${recoil === 'soldier' ? 'recoil-left' : ''}`}>
           <div className="floaters">
-            {floaters
-              .filter((f) => f.target === 'soldier')
-              .map((f) => (
-                <div key={f.id} className="floater soldier" style={{ marginLeft: f.x }}>
-                  {f.text}
-                </div>
-              ))}
+            <FloatColumn floaters={floaters} side="soldier" />
           </div>
-          <PixelWalker
-            stats={st}
-            pose={bracing ? 'brace' : soldierHurt ? 'hit' : 'strike'}
-            flash={soldierHurt}
-          />
+          <span className={`fighter ${lunge ? 'lunge-right' : ''}`}>
+            <PixelWalker
+              stats={st}
+              pose={bracing ? 'brace' : soldierHurt ? 'hit' : lunge ? 'strike' : 'walk'}
+              flash={soldierHurt}
+              kegare={g.kegare}
+            />
+          </span>
           <div className="bar">
             <div className="bar-fill" style={{ width: `${pct(g.soldier.hp, st.hp)}%` }} />
             {g.soldier.shield.gt(0) && (
@@ -182,19 +261,9 @@ export function Column() {
           </div>
         </div>
 
-        <div className="combatant">
+        <div className={`combatant ${recoil === 'enemy' ? 'recoil-right' : ''}`}>
           <div className="floaters">
-            {floaters
-              .filter((f) => f.target === 'enemy')
-              .map((f) => (
-                <div
-                  key={f.id}
-                  className={`floater ${f.crit ? 'crit' : ''}`}
-                  style={{ marginLeft: f.x }}
-                >
-                  {f.text}
-                </div>
-              ))}
+            <FloatColumn floaters={floaters} side="enemy" />
           </div>
           <span
             className={`${g.enemy.untargetable > 0 ? 'faded' : ''} ${
@@ -202,6 +271,17 @@ export function Column() {
             }`}
           >
             <PixelYokai enemy={target} flash={enemyHurt} />
+            {/* the fallen, dissolving where they stood */}
+            {deaths.map((d) => (
+              <span key={d.id} className={`corpse die-${d.family}`}>
+                <PixelCorpse
+                  family={d.family}
+                  seed={d.seed}
+                  speciesId={d.speciesId}
+                  scale={d.warden ? 6 : 5}
+                />
+              </span>
+            ))}
           </span>
           <div className="bar">
             <div
@@ -227,7 +307,39 @@ export function Column() {
           )}
         </div>
       </div>
+
+      <AbilityBar />
     </main>
+  )
+}
+
+/**
+ * Flying damage numbers for one side. Each carries its own arc in CSS custom
+ * properties, so the motion runs on the compositor at full framerate rather
+ * than at the sim's 10Hz frame bump.
+ */
+function FloatColumn({ floaters, side }: { floaters: Floater[]; side: 'enemy' | 'soldier' }) {
+  return (
+    <>
+      {floaters
+        .filter((f) => f.target === side)
+        .map((f) => (
+          <div
+            key={f.id}
+            className={`floater fl-${f.kind}`}
+            style={{
+              ['--dx' as string]: `${f.dx}px`,
+              ['--peak' as string]: `${-f.peak}px`,
+              ['--fall' as string]: `${f.fall}px`,
+              ['--fs' as string]: String(f.scale),
+              color: f.color,
+            }}
+          >
+            {f.label && <span className="fl-label">{f.label}</span>}
+            {f.text}
+          </div>
+        ))}
+    </>
   )
 }
 

@@ -1,113 +1,187 @@
-# MYRIAD
+<div align="center">
 
-> *Ten thousand soldiers marched into the Hollow to kill a god.*
-> *They succeeded.*
-> *The god, dying, forgot how to end.*
-> *Its death is still happening. You are inside it.*
+<img src=".github/assets/banner.svg" alt="百鬼 HYAKKI — a hundred demons" width="100%" />
 
-**MYRIAD** is an infinitely-scaling idle auto-battler about one nameless soldier in an endless column, marching into the still-dying body of a god. You pick a class, you never touch a button in combat, and the number on your back goes up forever.
+<br/>
+
+**An idle auto-battler descent through Japanese folklore — endless, procedural, and quietly horrifying.**
+You march. You never stop. The Parade does not stop because you looked away.
+
+<br/>
+
+![Platform](https://img.shields.io/badge/platform-Windows-0a0908?style=for-the-badge&labelColor=c1372b)
+![Built with](https://img.shields.io/badge/React_·_TypeScript_·_Tauri-14110f?style=for-the-badge&labelColor=46707a)
+![Tests](https://img.shields.io/badge/tests-138_passing-4a6b3f?style=for-the-badge)
+![Assets](https://img.shields.io/badge/art_%26_audio-0_asset_files-b8912f?style=for-the-badge)
+
+[![Download](https://img.shields.io/badge/⬇_Download-Windows_Installer-c1372b?style=for-the-badge)](https://github.com/SenseiIssei/HYAKKI/releases)
+[![Roadmap](https://img.shields.io/badge/📜_Roadmap-The_Descent_Rebuilt-46707a?style=for-the-badge)](https://claude.ai/code/artifact/35e33d40-f417-4a79-915a-94c90d102493)
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/senseiissei)
+
+</div>
 
 ---
 
-## The pitch in one paragraph
+## 百 What it is
 
-You are Soldier #1 of the Myriad. You march. You fight automatically. Eventually you meet something you cannot kill, and you die — and you wake at the start of the march as Soldier #2, permanently stronger, carrying **Ash** from everything you burned through. Do that a few hundred times and you stop being a number: you earn a **Name**, and Names buy things numbers cannot. Do it long enough and the enemies start looking familiar, because the game has been saving your corpses, and now it is sending them back at you with your own stats. The final upgrade is not a stat. It's becoming the thing that stopped you.
+**HYAKKI** (百鬼, *"a hundred demons"*) is a desktop idle game. You play a small soldier walking an endless road down through **Yomi**, the Japanese underworld — past the emptied village, across the river of three crossings, into the eight hot hells. Everything auto-battles. Your job is what you *become* between fights: what you learn, what you carry, and how far you're willing to defile yourself to go deeper.
+
+It is built on a hard rule: **zero art and zero audio assets.** Every sprite is a hand-authored pixel grid. Every sound is Web Audio synthesis. Every drop of music is generated on a dark pentatonic scale. Even the app icon is made by a script. Nothing here was drawn by hand — it was all placed, pixel by pixel and partial by partial.
+
+<div align="center">
+<br/>
+<img src=".github/assets/bestiary.png" alt="The bestiary: Kozō, Karakasa, Oni, Gashadokuro, Onryō, Yuki-onna, Ushi-oni, and a Mu" width="92%" />
+<br/>
+<sub><i>A handful of the seventeen yōkai — every one a real creature from the folklore, rendered from the game's own sprite engine.</i></sub>
+</div>
 
 ---
 
-## Genre & references
+## 鬼 The road, and the things on it
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### The descent
+- **Endless, procedural.** An infinite counter of Worlds and Stages, each seeded to be its own place.
+- **Seven classes**, each defined by how it *produces* damage, not which stat is highest.
+- **Wardens** — the **Ten Kings** of the courts of the dead, each a still, staring, one-of-ten sprite.
+- **Kegare** 穢れ — defilement that buys power and sells back safety. A filthy walk hits harder and dies easier.
+- **Ofuda** 御札 — four paper wards, chosen before a walk, each holding back one kind of thing.
+
+</td>
+<td width="50%" valign="top">
+
+### The arts
+- **Six auto-cast abilities** with cooldowns that **level and escalate** as you descend — a tier-1 flourish becomes a tier-3 catastrophe.
+- **Iai · Hi-no-Kagura · Raijin · Kamaitachi · Meido-gaeshi · Hyakki-ō** — the sky comes down.
+- **Full-arena VFX** — slashes, fire, lightning, void, meteors — all procedural SVG/CSS.
+- **Flying damage numbers** that arc off the point of impact.
+- **The Hundred Stories** — a Hyakumonogatari of 100 tales; read them and the room goes dark.
+
+</td>
+</tr>
+</table>
+
+<div align="center">
+<br/>
+<img src=".github/assets/walker-progression.png" alt="The walker gaining gear from Ri 1 to Ri 2000" width="78%" />
+<br/>
+<sub><i>The same soldier, deeper and deeper. Gear grows with power — and soon, with what you actually equip.</i></sub>
+</div>
+
+---
+
+## 算 By the numbers
+
+```mermaid
+%%{init: {'theme':'base','themeVariables':{'pie1':'#c1372b','pie2':'#b8912f','pie3':'#46707a','pie4':'#5a4663','pie5':'#4a6b3f','pieStrokeColor':'#0a0908','pieOuterStrokeColor':'#251e19','pieTitleTextColor':'#e4dccb','pieSectionTextColor':'#0a0908','pieLegendTextColor':'#9a9081'}}}%%
+pie showData
+    title Seventeen yōkai, four families
+    "Chaff — the small and many" : 5
+    "Organs — the horned and heavy" : 4
+    "Returned — the dead by how they died" : 4
+    "Nothing — the Mu, a hole in the world" : 2
+    "The Ten Kings" : 10
+```
 
 | | |
-|---|---|
-| **Genre** | Idle / incremental auto-battler with roguelite descents |
-| **Session shape** | Check in 3-6× a day for 2-10 min; runs overnight |
-| **Feels like** | Melvor Idle's depth × Vampire Survivors' pacing × Slay the Spire's map × a woodcut of hell |
-| **Platform** | Web (React + Vite + TypeScript), Tauri desktop shell later |
-| **Art** | Zero image assets. Every entity is a procedurally-generated symmetric SVG sigil, seeded by ID. |
-| **Monetization** | None. Free, offline-capable, no ads, no IAP. |
-| **Audio** | Drone, bell, breath. Almost no melody. |
+|---|---:|
+| Yōkai species (+ 10 Kings) | **17** |
+| Auto-cast arts | **6** |
+| Stories in the Hyakumonogatari | **100** |
+| Playable classes | **7** |
+| Relics & affixes (item foundation) | **34** |
+| Tests passing | **138** |
+| Art & audio asset files | **0** |
 
 ---
 
-## Documentation map
+## 界 Roadmap — *The Descent Rebuilt*
 
-| Doc | What's in it |
-|---|---|
-| [00 — Vision & Pillars](docs/00-VISION.md) | Design pillars, anti-goals, the one-sentence test |
-| [01 — Fiction & Glossary](docs/01-FICTION.md) | The world, the god, the naming conventions for everything |
-| [02 — Core Loop](docs/02-CORE-LOOP.md) | Minute-to-minute, session-to-session, week-to-week |
-| [03 — Combat & Math](docs/03-COMBAT-MATH.md) | Every formula. Damage, scaling, softcaps, prestige currency curves |
-| [04 — Classes](docs/04-CLASSES.md) | 6 starting + 3 unlockable classes, each with a distinct damage pipeline |
-| [05 — Progression](docs/05-PROGRESSION.md) | The three prestige layers, the Ash tree, Vows |
-| [06 — Relics](docs/06-RELICS.md) | Affix system, rarity, procedural generation, 40 handcrafted mythics |
-| [07 — Enemies & Wardens](docs/07-ENEMIES.md) | Five enemy families, ten named Wardens, the Returned system |
-| [08 — Descents (Dungeons)](docs/08-DESCENTS.md) | Branching node maps, Keys, five themed layers |
-| [09 — Art Direction](docs/09-ART-DIRECTION.md) | The sigil generator spec, palette, motion, typography |
-| [10 — UI & Screens](docs/10-UI-UX.md) | Every screen, wireframed in ASCII, plus the copy voice |
-| [11 — Architecture](docs/11-ARCHITECTURE.md) | Folder layout, headless sim, save format, Decimal math, offline catch-up |
-| [12 — Roadmap](docs/12-ROADMAP.md) | 7 phases from empty repo to endgame, with definition-of-done per phase |
-| [13 — Content Tables](docs/13-CONTENT-TABLES.md) | Ship-ready data: upgrade nodes, affixes, enemy stats, vow list |
-| [14 — Narrative](docs/14-NARRATIVE.md) | The fragment system, the twist, and how it's mechanically real |
+The next chapter turns the idle walk into a full RPG: World-Stage levels, a hundred and twenty equippable items across six slots, dungeons that drop loot, gear that changes how the soldier looks, five languages, and a game-like front menu.
 
----
+**📜 Read the full design bible → [The Descent Rebuilt](https://claude.ai/code/artifact/35e33d40-f417-4a79-915a-94c90d102493)**
 
-## Status
-
-**All seven phases complete. The game is finished and finishable.**
-
-Not done, deliberately: the Tauri desktop shell, cloud save, and deploying it anywhere —
-see [12 — Roadmap](docs/12-ROADMAP.md).
-
+```mermaid
+flowchart LR
+    P0([P0 · The Door]):::done --> P1([P1 · World–Stage]):::next
+    P1 --> P2([P2 · Six Slots])
+    P2 --> P3([P3 · Seven Rarities])
+    P3 --> P4([P4 · 120 Items])
+    P4 --> P5([P5 · Visual Gear])
+    P4 --> P6([P6 · The Dungeon])
+    P5 --> P7([P7 · Damage & Sound])
+    P6 --> P7
+    P7 --> P8([P8 · Creepier Music])
+    P8 --> P9([P9 · Five Tongues])
+    P9 --> P10([P10 · The Front Gate])
+    classDef done fill:#1a2e18,stroke:#4a6b3f,color:#cfe0c9;
+    classDef next fill:#2a1210,stroke:#c1372b,color:#f0d8d4;
 ```
+
+| | Phase | Delivers |
+|:--:|---|---|
+| ✅ | **The Door** | ✕ quits the app; minimize minimizes; the tray is now opt-in |
+| ▶ | **World–Stage** | `0-0, 0-1, 1-0…` infinite, each World procedurally themed |
+| | **Six Slots** | Head · Body · Legs · Hands · Weapon · Charm |
+| | **Seven Rarities** | Issued → Kept → Named → Blessed → Cursed → Myth → True-Name |
+| | **120 Items** | a full equippable catalogue with folklore lore |
+| | **Visual Gear** | equipped gear drives the walker's actual sprite |
+| | **The Dungeon** | delve with your loadout → tiered loot |
+| | **Damage & Sound** | weapon classes, richer maths, per-weapon sfx |
+| | **Creepier Music** | the score curdles as you descend |
+| | **Five Tongues** | English · Deutsch · 日本語 · Français · Español |
+| | **The Front Gate** | Continue / New Game / Enter Dungeon / … |
+
+---
+
+## 戸 Build & run
+
+```bash
+# prerequisites: Node 18+, Rust (for the desktop build)
 npm install
-npm run dev      # http://localhost:5180
-npm test         # 111 tests, incl. the balance-band and compounding design tests
-npx tsx scripts/balance.ts hoplite 25     # headless TTK curve, one run
-npx tsx scripts/prestige.ts hoplite 16 15 # does it compound? 16 Reveilles
-npx tsx scripts/offline.ts                # offline catch-up: speed and accuracy
-npx tsx scripts/interment.ts hoplite 60   # the Names economy over 60 Reveilles
+
+npm run dev      # play in the browser at localhost:5180
+npm test         # run the 138-test suite (balance + compounding + content)
+npm run build    # production web bundle
+
+# desktop installer (Windows) → src-tauri/target/release/bundle/
+npx @tauri-apps/cli@^1 build
 ```
 
-Working today: class select (Hoplite / Lampbearer / Augur, each with a real damage
-pipeline and an auto-firing Signature), infinite Ranks, procedural sigils for every
-entity, Bone economy, **Ash and Reveille**, **the 14-node tree with all 56 keystones
-implemented**, free Recant, **Stands every 10th Rank against five Wardens** with real
-telegraphed signatures, Burn, revives, shields, progressive-revelation onboarding,
-the Autopsy, save/load/export/import with rolling backups and a v1→v2 migration,
-offline catch-up, and two headless balance harnesses.
+The desktop shell is a real window with its own tray. **Closing it quits**; "Stop watching" drops it to the tray so the descent keeps running unwatched. The save is a real file at `%APPDATA%\dev.senseiissei.hyakki\` — not `localStorage`, which a browser wipe would eat.
 
-Phase 2 adds: **relics** (5 rarities, 14 affixes, 12 authored Myths and 6 True Names),
-the **sim-fork comparison card**, depth-gated slots, melt and bulk-melt, **all six
-classes** (Revenant / Chorus / Gravedigger earned through play), **Ghost snapshots**,
-and the **Organs** enemy family.
+---
 
-Measured: first run **Rank ~40**; compounding across 12 Reveilles with real equip
-decisions reaches **Rank 90**, monotonically, on all three starting classes.
+## 窟 Under the hood
 
-Phase 3 makes it genuinely idle: **offline catch-up** (12h window in 81ms),
-the **"While you slept" report**, **Standing Orders** (auto-Reveille, unlocked at
-Reveille 25), keyboard navigation, a **numbers-only mode**, and font scaling.
+| Layer | What |
+|---|---|
+| **Sim** | A pure, headless simulation in `src/sim/` — never imports React. `break_infinity.js` from commit one, because every stat is exponential. |
+| **Loop** | A wall-clock `setInterval` accumulator, **not** `requestAnimationFrame` — so the descent runs at full rate in a hidden window. |
+| **Art** | `src/pixel/` — sprites as character grids composited from parts per frame. The parallax world is rasterised coarse and upscaled nearest-neighbour so it shares the sprite grid. |
+| **Audio** | `src/audio/` — a generative score on the *in* scale (陰音階), a real cracked *bonshō*, per-region ambience, all synthesised. |
+| **Shell** | Tauri v1 (Rust) — real file saves with rotating backups, a system tray, and generated icons. |
 
-Measured: eight hours away returns **632 Ranks, 190 Stands, 33 Reveilles, 726 Ash**.
+Stack: **React 18 · Vite · TypeScript (strict) · Zustand · Tauri v1**.
 
-Phase 4 is the bargain: **Interment and Names**, the **Name shop**, **all 10 Vows**
-(every downside genuinely enforced), **Standing Orders tier 2** (auto-spend down a
-priority list), Wardens 6-8 with **T2 evolutions**, and **THE RETURNED** — enemies built
-from your own past runs, wearing their real coat numbers.
+---
 
-Phase 5 opens the second axis: **Descents** — Keys, branching route maps, all 9 room
-types, four Layers with their twists, the **live win estimate** (the real sim run 16 times
-over your plotted route), offline completion, CARTOGRAPHER, and the **Standing Orders
-priority list**.
+## 札 Support
 
-Phase 6 is the turn: **Apotheosis and Ichor** (7 rule modifiers that edit the game's own
-curves), **THE NOTHING** (erasure damage that ignores Armor and Evasion, and has no name),
-**30 fragments** with an Archive, **Warden authoring**, and **THE MYRIAD** — statted from
-every run you have ever recorded. Felling it locks your coat number at **#10,000** and
-there is no number after that one.
+HYAKKI is a solo project, built in the open. If the descent got its hooks in you, you can leave something in the tin:
 
-Phase 7 is the polish: **synthesised audio** (drone, bell, breath — no audio files, for
-the same reason there are no images), **20 observations** the game makes about you rather
-than tasks it sets you, **The Ledger** for everything it has been counting, plus the two
-gaps left open in Phase 6 — **Warden authoring now actually spawns** what you left behind,
-and **NOWHERE deletes your route** as you walk it.
+<div align="center">
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/senseiissei)
+
+</div>
+
+---
+
+<div align="center">
+<sub>百鬼 <b>HYAKKI</b> · made by <a href="https://github.com/SenseiIssei">SenseiIssei</a> · nothing here was drawn by hand</sub>
+</div>

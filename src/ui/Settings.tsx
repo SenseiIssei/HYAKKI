@@ -10,6 +10,10 @@ export function Settings() {
   const close = useUI((s) => s.setSettings)
   const numbersOnly = useUI((s) => s.numbersOnly)
   const setNumbersOnly = useUI((s) => s.setNumbersOnly)
+  const screenShake = useUI((s) => s.screenShake)
+  const setScreenShake = useUI((s) => s.setScreenShake)
+  const damageNumbers = useUI((s) => s.damageNumbers)
+  const setDamageNumbers = useUI((s) => s.setDamageNumbers)
   const fontScale = useUI((s) => s.fontScale)
   const setFontScale = useUI((s) => s.setFontScale)
   const audioOn = useUI((s) => s.audioOn)
@@ -101,6 +105,22 @@ export function Settings() {
             onChange={(e) => setNumbersOnly(e.target.checked)}
           />
           <span>Numbers only — no sigils, combat as a log</span>
+        </label>
+        <label className="orders-toggle">
+          <input
+            type="checkbox"
+            checked={damageNumbers}
+            onChange={(e) => setDamageNumbers(e.target.checked)}
+          />
+          <span>Floating damage numbers</span>
+        </label>
+        <label className="orders-toggle">
+          <input
+            type="checkbox"
+            checked={screenShake}
+            onChange={(e) => setScreenShake(e.target.checked)}
+          />
+          <span>Impact — hit-stop and screen shake</span>
         </label>
         <div className="panel-row">
           <span className="hint" style={{ alignSelf: 'center' }}>Text size</span>

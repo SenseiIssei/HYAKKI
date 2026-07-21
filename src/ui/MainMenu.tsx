@@ -21,6 +21,8 @@ export function MainMenu({
   const st = stats()
   const setSettings = useUI((s) => s.setSettings)
   const setLedger = useUI((s) => s.setLedger)
+  const setWards = useUI((s) => s.setWards)
+  const setStories = useUI((s) => s.setStories)
   const [confirming, setConfirming] = useState(false)
 
   const played = g.totalTicks > 0
@@ -87,6 +89,26 @@ export function MainMenu({
               {hasWalked ? 'Begin again' : 'Walk in'}
               {!hasWalked && <span className="menu-sub">choose what you were</span>}
             </button>
+            {g.ofudaOwned.length > 0 && (
+              <button className="menu-btn" onClick={() => setWards(true)}>
+                The Wards
+                <span className="menu-sub">
+                  {g.ofuda.length > 0
+                    ? `carrying ${fmtInt(g.ofuda.length)}`
+                    : 'paper against what walks'}
+                </span>
+              </button>
+            )}
+            {g.fragments.length > 0 && (
+              <button className="menu-btn" onClick={() => setStories(true)}>
+                A Hundred Candles
+                <span className="menu-sub">
+                  {g.snuffed.length > 0
+                    ? `${fmtInt(g.snuffed.filter((n) => n <= 99).length)} put out`
+                    : `${fmtInt(g.fragments.length)} lit`}
+                </span>
+              </button>
+            )}
             {hasWalked && (
               <button className="menu-btn" onClick={() => setLedger(true)}>
                 The Register

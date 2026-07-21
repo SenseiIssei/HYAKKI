@@ -4,6 +4,7 @@ import { BONE_UPGRADE_BY_ID } from '../content/upgrades'
 import { CLASS_BY_ID } from '../content/classes'
 import { TREE, keystoneFlags } from '../content/tree'
 import { AFFIX_BY_ID } from '../content/relics'
+import { bandFor } from '../content/kegare'
 import { equippedFlags, uniqueOf } from './relics'
 import type { GameState, StatBlock } from './types'
 
@@ -85,6 +86,17 @@ export function computeStats(s: GameState): StatBlock {
       mult[k as BaseKey] = (mult[k as BaseKey] ?? 1) * (v as number)
     }
   }
+
+  // ── KEGARE: what the road has left on you ──
+  // Defilement buys damage and Ash and sells back healing and armour. The split
+  // of kinds here is load-bearing: atk/reg/arm are MULTIPLICATIVE, but `af`
+  // (ash find) is ADDITIVE, because a multiplicative modifier on income feeds
+  // its own income and goes superexponential. See src/content/kegare.ts.
+  const kb = bandFor(s.kegare)
+  mult.atk = (mult.atk ?? 1) * kb.atk
+  mult.reg = (mult.reg ?? 1) * kb.reg
+  mult.arm = (mult.arm ?? 1) * kb.arm
+  add.af = (add.af ?? 0) + kb.ash
 
   const val = (k: BaseKey) => (base[k] + flat[k]) * (1 + (add[k] ?? 0)) * (mult[k] ?? 1)
 

@@ -9,8 +9,8 @@ export const BALANCE = {
   // ── soldier base statline ──
   BASE_HP: 140,
   BASE_REG: 3.0,
-  BASE_ATK: 14,
-  BASE_SPD: 1.0,
+  BASE_ATK: 17,
+  BASE_SPD: 1.35,
   BASE_ARM: 0,
   BASE_EVA: 0,
   BASE_CC: 0.05,
@@ -37,17 +37,22 @@ export const BALANCE = {
   HARDEN_1000: 1.05,
   HARDEN_10000: 1.09,
 
-  ENEMIES_PER_RANK_BASE: 4,
-  ENEMIES_PER_RANK_DIV: 25,
-  ENEMIES_PER_RANK_CAP: 12,
+  /**
+   * Pace. Fewer things per Ri and a faster base swing — the Ri counter should
+   * move often enough that you feel you are travelling, not grinding. Measured
+   * before/after in scripts/balance.ts.
+   */
+  ENEMIES_PER_RANK_BASE: 3,
+  ENEMIES_PER_RANK_DIV: 40,
+  ENEMIES_PER_RANK_CAP: 8,
 
   // ── stands ──
   STAND_EVERY: 10,
   STAND_HP_MULT: 8,
   STAND_ATK_MULT: 1.6,
-  /** seconds */
-  STAND_TIMER_BASE: 30,
-  STAND_TIMER_PER_100: 5,
+  /** seconds — a hearing should be tense, not a waiting room */
+  STAND_TIMER_BASE: 22,
+  STAND_TIMER_PER_100: 4,
   /** Learning shouldn't cost a run. Kept modest: the bonus only ever applies
    *  once per Warden, so a large one makes the NEXT run feel like a regression. */
   STAND_FIRST_SEEN_BONUS: 1.25,
@@ -60,7 +65,12 @@ export const BALANCE = {
   DAMAGE_FLOOR: 0.05,
 
   // ── economy ──
-  BONE_BASE: 2,
+  /**
+   * Raised alongside the enemy-count cut. Fewer things per Ri means fewer
+   * drops, so per-kill Tama has to rise or upgrades fall behind and the whole
+   * midgame slows down — measured, TTK hit 9.8s at Ri 40 before this.
+   */
+  BONE_BASE: 3.4,
   BONE_GROWTH: 1.11,
   BONE_STAND_MULT: 25,
   /**

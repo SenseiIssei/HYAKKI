@@ -20,7 +20,44 @@
   --mono: ui-monospace, 'Cascadia Mono', 'JetBrains Mono', Consolas, monospace;
   --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  --label: 0.14em;
+  /* Tracking was 0.14em on 10px text, which is close to unreadable at a
+     glance. Wide tracking is for a handful of words, not for labels you scan. */
+  --label: 0.09em;
+
+  /* One scale, so nothing is 10.5px by accident */
+  --fs-micro: 12px;
+  --fs-small: 13px;
+  --fs-body: 15px;
+  --fs-lead: 17px;
+}
+
+body {
+  font-size: var(--fs-body);
+}
+
+/* Readability pass: every label was --ash (#55504a) on #0a0908, which is about
+   2.6:1 — under the 4.5:1 floor the docs promised. These are the real fixes. */
+.currency-name,
+.trunk-blurb,
+.node-key-at,
+.up-blurb,
+.hint,
+.drawer-sub,
+.cmp-head,
+.cmp-note,
+.orders-when,
+.report-row span:first-child,
+.autopsy-stat span:first-child,
+.relic-rarity {
+  color: #9a9081;
+}
+
+.hint,
+.cmp-note,
+.node-key-text,
+.up-blurb {
+  font-size: var(--fs-small);
+  line-height: 1.6;
 }
 
 /* ── kanji ──────────────────────────────────────────────────── */
@@ -236,9 +273,9 @@ button {
 }
 
 .rank-label {
-  font-size: 10px;
-  letter-spacing: 0.42em;
-  color: var(--ash);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.34em;
+  color: #9a9081;
   text-transform: uppercase;
 }
 
@@ -258,12 +295,32 @@ button {
 }
 
 .enemy-name {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
   font-family: var(--serif);
-  font-size: 17px;
-  color: var(--bone-dim);
-  letter-spacing: 0.04em;
-  min-height: 22px;
+  font-size: 21px;
+  color: var(--bone);
+  letter-spacing: 0.06em;
+  min-height: 26px;
+  font-style: normal;
+}
+
+.enemy-kanji {
+  font-size: 24px;
+  color: var(--blood);
+  opacity: 0.9;
+}
+
+.enemy-lore {
+  font-family: var(--serif);
   font-style: italic;
+  font-size: var(--fs-small);
+  line-height: 1.55;
+  color: #9a9081;
+  max-width: 46ch;
+  margin: 6px auto 0;
 }
 
 .arena {
@@ -354,7 +411,7 @@ button {
 
 .bar {
   width: 100%;
-  height: 6px;
+  height: 10px;
   background: var(--void-lift);
   border: 1px solid var(--void-edge);
   position: relative;
@@ -381,9 +438,9 @@ button {
   display: flex;
   justify-content: space-between;
   font-family: var(--mono);
-  font-size: 10px;
-  color: var(--bone-dim);
-  letter-spacing: 0.05em;
+  font-size: var(--fs-small);
+  color: var(--bone);
+  letter-spacing: 0.02em;
 }
 
 /* ── damage numbers ─────────────────────────────────────────── */
@@ -456,15 +513,15 @@ button {
 }
 
 .currency-name {
-  font-size: 10px;
+  font-size: var(--fs-micro);
   letter-spacing: var(--label);
-  color: var(--ash);
   text-transform: uppercase;
 }
 
 .currency-value {
   font-family: var(--mono);
-  font-size: 15px;
+  font-size: 19px;
+  font-weight: 600;
   color: var(--bone);
 }
 
@@ -502,9 +559,11 @@ button {
 }
 
 .up-name {
-  font-size: 11px;
+  font-size: var(--fs-small);
+  font-weight: 600;
   letter-spacing: var(--label);
   text-transform: uppercase;
+  color: var(--bone);
 }
 
 .up-blurb {
@@ -1882,21 +1941,21 @@ button {
 
 .logstrip {
   flex: none;
-  height: 24px;
+  height: 30px;
   border-top: 1px solid var(--void-edge);
   display: flex;
   align-items: center;
   padding: 0 16px;
-  gap: 18px;
+  gap: 22px;
   overflow: hidden;
   font-family: var(--mono);
-  font-size: 10.5px;
-  color: var(--ash);
+  font-size: var(--fs-small);
+  color: #8a8173;
   white-space: nowrap;
 }
 
 .logstrip span:first-child {
-  color: var(--bone-dim);
+  color: var(--bone);
 }
 
 /* ── overlays ───────────────────────────────────────────────── */
@@ -2094,14 +2153,23 @@ button {
   border-color: var(--ash);
 }
 
-.class-card .sigil {
-  width: 96px;
-  height: 96px;
+/* the man himself, in the gear this class actually produces */
+.class-figure {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 156px;
+  image-rendering: pixelated;
+}
+
+.class-figure.shrouded {
+  opacity: 0.28;
+  filter: grayscale(1);
 }
 
 .class-name {
-  font-size: 12px;
-  letter-spacing: 0.24em;
+  font-size: var(--fs-small);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -2229,4 +2297,438 @@ button {
     animation: none;
   }
   /* damage numbers and hit flashes stay — they carry information */
+}
+
+/* ── KEGARE 穢れ ── */
+/* A bar you are FILLING, not a debuff icon: it is paying you the whole time. */
+.defile {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--void-edge);
+}
+
+.defile-bar {
+  height: 8px;
+  background: #17110f;
+  border: 1px solid var(--void-edge);
+  margin: 4px 0 6px;
+  overflow: hidden;
+}
+
+.defile-bar > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(to right, #6b4a2f, #8d2f27);
+  transition: width 400ms ease;
+}
+
+.defile-wash {
+  width: 100%;
+}
+
+.defile-wash:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ── OFUDA 御札 ── */
+.drawer.wards {
+  max-width: 560px;
+}
+
+.ward-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.ward-card {
+  text-align: left;
+  border: 1px solid var(--void-edge);
+  background: var(--void-lift);
+  padding: 12px 14px;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.ward-card:not(:disabled):hover {
+  border-color: var(--bone-dim);
+}
+
+/* a carried ward reads like a strip actually pasted down: vermilion edge */
+.ward-card.on {
+  border-color: var(--blood);
+  background: #1a1210;
+}
+
+.ward-card.locked {
+  opacity: 0.5;
+}
+
+.ward-card:disabled {
+  cursor: default;
+}
+
+.ward-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.ward-name {
+  font-family: var(--serif);
+  font-size: var(--fs-lead);
+  letter-spacing: 0.04em;
+}
+
+.ward-kanji {
+  color: var(--blood);
+  margin-right: 8px;
+}
+
+.ward-meta {
+  font-size: var(--fs-micro);
+  color: #9a9081;
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+
+.ward-text {
+  font-family: var(--jp), var(--serif);
+  font-size: var(--fs-small);
+  color: var(--bone-dim);
+  margin: 8px 0 4px;
+  letter-spacing: 0.08em;
+}
+
+.ward-lore {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: var(--fs-small);
+  line-height: 1.55;
+  color: #9a9081;
+}
+
+.ward-foot {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--void-edge);
+  font-size: var(--fs-small);
+  color: var(--ash);
+  line-height: 1.5;
+}
+
+/* ── HYAKUMONOGATARI 百物語 ── */
+.drawer.hyaku {
+  max-width: 640px;
+  transition: background 600ms ease;
+}
+
+.hyaku-room {
+  transition: opacity 700ms ease;
+  margin-top: 12px;
+}
+
+.candle-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 7px;
+}
+
+.candle {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border: 1px solid var(--void-edge);
+  background: #0d0b0a;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 3px;
+  transition: background 300ms ease, border-color 300ms ease;
+}
+
+.candle .flame {
+  position: absolute;
+  top: 12%;
+  width: 5px;
+  height: 8px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: transparent;
+}
+
+/* lit: a small warm flame that flickers */
+.candle.lit {
+  border-color: #4a3a22;
+  background: radial-gradient(ellipse at 50% 30%, rgba(184, 145, 47, 0.28), transparent 62%);
+  cursor: pointer;
+}
+
+.candle.lit .flame {
+  background: radial-gradient(ellipse at center, #ffd98a, #d8901f 60%, transparent 75%);
+  box-shadow: 0 0 6px 2px rgba(216, 144, 31, 0.55);
+  animation: flicker 1.7s ease-in-out infinite;
+}
+
+.candle.lit:hover {
+  border-color: var(--gold);
+}
+
+/* out: a dead wick, no light */
+.candle.out {
+  background: #080706;
+  border-color: #171310;
+  cursor: pointer;
+}
+
+.candle.out .flame {
+  background: #241c16;
+  box-shadow: none;
+}
+
+.candle:disabled {
+  cursor: default;
+}
+
+.candle-n {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ash);
+  opacity: 0.5;
+}
+
+/* the hundredth candle: taller flame, vermilion frame once ready */
+.candle.hundred {
+  border-color: #3a1c1a;
+}
+
+.candle.hundred.ready {
+  border-color: var(--blood);
+  background: radial-gradient(ellipse at 50% 30%, rgba(193, 55, 43, 0.4), transparent 60%);
+  animation: hundred-pulse 2.4s ease-in-out infinite;
+}
+
+.candle.hundred.ready .flame {
+  background: radial-gradient(ellipse at center, #cfe6ff, #46707a 60%, transparent 78%);
+  box-shadow: 0 0 10px 3px rgba(70, 112, 122, 0.7);
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; transform: translateY(0) scaleY(1); }
+  45% { opacity: 0.82; transform: translateY(0.5px) scaleY(0.92); }
+  70% { opacity: 0.95; transform: translateY(-0.5px) scaleY(1.05); }
+}
+
+@keyframes hundred-pulse {
+  0%, 100% { box-shadow: inset 0 0 8px rgba(193, 55, 43, 0.3); }
+  50% { box-shadow: inset 0 0 16px rgba(193, 55, 43, 0.55); }
+}
+
+.hyaku-foot {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--void-edge);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: var(--fs-small);
+  color: #9a9081;
+  line-height: 1.55;
+}
+
+/* one story, read on its own */
+.story-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(4, 3, 2, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.story {
+  max-width: 460px;
+  background: var(--void-lift);
+  border: 1px solid var(--void-edge);
+  padding: 24px 26px;
+}
+
+.story .frag-text {
+  margin: 12px 0 18px;
+  line-height: 1.7;
+}
+
+.story-hundred {
+  border-color: var(--ichor);
+  background: #0b0f10;
+}
+
+/* ── AOANDON 青行灯 ── */
+.aoandon {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  cursor: pointer;
+  background: #020304;
+  animation: ao-in 2.6s ease forwards;
+}
+
+.aoandon-dark {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 20%, #000 80%);
+}
+
+.aoandon-face {
+  position: relative;
+  width: 120px;
+  height: 150px;
+  z-index: 1;
+}
+
+.ao-glow {
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(ellipse at 50% 60%, rgba(70, 112, 122, 0.55), transparent 68%);
+  filter: blur(6px);
+  animation: flicker 2.3s ease-in-out infinite;
+}
+
+.ao-eyes {
+  position: absolute;
+  top: 46%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 26px;
+}
+
+.ao-eyes span {
+  width: 12px;
+  height: 4px;
+  background: #cfe6ff;
+  box-shadow: 0 0 8px 2px rgba(120, 180, 200, 0.8);
+}
+
+.ao-mouth {
+  position: absolute;
+  top: 63%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, #0a0f10 0 3px, #1a2a2e 3px 6px);
+  border-top: 1px solid #2a4a50;
+}
+
+.aoandon-line {
+  position: relative;
+  z-index: 1;
+  max-width: 42ch;
+  text-align: center;
+  font-family: var(--serif);
+  font-size: var(--fs-lead);
+  line-height: 1.75;
+  color: #b8ccd2;
+}
+
+.aoandon-sub {
+  position: relative;
+  z-index: 1;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: var(--fs-small);
+  color: #5f7a80;
+}
+
+@keyframes ao-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── IMPACT: shake and hit-stop ── */
+.arena.shake { animation: shake 150ms ease-out; }
+.arena.shake-hard { animation: shake-hard 260ms ease-out; }
+/* hit-stop: a single frozen beat, sold by a hard scale-punch that snaps back */
+.arena.stop { animation: hitstop 150ms steps(2, end); }
+
+@keyframes shake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(2px, -1px); }
+  75% { transform: translate(-1px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes shake-hard {
+  0% { transform: translate(0, 0) scale(1); }
+  15% { transform: translate(-4px, 2px) scale(1.01); }
+  35% { transform: translate(5px, -3px); }
+  55% { transform: translate(-4px, 2px); }
+  75% { transform: translate(3px, -1px); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes hitstop {
+  0% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arena.shake, .arena.shake-hard, .arena.stop { animation: none; }
+}
+
+/* ── DEATH: each family goes out its own way ── */
+.corpse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.corpse .pixel { image-rendering: pixelated; }
+
+/* chaff scatters — small, quick, thrown apart */
+.corpse.die-chaff { animation: die-chaff 500ms ease-out forwards; }
+@keyframes die-chaff {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: brightness(1.6); }
+  100% { opacity: 0; transform: translate(-50%, -60%) scale(1.25) rotate(8deg); filter: brightness(0.4); }
+}
+
+/* organs collapse — heavy, downward, folding */
+.corpse.die-organs { animation: die-organs 620ms cubic-bezier(0.5, 0, 0.9, 0.4) forwards; }
+@keyframes die-organs {
+  0% { opacity: 1; transform: translate(-50%, -50%) scaleY(1); }
+  40% { opacity: 0.9; transform: translate(-50%, -46%) scaleY(0.9); filter: brightness(0.7); }
+  100% { opacity: 0; transform: translate(-50%, -38%) scaleY(0.35) scaleX(1.1); filter: brightness(0.2); }
+}
+
+/* the returned fade upward — a ghost letting go */
+.corpse.die-returned { animation: die-returned 620ms ease-out forwards; }
+@keyframes die-returned {
+  0% { opacity: 0.85; transform: translate(-50%, -50%); filter: brightness(1.2) hue-rotate(0deg); }
+  100% { opacity: 0; transform: translate(-50%, -85%); filter: brightness(1.6) hue-rotate(-20deg) blur(2px); }
+}
+
+/* the Mu simply close — a hole shutting */
+.corpse.die-nothing { animation: die-nothing 500ms ease-in forwards; }
+@keyframes die-nothing {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.02); filter: brightness(0); }
+}
+
+/* a Warden's corpse lingers a beat longer, and dims rather than vanishes */
+.corpse.die-warden { animation: die-warden 620ms ease-out forwards; }
+@keyframes die-warden {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: brightness(1.4); }
+  100% { opacity: 0; transform: translate(-50%, -48%) scale(1.05); filter: brightness(0.15) saturate(0.4); }
 }

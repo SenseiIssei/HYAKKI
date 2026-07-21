@@ -4,8 +4,10 @@
 //!
 //! Two things this exists for, beyond having its own window:
 //!
-//! 1. **Closing it does not stop the Parade.** The window hides to the tray and
-//!    the simulation keeps running at full rate, which a browser tab cannot do.
+//! 1. **Closing quits; minimising minimises.** The X button ends the process.
+//!    To keep the Parade running unwatched, "Stop watching" (win_hide) drops it
+//!    to the tray instead — an opt-in, not the default the close button used to
+//!    be. The tray icon reopens it.
 //! 2. **The save is a real file.** `localStorage` is destroyed by "clear
 //!    browsing data", which people do routinely, and which would eat 200 hours.
 
@@ -167,10 +169,17 @@ fn main() {
             _ => {}
         })
         .on_window_event(|event| {
-            // Closing hides. The Parade does not stop because you looked away.
-            if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
-                let _ = event.window().hide();
-                api.prevent_close();
+            // Closing actually quits now. Saving the current walk is the
+            // frontend's job before it calls win_quit; a raw OS close (Alt+F4)
+            // flushes the last state and exits rather than lingering in the tray.
+            // To keep it running unwatched, use "Stop watching" (win_hide),
+            // which minimises to the tray without ending the process.
+            if let tauri::WindowEvent::CloseRequested { .. } = event.event() {
+                if let Some(w) = event.window().app_handle().get_window("main") {
+                    let _ = w.emit("hyakki://quitting", ());
+                }
+                std::thread::sleep(std::time::Duration::from_millis(150));
+                std::process::exit(0);
             }
         })
         .invoke_handler(tauri::generate_handler![

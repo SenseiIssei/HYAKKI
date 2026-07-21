@@ -229,7 +229,13 @@
   animation: scroll var(--sp) linear infinite;
   transition: opacity 3s linear;
 }
-.bd-band svg { width: 50%; height: 100%; display: block; }
+.bd-band img {
+  width: 50%;
+  height: 100%;
+  display: block;
+  /* the whole point: keep the skyline on the same grid as the sprites */
+  image-rendering: pixelated;
+}
 
 @keyframes scroll {
   from { transform: translateX(0); }

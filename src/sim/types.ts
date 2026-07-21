@@ -38,6 +38,8 @@ export type Enemy = {
   cooldown: number
   isWarden: boolean
   wardenId?: string
+  /** which yōkai this actually is, within its family */
+  speciesId?: string
   /** THE RETURNED: the past self this one was made from */
   ghost?: Ghost
   /** WHAT YOU LEFT BEHIND: the Ascension this one was made from */
@@ -163,7 +165,16 @@ export type ActiveDescent = {
 export type SimEvent =
   | { t: 'hit'; target: 'enemy' | 'soldier'; amount: Decimal; crit: boolean }
   | { t: 'miss'; target: 'enemy' | 'soldier' }
-  | { t: 'kill'; bone: Decimal; name: string }
+  | {
+      t: 'kill'
+      bone: Decimal
+      name: string
+      /** enough of the fallen to draw its corpse dissolving */
+      family: string
+      seed: number
+      speciesId?: string
+      warden: boolean
+    }
   | { t: 'rank'; rank: number }
   | { t: 'stand'; warden: string }
   | { t: 'standWon'; line: string }
@@ -172,6 +183,23 @@ export type SimEvent =
   | { t: 'revive' }
   | { t: 'relic'; relic: Relic }
   | { t: 'echoLost' }
+  | { t: 'purify' }
+  | { t: 'ward'; name: string; kanji: string; failed: boolean }
+  | {
+      t: 'ability'
+      id: string
+      vfx: string
+      /** 1..3 — how epic the animation should be */
+      tier: number
+      color: string
+      name: string
+      kanji: string
+      damage: Decimal
+      /** the number of separate strikes the burst was split into */
+      hits: number
+      /** did it finish the enemy */
+      killed: boolean
+    }
   | { t: 'unlock'; classId: string; name: string }
   | { t: 'death'; rank: number; cause: string }
   | { t: 'log'; text: string }
@@ -223,6 +251,37 @@ export type GameState = {
   silencedTicks: number
   /** CHORUS: past selves still standing this run */
   echoes: number
+
+  /**
+   * ABILITIES 術 — cooldown remaining, in ticks, per ability id. Run-scoped:
+   * you draw every art fresh at each waking. Which arts you know and how strong
+   * they are is derived from depth (see src/content/abilities.ts), so nothing
+   * here needs to persist except the cooldowns of the current fight.
+   */
+  abilityCd: Record<string, number>
+
+  /**
+   * KEGARE 穢れ — defilement. Not sin and not damage: it is the pollution that
+   * contact with death leaves on a living thing, and the whole of Shinto
+   * practice is about washing it off rather than being forgiven for it.
+   *
+   * Run-scoped, 0..1. It buys real power and takes real safety (see
+   * src/content/kegare.ts), so a filthy walk is a strategy rather than a
+   * punishment. Cleansed at the riverbed, for a price.
+   */
+  kegare: number
+
+  /**
+   * OFUDA 御札 — the paper wards carried onto this walk, by id, up to
+   * OFUDA_SLOTS. Chosen BEFORE a walk and never swapped during one: a ward is
+   * a bet on what the road is made of, and that bet has to be locked to mean
+   * anything.
+   */
+  ofuda: string[]
+  /** charges left on each carried ward. Paper burns; these never refill mid-walk. */
+  ofudaCharges: Record<string, number>
+  /** wards unlocked so far, by id — they drop from Hearings, not from chaff */
+  ofudaOwned: string[]
 
   // ── relics ──
   /** length is the slot count; null is an empty slot */
@@ -278,8 +337,16 @@ export type GameState = {
   rules: Record<string, number>
   /** THE MYRIAD has fallen. There is no number after this one. */
   myriadFelled: boolean
-  /** fragment numbers read */
+  /** fragment numbers EARNED — a candle has been lit for each */
   fragments: number[]
+  /**
+   * Fragment numbers actually READ in the Hyakumonogatari — the candle snuffed.
+   * The room darkens with the count of these, and the hundredth story opens
+   * only when ninety-nine have been put out.
+   */
+  snuffed: number[]
+  /** the hundredth candle has been put out. There is no story after this one. */
+  hundredth: boolean
   /** observation ids the game has made about you */
   observations: string[]
   /**

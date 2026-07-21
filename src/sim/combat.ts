@@ -1,6 +1,16 @@
 ﻿import Decimal from 'break_infinity.js'
 import { BALANCE as B } from '../content/balance'
 import { CLASS_BY_ID } from '../content/classes'
+import { kegareFromKill } from '../content/kegare'
+import { OFUDA_BY_ID, wardFailChance } from '../content/ofuda'
+import type { Family } from '../content/balance'
+import {
+  ABILITIES,
+  abilityCooldownSec,
+  abilityLevel,
+  abilityMult,
+  abilityTier,
+} from '../content/abilities'
 import { DEATH_LINES } from '../content/names'
 import { keystoneFlags } from '../content/tree'
 import { WARDEN_BY_ID } from '../content/wardens'
@@ -95,8 +105,55 @@ function soldierHit(
   return { dmg: Decimal.max(dmg, ZERO), crit }
 }
 
-function applyDamageToSoldier(s: GameState, st: StatBlock, f: Flags, raw: Decimal): Decimal {
+/**
+ * OFUDA. A ward is specific: it names one family and holds only that back.
+ *
+ * Charges are spent here and never refilled during a walk — a ward is paper.
+ * Once you are filthy enough to be handling a ritual object wrong, it also
+ * sometimes simply fails, which is the one place the two new systems touch.
+ */
+/**
+ * Hand over the next unowned ward. Ordered so the wards arrive roughly as the
+ * families they answer start to matter — the Gate Paper for chaff first, the
+ * Nine Characters for the Mu last, since you do not meet nothing early.
+ */
+const OFUDA_ORDER = ['kadofuda', 'onibarai', 'chinkon', 'kuji']
+function grantOfuda(s: GameState): void {
+  for (const id of OFUDA_ORDER) {
+    if (s.ofudaOwned.includes(id)) continue
+    s.ofudaOwned.push(id)
+    const o = OFUDA_BY_ID[id]
+    if (o) s.events.push({ t: 'log', text: `A strip of paper, still warm: ${o.name}.` })
+    return
+  }
+}
+
+function tryWard(s: GameState, family: Family, rng: Rng): number {
+  for (const id of s.ofuda) {
+    const o = OFUDA_BY_ID[id]
+    if (!o || o.against !== family) continue
+    if ((s.ofudaCharges[id] ?? 0) <= 0) continue
+    s.ofudaCharges[id] = (s.ofudaCharges[id] ?? 0) - 1
+    if (rng.next() < wardFailChance(s.kegare)) {
+      s.events.push({ t: 'ward', name: o.name, kanji: o.kanji, failed: true })
+      return 1
+    }
+    s.events.push({ t: 'ward', name: o.name, kanji: o.kanji, failed: false })
+    return o.ward
+  }
+  return 1
+}
+
+function applyDamageToSoldier(
+  s: GameState,
+  st: StatBlock,
+  f: Flags,
+  raw: Decimal,
+  family?: Family,
+  rng?: Rng,
+): Decimal {
   let taken = raw
+  if (family && rng) taken = taken.mul(tryWard(s, family, rng))
   if (inStand(s) && f.has('scar25')) taken = taken.mul(0.9)
 
   // MEAT 50 — a single hit from above half health cannot finish you.
@@ -130,6 +187,67 @@ function lifesteal(s: GameState, st: StatBlock, f: Flags, dmg: Decimal) {
   let rate = st.ls
   if (inStand(s) && f.has('marrow75')) rate *= 2
   heal(s, st, f, dmg.mul(rate))
+}
+
+// ── abilities ──────────────────────────────────────────────────────────
+//
+// Auto-cast arts. Every tick their cooldowns tick down; when one is ready and
+// there is something to hit, it fires on its own, deals a burst, and asks the
+// view for an animation. At most one fires per tick, checked in learn-order, so
+// the cheap arts keep a rhythm going and the great ones land as punctuation.
+
+function castAbilities(s: GameState, st: StatBlock, f: Flags, rng: Rng): boolean {
+  const best = s.bestRankEver
+
+  for (const a of ABILITIES) {
+    const lvl = abilityLevel(a, best)
+    if (lvl <= 0) continue // not learned yet
+    const cd = s.abilityCd[a.id] ?? 0
+    if (cd > 0) {
+      s.abilityCd[a.id] = cd - 1
+      continue
+    }
+    // ready — but only actually cast if there is a target to cast it at
+    if (s.enemy.untargetable > 0) continue
+
+    const tgt = currentTarget(s.enemy)
+    const mult = abilityMult(a, lvl)
+    // abilities crit off your own crit chance, and hit hard when they do
+    const crit = rng.chance(st.cc)
+    let dmg = st.atk.mul(mult)
+    if (crit) dmg = dmg.mul(st.cm + 0.5)
+    tgt.hp = tgt.hp.sub(dmg)
+    s.freshEnemy = false
+    s.abilityCd[a.id] = Math.round(abilityCooldownSec(a, lvl) * B.TICKS_PER_SEC)
+
+    const killed = tgt.hp.lte(0)
+    s.events.push({
+      t: 'ability',
+      id: a.id,
+      vfx: a.vfx,
+      tier: abilityTier(a, lvl),
+      color: a.color,
+      name: a.name,
+      kanji: a.kanji,
+      damage: dmg,
+      hits: a.hits,
+      killed,
+    })
+
+    if (killed) {
+      const overkill = tgt.hp.neg()
+      if (tgt === s.enemy) {
+        onEnemyKilled(s, st, f, overkill, rng)
+        return true
+      }
+      s.enemy.guards.shift()
+      s.freshEnemy = true
+      return false
+    }
+    // one art per tick — the rest keep cooling down next tick
+    return false
+  }
+  return false
 }
 
 // ── signatures ─────────────────────────────────────────────────────────
@@ -398,7 +516,23 @@ function onEnemyKilled(s: GameState, st: StatBlock, f: Flags, overkill: Decimal,
   s.bone = s.bone.add(bone)
   s.killsThisRun += 1
   s.totalKills += 1
-  s.events.push({ t: 'kill', bone, name: e.name })
+
+  // What you put down leaves something on you. Wardens and the Mu stain worst;
+  // a woken sandal barely counts. Slows as you fill, so the scale doesn't
+  // collapse to on/off within a single Ri band.
+  s.kegare = Math.min(
+    1,
+    s.kegare + kegareFromKill(wasWarden ? 'warden' : e.family, s.kegare, s.rank),
+  )
+  s.events.push({
+    t: 'kill',
+    bone,
+    name: e.name,
+    family: e.family,
+    seed: e.seed >>> 0,
+    speciesId: e.speciesId,
+    warden: wasWarden,
+  })
 
   // you put down something wearing your own coat number
   if (e.ghost && e.ghost.soldierNumber === s.soldierNumber) s.seen.metSelf = true
@@ -425,6 +559,11 @@ function onEnemyKilled(s: GameState, st: StatBlock, f: Flags, overkill: Decimal,
         s.events.push({ t: 'log', text: `It had a name. You have it now.` })
       }
     }
+    // A Hearing is where paper is issued. Wards come from the courts, never
+    // from chaff — the small things do not carry writing. Each of the four is
+    // handed over the first time a Hearing is won after you were ready for it,
+    // so a player collects the set across a campaign rather than all at once.
+    grantOfuda(s)
   }
 
   const carry = e.burn * B.BURN_CARRY
@@ -503,10 +642,11 @@ export function tick(s: GameState, st: StatBlock, f: Flags, rf: Flags, rng: Rng)
 
   tickSignature(s, st, f)
   tickWardenSignature(s)
+  if (castAbilities(s, st, f, rng)) return
 
   // MOTH: the hit that lands when it stops going around.
   if (s.enemy.untargetable > 0 && --s.enemy.untargetable === 0) {
-    const taken = applyDamageToSoldier(s, st, f, s.enemy.atk.mul(4))
+    const taken = applyDamageToSoldier(s, st, f, s.enemy.atk.mul(4), s.enemy.family as Family, rng)
     s.events.push({ t: 'hit', target: 'soldier', amount: taken, crit: true })
     if (s.soldier.hp.lte(0)) {
       killSoldier(s, st, f, taken, rng)
@@ -595,7 +735,7 @@ export function tick(s: GameState, st: StatBlock, f: Flags, rf: Flags, rng: Rng)
         s.sigStored = s.sigStored.add(raw)
         s.events.push({ t: 'miss', target: 'soldier' })
       } else {
-        const taken = applyDamageToSoldier(s, st, f, raw)
+        const taken = applyDamageToSoldier(s, st, f, raw, s.enemy.family as Family, rng)
         s.events.push({ t: 'hit', target: 'soldier', amount: taken, crit: false })
 
         // Resolve fills from time AND danger, so Signatures fire when needed.

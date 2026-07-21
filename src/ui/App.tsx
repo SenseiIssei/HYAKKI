@@ -20,10 +20,12 @@ import {
   soundReveille,
   useUI,
 } from '../store/gameStore'
-import { isDesktop, winDrag, winHide, winMaximize, winMinimize, winQuit } from '../save/desktop'
+import { isDesktop, winDrag, winMaximize, winMinimize, winQuit } from '../save/desktop'
 import { Bargain } from './Bargain'
 import { Ascend } from './Ascend'
 import { Ledger } from './Ledger'
+import { Wards } from './Wards'
+import { Hyakumonogatari } from './Hyakumonogatari'
 import { Descend, DescentReport } from './Descend'
 import { Orders } from './Orders'
 import { Report } from './Report'
@@ -65,6 +67,8 @@ export function App() {
   const ascendOpen = useUI((s) => s.ascendOpen)
   const setAscend = useUI((s) => s.setAscend)
   const ledgerOpen = useUI((s) => s.ledgerOpen)
+  const wardsOpen = useUI((s) => s.wardsOpen)
+  const storiesOpen = useUI((s) => s.storiesOpen)
   const report = useUI((s) => s.report)
   const fontScale = useUI((s) => s.fontScale)
 
@@ -155,6 +159,8 @@ export function App() {
         />
         {settingsOpen && <Settings />}
         {ledgerOpen && <Ledger />}
+        {wardsOpen && <Wards />}
+        {storiesOpen && <Hyakumonogatari />}
         <div className="grain" />
         <div className="vignette" />
       </>
@@ -167,7 +173,6 @@ export function App() {
         <div className="drift" />
         <Backdrop ri={1} />
         <Opening
-          seed={g.soldierSeed}
           progress={progress}
           onChoose={(id) => {
             chooseClass(id)
@@ -218,13 +223,13 @@ export function App() {
                 <button className="win-btn" aria-label="Maximise" onClick={winMaximize}>
                   □
                 </button>
-                {/* Closing hides to the tray; the Parade does not stop.
-                    Shift-click actually quits. */}
+                {/* X quits the app outright now. To keep it running in the
+                    tray, use "Stop watching" on the menu (winHide). */}
                 <button
                   className="win-btn close"
                   aria-label="Close"
-                  title="Hides to the tray — shift-click to quit"
-                  onClick={(e) => (e.shiftKey ? winQuit() : winHide())}
+                  title="Quit"
+                  onClick={winQuit}
                 >
                   ✕
                 </button>
@@ -286,13 +291,14 @@ export function App() {
       {descendOpen && <Descend />}
       {ascendOpen && <Ascend />}
       {ledgerOpen && <Ledger />}
+      {wardsOpen && <Wards />}
+      {storiesOpen && <Hyakumonogatari />}
       {/* A finished Descent announces itself rather than waiting to be noticed. */}
       {!report && !descendOpen && readyDescents()[0] && (
         <DescentReport id={readyDescents()[0].id} />
       )}
       {pickerOpen && (
         <Opening
-          seed={g.soldierSeed}
           progress={progress}
           title="You are back at the pass. The stone is still moved aside."
           prompt="Choose what you are this time"

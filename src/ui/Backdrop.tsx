@@ -166,25 +166,81 @@ function motif(kind: Region['motif'], seed: number, n: number, h: number): strin
   }
 }
 
+/**
+ * Bands are generated as paths but PAINTED as pixels.
+ *
+ * The shapes below are still vector — that is the right way to author a
+ * skyline, and every region gets one for free. But drawing them as SVG put
+ * smooth sub-pixel silhouettes behind hand-placed pixel sprites, and the seam
+ * between the two was the most obviously wrong thing on screen. So the path is
+ * rasterised once, at a deliberately coarse resolution, and scaled back up with
+ * nearest-neighbour: same generated shapes, same chunky grid as the walker.
+ */
+/**
+ * Chosen so the upscale is near-uniform on both axes — a band is drawn about
+ * four times wider than it is tall, so a 2:1 canvas would give pixels twice as
+ * wide as they are high, which reads as a stretched image rather than as
+ * pixel art. Measured against the live layout: 1280x331 from 160x40 is 8.0x
+ * across and 8.3x down.
+ */
+const BAND_W = 160
+const BAND_H = 40
+
+function useBandImage(d: string, fill: string) {
+  return useMemo(() => {
+    if (!d) return null
+    const c = document.createElement('canvas')
+    c.width = BAND_W
+    c.height = BAND_H
+    const ctx = c.getContext('2d')
+    if (!ctx) return null
+    // the paths are authored in a 400x200 space
+    ctx.scale(BAND_W / 400, BAND_H / 200)
+    ctx.fillStyle = fill
+    ctx.fill(new Path2D(d))
+    return c.toDataURL()
+  }, [d, fill])
+}
+
 /** One scrolling band. Two copies side by side make the loop seamless. */
 function Band({
   d, fill, speed, y, opacity = 1,
 }: {
   d: string; fill: string; speed: number; y: number; opacity?: number
 }) {
+  const src = useBandImage(d, fill)
+  if (!src) return null
   return (
     <div className="bd-band" style={{ ['--sp' as string]: `${speed}s`, bottom: `${y}%`, opacity }}>
-      <svg viewBox="0 0 400 200" preserveAspectRatio="none">
-        <path d={d} fill={fill} />
-      </svg>
-      <svg viewBox="0 0 400 200" preserveAspectRatio="none">
-        <path d={d} fill={fill} />
-      </svg>
+      <img src={src} alt="" />
+      <img src={src} alt="" />
     </div>
   )
 }
 
-export function Backdrop({ ri, still = false }: { ri: number; still?: boolean }) {
+/**
+ * How defilement discolours the world.
+ *
+ * Kegare is pollution, so the world does not get *darker* — it goes sallow and
+ * bloodshot, the way meat does. Applied as a filter on the whole backdrop
+ * rather than by rewriting every region's palette, so a new region inherits the
+ * behaviour for free and the authored colours stay authored.
+ */
+function rotFilter(kegare: number): string | undefined {
+  const k = Math.min(1, Math.max(0, kegare))
+  if (k < 0.02) return undefined
+  return `saturate(${1 + k * 1.5}) hue-rotate(${-k * 18}deg) contrast(${1 + k * 0.22}) brightness(${1 - k * 0.16})`
+}
+
+export function Backdrop({
+  ri,
+  still = false,
+  kegare = 0,
+}: {
+  ri: number
+  still?: boolean
+  kegare?: number
+}) {
   const region = regionFor(ri)
   const { next, t } = blendTo(ri)
 
@@ -208,7 +264,11 @@ export function Backdrop({ ri, still = false }: { ri: number; still?: boolean })
   }, [next])
 
   return (
-    <div className={`backdrop ${still ? 'still' : ''}`} aria-hidden="true">
+    <div
+      className={`backdrop ${still ? 'still' : ''}`}
+      aria-hidden="true"
+      style={{ filter: rotFilter(kegare) }}
+    >
       <div
         className="bd-sky"
         style={{ background: `linear-gradient(to bottom, ${region.sky[0]}, ${region.sky[1]})` }}

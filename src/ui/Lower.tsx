@@ -1,7 +1,53 @@
 import { useEffect } from 'react'
 import { BONE_UPGRADES } from '../content/upgrades'
 import { fmt, fmtInt } from '../format'
-import { boneBuyCount, boneCost, buyBone, game, reveal, useUI } from '../store/gameStore'
+import { bandFor } from '../content/kegare'
+import {
+  boneBuyCount,
+  boneCost,
+  buyBone,
+  game,
+  purify,
+  purifyCost,
+  reveal,
+  useUI,
+} from '../store/gameStore'
+
+/**
+ * KEGARE 穢れ, and the option to wash it off.
+ *
+ * Deliberately shown as a bar you are *filling*, not a debuff icon — it is
+ * paying you the whole time it is on you, and the decision to wash is a
+ * decision to become poorer and harder to kill. Hidden entirely while clean,
+ * so a new player is never shown a mechanic they have not met yet.
+ */
+function Defilement() {
+  const g = game()
+  const band = bandFor(g.kegare)
+  const cost = purifyCost()
+  const afford = g.bone.gte(cost)
+  return (
+    <div className="defile">
+      <div className="currency-row">
+        <span className="currency-name">
+          <span className="kanji">{band.kanji}</span> {band.name}
+        </span>
+        <span className="currency-value">{Math.round(g.kegare * 100)}%</span>
+      </div>
+      <div className="defile-bar">
+        <span style={{ width: `${Math.min(100, g.kegare * 100)}%` }} />
+      </div>
+      <button
+        className="small-btn defile-wash"
+        disabled={!afford}
+        onClick={() => purify()}
+        title={band.line}
+      >
+        Wash · {fmt(cost)}
+      </button>
+    </div>
+  )
+}
 
 /**
  * Progressive revelation: an upgrade row does not exist until the player has
@@ -31,6 +77,7 @@ export function Lower() {
           </span>
           <span className="currency-value">{fmt(g.bone)}</span>
         </div>
+        {g.kegare > 0.02 && <Defilement />}
         {g.seen['up.reinforce'] && (
           <>
             <div className="currency-row">

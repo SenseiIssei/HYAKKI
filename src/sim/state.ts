@@ -1,5 +1,6 @@
 ﻿import Decimal from 'break_infinity.js'
 import { DEFAULT_CLASS } from '../content/classes'
+import { OFUDA_BY_ID } from '../content/ofuda'
 import { spawnFor } from './enemies'
 import { enemiesPerRank } from './formulas'
 import { hashSeed } from './rng'
@@ -7,7 +8,7 @@ import { maxEchoes } from './ghosts'
 import { computeStats } from './stats'
 import type { GameState } from './types'
 
-export const SAVE_VERSION = 8
+export const SAVE_VERSION = 9
 
 /** Everything that a Reveille wipes. Kept in one place so nothing is missed. */
 export function resetRun(s: GameState): void {
@@ -38,6 +39,15 @@ export function resetRun(s: GameState): void {
   s.freshEnemy = true
   s.silencedTicks = 0
   s.echoes = maxEchoes(s)
+  // you are washed by the waking, whatever you walked through
+  s.kegare = 0
+  // every art is drawn fresh — no cooldown carries into a new walk
+  s.abilityCd = {}
+
+  // The loadout survives a waking — it is a choice, not a consequence — but
+  // the paper does not. Every ward comes back to full for the new walk.
+  s.ofudaCharges = {}
+  for (const id of s.ofuda) s.ofudaCharges[id] = OFUDA_BY_ID[id]?.charges ?? 0
 
   s.bone = new Decimal(0)
   s.boneLevels = {}
@@ -100,6 +110,11 @@ export function createInitialState(classId = DEFAULT_CLASS, seed?: number): Game
     freshEnemy: true,
     silencedTicks: 0,
     echoes: 0,
+    kegare: 0,
+    abilityCd: {},
+    ofuda: [],
+    ofudaCharges: {},
+    ofudaOwned: [],
 
     equipped: [null, null],
     inventory: [],
@@ -135,6 +150,8 @@ export function createInitialState(classId = DEFAULT_CLASS, seed?: number): Game
     rules: {},
     myriadFelled: false,
     fragments: [],
+    snuffed: [],
+    hundredth: false,
     observations: [],
     authored: null,
 

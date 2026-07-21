@@ -74,6 +74,8 @@ export function serialize(g: GameState): string {
     rules: g.rules,
     myriadFelled: g.myriadFelled,
     fragments: g.fragments,
+    snuffed: g.snuffed,
+    hundredth: g.hundredth,
     observations: g.observations,
     authored: g.authored,
 
@@ -82,6 +84,10 @@ export function serialize(g: GameState): string {
     slotBonus: g.slotBonus,
     ghosts: g.ghosts,
     echoes: g.echoes,
+    kegare: g.kegare,
+    ofuda: g.ofuda,
+    ofudaCharges: g.ofudaCharges,
+    ofudaOwned: g.ofudaOwned,
 
     totalTicks: g.totalTicks,
     totalKills: g.totalKills,
@@ -188,6 +194,18 @@ const MIGRATIONS: Record<number, Migration> = {
   }),
   // v7 predates the observations the game makes about you.
   7: (b) => ({ ...b, v: 8, observations: [] }),
+  // v8 predates kegare and the ofuda loadout. Every soldier already on the
+  // road starts clean and carrying no paper.
+  8: (b) => ({
+    ...b,
+    v: 9,
+    kegare: 0,
+    ofuda: [],
+    ofudaCharges: {},
+    ofudaOwned: [],
+    snuffed: [],
+    hundredth: false,
+  }),
 }
 
 export function migrate(blob: SaveBlob): SaveBlob {

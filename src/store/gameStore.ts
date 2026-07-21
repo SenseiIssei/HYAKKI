@@ -9,6 +9,14 @@ import { meltValue, rarityRank, relicLabel } from '../sim/relics'
 import { affordableLevels, costOfNext } from '../sim/formulas'
 import { NAME_SHOP_BY_ID, nameCost } from '../content/nameshop'
 import { LAYER_BY_ID } from '../content/layers'
+import { purificationCost } from '../content/kegare'
+import { OFUDA_BY_ID, OFUDA_SLOTS } from '../content/ofuda'
+import {
+  ABILITIES,
+  abilityCooldownSec,
+  abilityLevel,
+  abilityTier,
+} from '../content/abilities'
 import {
   concurrentCap,
   descentReady,
@@ -19,7 +27,7 @@ import {
 } from '../sim/descent'
 import type { DescentMap } from '../sim/types'
 import { ICHOR_BY_ID, ichorCost } from '../content/ichor'
-import { newFragments } from '../content/fragments'
+import { canSnuffHundredth, newFragments, roomDarkness } from '../content/fragments'
 import { newObservations } from '../content/achievements'
 import { fightMyriad, myriadReady } from '../sim/myriad'
 import {
@@ -44,6 +52,7 @@ import {
   setAudioEnabled,
   setMusicWanted,
   setTension,
+  sfxAbility,
   setVolume,
   sfxBell,
   sfxDeath,
@@ -77,17 +86,150 @@ export function replaceGame(next: GameState) {
 }
 
 // ── floating damage numbers ──
+/**
+ * A damage number that FLIES: it is thrown from the point of impact with a
+ * randomised arc (dx across, up to a peak, then falling past) and fades. The
+ * trajectory is baked into CSS custom properties at birth so the arc runs on
+ * the GPU at full framerate, not at the sim's 10Hz.
+ */
 export type Floater = {
   id: number
   text: string
-  crit: boolean
+  kind: 'hit' | 'crit' | 'ability' | 'taken'
   target: 'enemy' | 'soldier'
-  x: number
   born: number
+  /** horizontal drift, px */
+  dx: number
+  /** peak height of the arc, px (positive = up) */
+  peak: number
+  /** how far below the origin it ends, px */
+  fall: number
+  /** size multiplier */
+  scale: number
+  color?: string
+  /** an ability's name, shown above its number */
+  label?: string
 }
 let floaterId = 0
 let floaters: Floater[] = []
 export const getFloaters = () => floaters
+export const FLOAT_MS = 1100
+
+/**
+ * An ability going off: a full VFX overlay plays for it. Like deaths, this is a
+ * transient queue the arena reads and renders on its own timeline.
+ */
+export type Cast = {
+  id: number
+  vfx: string
+  tier: number
+  color: string
+  kanji: string
+  name: string
+  born: number
+}
+let castId = 0
+let casts: Cast[] = []
+export const getCasts = () => casts
+export const CAST_MS = 950
+
+/**
+ * What the ability bar needs to draw: every learned art, its level, tier, and
+ * how far through its cooldown it is (0 = ready, 1 = just fired).
+ */
+export type AbilityStatus = {
+  id: string
+  name: string
+  kanji: string
+  color: string
+  level: number
+  tier: number
+  /** 0..1 progress of the cooldown ring; 0 = ready */
+  cd: number
+}
+export function abilityStatuses(): AbilityStatus[] {
+  const best = G.bestRankEver
+  const out: AbilityStatus[] = []
+  for (const a of ABILITIES) {
+    const lvl = abilityLevel(a, best)
+    if (lvl <= 0) continue
+    const maxCd = Math.max(1, Math.round(abilityCooldownSec(a, lvl) * B.TICKS_PER_SEC))
+    const left = G.abilityCd[a.id] ?? 0
+    out.push({
+      id: a.id,
+      name: a.name,
+      kanji: a.kanji,
+      color: a.color,
+      level: lvl,
+      tier: abilityTier(a, lvl),
+      cd: Math.min(1, Math.max(0, left / maxCd)),
+    })
+  }
+  return out
+}
+
+// a cheap deterministic-ish jitter so numbers don't stack on one line
+let floatSpin = 0
+function pushFloater(
+  now: number,
+  text: string,
+  kind: Floater['kind'],
+  target: 'enemy' | 'soldier',
+  color?: string,
+  label?: string,
+) {
+  floatSpin = (floatSpin + 7) % 360
+  const rad = (floatSpin / 360) * Math.PI * 2
+  const spread = Math.sin(rad) // -1..1
+  const big = kind === 'ability' ? 1 : kind === 'crit' ? 0.7 : 0.35
+  floaters.push({
+    id: floaterId++,
+    text,
+    kind,
+    target,
+    born: now,
+    dx: Math.round(spread * (28 + big * 60)),
+    peak: Math.round(34 + big * 66 + Math.abs(spread) * 10),
+    fall: Math.round(30 + big * 40),
+    scale: kind === 'ability' ? 1.9 : kind === 'crit' ? 1.35 : 1,
+    color,
+    label,
+  })
+  if (floaters.length > 40) floaters = floaters.slice(-40)
+}
+
+// Damage numbers are opt-out, and throttled: a fast walk lands several hits a
+// second and an uncapped stream of numbers fights the log strip for the eye.
+let lastFloaterAt = 0
+export function damageNumbersOn(): boolean {
+  return localStorage.getItem('hyakki.dmgnum') !== '0'
+}
+
+/**
+ * A corpse, mid-dissolve. The sim spawns the next enemy the instant one dies,
+ * so a death animation cannot live on the enemy — it is a separate overlay,
+ * captured at the moment of the kill and left to fade on its own.
+ */
+export type DeathAnim = {
+  id: number
+  family: string
+  seed: number
+  speciesId?: string
+  warden: boolean
+  born: number
+}
+let deathId = 0
+let deaths: DeathAnim[] = []
+export const getDeaths = () => deaths
+export const DEATH_MS = 620
+
+/**
+ * Impact. Bumped on every kill and every crit so the view can shake and
+ * hit-stop. A monotonic counter rather than a boolean, so the reader can tell
+ * a fresh impact from a stale one without a reset handshake.
+ */
+let impact = { kill: 0, crit: 0, warden: 0, swing: 0, struck: 0, cast: 0, castTier: 0 }
+export const getImpact = () => impact
 
 // ── the log strip ──
 let log: { id: number; text: string }[] = []
@@ -104,16 +246,59 @@ export function drainEvents(now: number) {
     for (const e of evts) {
       switch (e.t) {
         case 'hit':
-          floaters.push({
-            id: floaterId++,
-            text: fmt(e.amount),
-            crit: e.crit,
-            target: e.target,
-            x: (floaterId * 37) % 60 - 30,
+          // opt-out, and throttled to ~8/sec — a crit always shows, since it
+          // is the hit worth seeing
+          if (damageNumbersOn() && (e.crit || now - lastFloaterAt >= 120)) {
+            lastFloaterAt = now
+            pushFloater(now, fmt(e.amount), e.crit ? 'crit' : 'hit', e.target)
+          }
+          if (e.target === 'enemy') {
+            sfxHit(e.crit)
+            // a swing throws the walker forward; a crit shakes the frame
+            impact = {
+              ...impact,
+              swing: impact.swing + 1,
+              crit: e.crit ? impact.crit + 1 : impact.crit,
+            }
+          } else {
+            sfxTaken()
+            impact = { ...impact, struck: impact.struck + 1 }
+          }
+          break
+        case 'ability': {
+          casts.push({
+            id: castId++,
+            vfx: e.vfx,
+            tier: e.tier,
+            color: e.color,
+            kanji: e.kanji,
+            name: e.name,
             born: now,
           })
-          if (e.target === 'enemy') sfxHit(e.crit)
-          else sfxTaken()
+          if (casts.length > 4) casts = casts.slice(-4)
+          // the big number, thrown hard and coloured to the art
+          if (damageNumbersOn()) {
+            pushFloater(now, fmt(e.damage), 'ability', 'enemy', e.color, e.name)
+          }
+          sfxAbility(e.tier)
+          // abilities shake with their tier; the ultimate rocks the screen
+          impact = { ...impact, cast: impact.cast + 1, castTier: e.tier }
+          break
+        }
+        case 'kill':
+          deaths.push({
+            id: deathId++,
+            family: e.family,
+            seed: e.seed,
+            speciesId: e.speciesId,
+            warden: e.warden,
+            born: now,
+          })
+          // keep the overlay list short; old corpses have finished fading
+          if (deaths.length > 6) deaths = deaths.slice(-6)
+          impact = e.warden
+            ? { ...impact, warden: impact.warden + 1, kill: impact.kill + 1 }
+            : { ...impact, kill: impact.kill + 1 }
           break
         case 'rank':
           pushLog(`Ri ${e.rank}.`)
@@ -145,6 +330,16 @@ export function drainEvents(now: number) {
         case 'echoLost':
           pushLog('One of you stops.')
           break
+        case 'ward':
+          pushLog(
+            e.failed
+              ? `The ${e.name} tears in your hand. It does nothing.`
+              : `${e.name} holds. The paper takes it instead of you.`,
+          )
+          break
+        case 'purify':
+          pushLog('You wash in the river. It comes off. Most of it.')
+          break
         case 'unlock':
           pushLog(`${e.name}. You could be that now.`)
           break
@@ -160,8 +355,17 @@ export function drainEvents(now: number) {
     G.events = []
   }
   const before = floaters.length
-  floaters = floaters.filter((f) => now - f.born < 750)
-  return floaters.length !== before || evts.length > 0
+  floaters = floaters.filter((f) => now - f.born < FLOAT_MS)
+  const deathsBefore = deaths.length
+  deaths = deaths.filter((d) => now - d.born < DEATH_MS)
+  const castsBefore = casts.length
+  casts = casts.filter((c) => now - c.born < CAST_MS)
+  return (
+    floaters.length !== before ||
+    deaths.length !== deathsBefore ||
+    casts.length !== castsBefore ||
+    evts.length > 0
+  )
 }
 
 // ── UI store: a frame counter and drawer state. Never persisted with the sim. ──
@@ -188,6 +392,10 @@ type UIState = {
   setAscend: (v: boolean) => void
   ledgerOpen: boolean
   setLedger: (v: boolean) => void
+  wardsOpen: boolean
+  setWards: (v: boolean) => void
+  storiesOpen: boolean
+  setStories: (v: boolean) => void
   audioOn: boolean
   setAudioOn: (v: boolean) => void
   audioVolume: number
@@ -199,6 +407,12 @@ type UIState = {
   /** low-end / high-legibility mode: combat as a text log, no sigils */
   numbersOnly: boolean
   setNumbersOnly: (v: boolean) => void
+  /** hit-stop and screen shake on impact. Off for anyone who wants it still. */
+  screenShake: boolean
+  setScreenShake: (v: boolean) => void
+  /** floating damage numbers over the fighters */
+  damageNumbers: boolean
+  setDamageNumbers: (v: boolean) => void
   fontScale: number
   setFontScale: (n: number) => void
   buyMode: 1 | 10 | 'max'
@@ -228,6 +442,10 @@ export const useUI = create<UIState>((set) => ({
   setAscend: (v) => set({ ascendOpen: v }),
   ledgerOpen: false,
   setLedger: (v) => set({ ledgerOpen: v }),
+  wardsOpen: false,
+  setWards: (v) => set({ wardsOpen: v }),
+  storiesOpen: false,
+  setStories: (v) => set({ storiesOpen: v }),
   // Sound is off until asked for. An idle game runs for hours.
   audioOn: localStorage.getItem('myriad.audio') === '1',
   setAudioOn: (v) => {
@@ -253,6 +471,16 @@ export const useUI = create<UIState>((set) => ({
   setNumbersOnly: (v) => {
     localStorage.setItem('myriad.numbersOnly', v ? '1' : '0')
     set({ numbersOnly: v })
+  },
+  screenShake: localStorage.getItem('hyakki.shake') !== '0',
+  setScreenShake: (v) => {
+    localStorage.setItem('hyakki.shake', v ? '1' : '0')
+    set({ screenShake: v })
+  },
+  damageNumbers: localStorage.getItem('hyakki.dmgnum') !== '0',
+  setDamageNumbers: (v) => {
+    localStorage.setItem('hyakki.dmgnum', v ? '1' : '0')
+    set({ damageNumbers: v })
   },
   fontScale: Number(localStorage.getItem('myriad.fontScale') ?? 100),
   setFontScale: (n) => {
@@ -292,6 +520,55 @@ export function buyBone(id: string, mode: 1 | 10 | 'max'): boolean {
   // your health percentage.
   const gained = ST.hp.sub(prevMaxHp)
   if (gained.gt(0)) G.soldier.hp = Decimal.min(ST.hp, G.soldier.hp.add(gained))
+  useUI.getState().bump()
+  return true
+}
+
+/**
+ * MISOGI 禊 — washing.
+ *
+ * Kegare is pollution, not guilt, so it is removed by water rather than by
+ * being forgiven — and the cost is the point. Defilement is paying you in
+ * damage and Ash the whole time you carry it, so washing is choosing to be
+ * poorer and harder to kill. Priced off depth and filth so it never becomes
+ * a formality you click through.
+ */
+export function purify(): boolean {
+  if (G.kegare <= 0) return false
+  const cost = new Decimal(purificationCost(G.kegare, G.rank))
+  if (G.bone.lt(cost)) return false
+  G.bone = G.bone.sub(cost)
+  G.kegare = 0
+  refreshStats()
+  G.events.push({ t: 'purify' })
+  useUI.getState().bump()
+  return true
+}
+
+export function purifyCost(): Decimal {
+  return new Decimal(purificationCost(G.kegare, G.rank))
+}
+
+/**
+ * OFUDA loadout. Toggling a ward on or off is only allowed OUT of a walk —
+ * enforced here rather than in the UI so a stale panel can't sneak a swap
+ * mid-fight. Charges refill to full whenever the carried set changes, since
+ * you are re-papering before setting off.
+ */
+export function toggleOfuda(id: string): boolean {
+  if (!G.ofudaOwned.includes(id)) return false
+  // dead-or-fresh only: a walk in progress has its loadout locked
+  const walking = G.totalTicks > 0 && !G.dead && G.rank > 1
+  if (walking) return false
+  const at = G.ofuda.indexOf(id)
+  if (at >= 0) {
+    G.ofuda.splice(at, 1)
+  } else {
+    if (G.ofuda.length >= OFUDA_SLOTS) return false
+    G.ofuda.push(id)
+  }
+  G.ofudaCharges = {}
+  for (const w of G.ofuda) G.ofudaCharges[w] = OFUDA_BY_ID[w]?.charges ?? 0
   useUI.getState().bump()
   return true
 }
@@ -428,6 +705,34 @@ export function challengeMyriad() {
   useUI.getState().bump()
   saveNow()
   return result
+}
+
+/**
+ * Snuff a candle: read a story for real.
+ *
+ * Earning a fragment only LIGHTS its candle. Reading it here puts the candle
+ * out, and the room darkens with the count — because the whole horror of
+ * Hyakumonogatari is that the counting itself is the summoning, and you do the
+ * counting one deliberate story at a time.
+ *
+ * The hundredth is refused until ninety-nine are out. Putting it out is a
+ * one-way door: it sets `hundredth`, which the encounter watches for.
+ */
+export function snuffCandle(n: number): boolean {
+  if (!G.fragments.includes(n)) return false
+  if (G.snuffed.includes(n)) return false
+  if (n === 100) {
+    if (!canSnuffHundredth(G.snuffed)) return false
+    G.hundredth = true
+  }
+  G.snuffed.push(n)
+  useUI.getState().bump()
+  return true
+}
+
+/** 0..1 — how dark the room has become. Only the read stories count. */
+export function roomDark(): number {
+  return roomDarkness(G.snuffed)
 }
 
 /** Fragments unlock silently; the log mentions one landed, nothing more. */

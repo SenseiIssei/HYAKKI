@@ -1,7 +1,35 @@
 import { CLASSES, classUnlocked, unlockProgress } from '../content/classes'
-import { COLORS } from '../render/presets'
 import { fmtPct } from '../format'
-import { Sigil } from './Sigil'
+import { PixelWalker } from './PixelActor'
+import type { Look } from '../render/figure'
+
+/**
+ * What each class looks like on its card.
+ *
+ * These are AUTHORED, not derived. The first attempt built them from each
+ * class's grants and passives, which was tidier but wrong: classes are defined
+ * by how they produce damage, not by their opening statline, so six classes
+ * came out with the same blade, the same armour and the same head. A card has
+ * one job — to say what you would become — and six identical men do not say it.
+ */
+export const CLASS_LOOKS: Record<string, Look> = {
+  // NIŌ, the gate that is a person: everything is armour, the blade incidental
+  hoplite: { weapon: 2, armour: 5, head: 4, gait: 1.05, aura: 0.1, kegare: 0 },
+  // KITSUNEBI, foxfire: burning blade, almost no armour, lit from inside
+  lampbearer: { weapon: 5, armour: 1, head: 3, gait: 0.55, aura: 0.95, kegare: 0.1 },
+  // ONMYŌJI, the diviner: robes and a wide hat, carries paper rather than plate
+  augur: { weapon: 3, armour: 1, head: 3, gait: 0.8, aura: 0.55, kegare: 0 },
+  // ONRYŌ, the vengeful dead: no armour at all, a mask, and far too fast
+  revenant: { weapon: 4, armour: 0, head: 5, gait: 0.42, aura: 0.35, kegare: 0.95 },
+  // KUCHIYOSE, the summoner: plain, deliberately — the power stands behind them
+  chorus: { weapon: 2, armour: 2, head: 2, gait: 0.75, aura: 0.45, kegare: 0.35 },
+  // ONBŌ, who burns the dead: a long blade and a working man's cloak
+  gravedigger: { weapon: 5, armour: 3, head: 1, gait: 0.95, aura: 0.2, kegare: 0.55 },
+}
+
+const FALLBACK_LOOK: Look = {
+  weapon: 3, armour: 3, head: 2, gait: 0.8, aura: 0.3, kegare: 0.2,
+}
 
 type Progress = { totalDeaths: number; reveilles: number; totalKills: number }
 
@@ -11,14 +39,12 @@ type Progress = { totalDeaths: number; reveilles: number; totalKills: number }
  * is most of the reason to keep marching. docs/02-CORE-LOOP.md § Minute one
  */
 export function Opening({
-  seed,
   progress,
   onChoose,
   title = 'A hundred demons. Which is to say: too many to count.',
   prompt = 'Choose what you were',
   onCancel,
 }: {
-  seed: number
   progress: Progress
   onChoose: (id: string) => void
   title?: string
@@ -43,13 +69,13 @@ export function Opening({
                 onClick={() => open && onChoose(c.id)}
                 aria-label={open ? c.name : `${c.name}, locked. ${c.unlock?.text ?? ''}`}
               >
-                <Sigil
-                  preset={c.sigil}
-                  seed={seed ^ c.id.charCodeAt(0)}
-                  cacheKey={`pick-${c.id}`}
-                  color={open ? COLORS.bone : COLORS.ash}
-                  spin={280}
-                />
+                <span className={`class-figure ${open ? '' : 'shrouded'}`}>
+                  <PixelWalker
+                    look={CLASS_LOOKS[c.id] ?? FALLBACK_LOOK}
+                    pose={open ? 'walk' : 'brace'}
+                    scale={3}
+                  />
+                </span>
                 <span className="class-name">
                   {c.kanji && <span className="kanji class-kanji">{c.kanji}</span>}
                   {c.name}

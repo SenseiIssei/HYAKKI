@@ -128,6 +128,89 @@ export function setTension(on: boolean) {
   droneGain.gain.setTargetAtTime(on ? 0.09 : 0.055, now(), 1.5)
 }
 
+// ── ambience: the sound of where you are ────────────────────────────────
+//
+// A single looping band of filtered noise whose colour is the region. It is
+// built lazily the first time a region is entered, and cross-faded between
+// regions rather than restarted, so travelling never clicks or drops to silence.
+
+type AmbienceVoice = {
+  gain: GainNode
+  filter: BiquadFilterNode
+  src: AudioBufferSourceNode
+  lfo: OscillatorNode
+}
+let ambience: AmbienceVoice | null = null
+let ambienceRegion = ''
+
+/** Per-region character: filter shape, movement, and how loud it sits. */
+const AMBIENCE: Record<string, { type: BiquadFilterType; freq: number; q: number; lfo: number; depth: number; gain: number }> = {
+  // wind through bamboo: airy, high, always moving
+  bamboo: { type: 'bandpass', freq: 1400, q: 0.7, lfo: 0.13, depth: 600, gain: 0.05 },
+  // an emptied village at night: low wind under wide eaves
+  village: { type: 'lowpass', freq: 500, q: 0.5, lfo: 0.07, depth: 220, gain: 0.045 },
+  // a shut shrine: still air, a faint high ring
+  shrine: { type: 'bandpass', freq: 2200, q: 1.4, lfo: 0.05, depth: 300, gain: 0.03 },
+  // the river of three crossings: broadband water
+  sanzu: { type: 'bandpass', freq: 900, q: 0.4, lfo: 0.6, depth: 500, gain: 0.06 },
+  // the hot hells: a low furnace rumble
+  jigoku: { type: 'lowpass', freq: 240, q: 0.8, lfo: 0.2, depth: 120, gain: 0.07 },
+  // muken, the deepest: almost nothing, a pressure
+  muken: { type: 'lowpass', freq: 120, q: 0.9, lfo: 0.03, depth: 60, gain: 0.04 },
+}
+
+function ambienceLoop(): AudioBufferSourceNode | null {
+  if (!ctx) return null
+  // two seconds of noise, looped — long enough not to hear the seam
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate)
+  const d = buf.getChannelData(0)
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1
+  const src = ctx.createBufferSource()
+  src.buffer = buf
+  src.loop = true
+  return src
+}
+
+/**
+ * Move the ambience to a region. Cross-fades the filter and level rather than
+ * tearing down the noise source, so the bed is continuous as you travel.
+ */
+export function setAmbience(regionId: string) {
+  if (!ctx || !master || regionId === ambienceRegion) return
+  ambienceRegion = regionId
+  const cfg = AMBIENCE[regionId] ?? AMBIENCE.bamboo
+  const t = now()
+
+  if (!ambience) {
+    const src = ambienceLoop()
+    if (!src) return
+    const filter = ctx.createBiquadFilter()
+    filter.type = cfg.type
+    filter.frequency.value = cfg.freq
+    filter.Q.value = cfg.q
+    const gain = ctx.createGain()
+    gain.gain.value = 0
+    src.connect(filter).connect(gain).connect(master)
+    // a slow wander on the cutoff, so the wind never sits still
+    const lfo = ctx.createOscillator()
+    lfo.type = 'sine'
+    lfo.frequency.value = cfg.lfo
+    const lfoGain = ctx.createGain()
+    lfoGain.gain.value = cfg.depth
+    lfo.connect(lfoGain).connect(filter.frequency)
+    src.start()
+    lfo.start()
+    ambience = { gain, filter, src, lfo }
+  }
+
+  const a = ambience
+  a.filter.type = cfg.type
+  a.filter.frequency.setTargetAtTime(cfg.freq, t, 2)
+  a.filter.Q.setTargetAtTime(cfg.q, t, 2)
+  a.lfo.frequency.setTargetAtTime(cfg.lfo, t, 2)
+  a.gain.gain.setTargetAtTime(enabled ? cfg.gain : 0, t, 2.5)
+}
+
 // ── one-shots ──────────────────────────────────────────────────────────
 
 let noiseBuffer: AudioBuffer | null = null
@@ -245,6 +328,52 @@ export function sfxDeath() {
   if (!ctx || !master || !enabled) return
   bonsho(master, ctx, 0.3)
   setTension(false)
+}
+
+/**
+ * An art going off. A bright rising sweep with a body thump under it, scaled by
+ * tier so a tier-3 catastrophe lands heavier and lower than a tier-1 flourish.
+ */
+export function sfxAbility(tier = 1) {
+  if (!ctx || !master || !enabled) return
+  const t = now()
+  const gain = 0.1 + tier * 0.05
+
+  // the sweep — the blade / the fire / the bolt
+  const src = noise()
+  if (src) {
+    const bp = ctx.createBiquadFilter()
+    bp.type = 'bandpass'
+    bp.Q.value = 2.2
+    bp.frequency.setValueAtTime(400, t)
+    bp.frequency.exponentialRampToValueAtTime(700 + tier * 1600, t + 0.18)
+    src.connect(bp)
+    env(bp, gain, 0.012, 0.3 + tier * 0.12)
+    src.start()
+    src.stop(t + 1)
+  }
+
+  // the body thump — deeper and louder with tier
+  const osc = ctx.createOscillator()
+  osc.type = 'sine'
+  osc.frequency.setValueAtTime(180 - tier * 24, t)
+  osc.frequency.exponentialRampToValueAtTime(46 - tier * 6, t + 0.22)
+  const g = ctx.createGain()
+  g.gain.setValueAtTime(0, t)
+  g.gain.linearRampToValueAtTime(0.16 + tier * 0.07, t + 0.01)
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5 + tier * 0.2)
+  osc.connect(g).connect(master)
+  osc.start(t)
+  osc.stop(t + 1)
+
+  // a tier-3 art tolls the bell under everything
+  if (tier >= 3) bonsho(master, ctx, 0.16)
+}
+
+/** The great bell, on its own, for the moment the counting ends. */
+export function sfxBonsho(gain = 0.32) {
+  if (!ctx || !master || !enabled) return
+  bonsho(master, ctx, gain)
 }
 
 /** Stone on stone, at the riverbed. */

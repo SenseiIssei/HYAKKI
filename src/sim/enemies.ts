@@ -3,6 +3,7 @@ import { enemyName, enemySeed } from '../content/names'
 import { wardenFor, wardenName } from '../content/wardens'
 import { AFFIX_BY_ID } from '../content/relics'
 import { enemyArm, enemyAtk, enemyHp, isStandRank, wardenHp } from './formulas'
+import { speciesFor } from '../pixel/species'
 import { pickGhostFrom } from './ghosts'
 import { Rng } from './rng'
 import type { AuthoredWarden, GameState, Ghost } from './types'
@@ -72,9 +73,18 @@ export function spawnEnemy(
   const maxHp = enemyHp(rank, family)
   const spd = B.ENEMY_SPD_BASE * FAMILY_MODS[family].spd
 
+  // Wardens are the Ten Kings and get their own authored sprites; everything
+  // else can draw from the species tables, the returned and the nothing now
+  // included.
+  const sp = family === 'warden' ? null : speciesFor(family, rank, seed)
   const e: Enemy = {
     ...blank(family, seed, spd),
-    name: enemyName(family, seed),
+    speciesId: sp?.id,
+    // A named species uses its own name; only the unnamed fall back to the
+    // generated grammar. The nothing keeps its sprite but stays NAMELESS — the
+    // lore is explicit that it was not given one because there was nothing to
+    // name (fragment #28). So a Mu carries a shape and no word.
+    name: family === 'nothing' ? '' : sp ? `${sp.name}` : enemyName(family, seed),
     hp: maxHp,
     maxHp,
     atk: enemyAtk(rank, family),

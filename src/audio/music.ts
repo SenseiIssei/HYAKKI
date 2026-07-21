@@ -201,24 +201,60 @@ function run() {
 /** A struck bell that belongs to a temple rather than a clock. */
 export function bonsho(master: GainNode, context: Ctx, gain = 0.25) {
   const t = context.currentTime
-  // a real bonshō is inharmonic and beats against itself
-  for (const [mult, lvl, det] of [
-    [1, 1, 0],
-    [1.004, 0.9, 0], // the beat
-    [2.74, 0.42, 4],
-    [5.38, 0.2, -6],
-    [8.9, 0.09, 9],
-  ]) {
+  const root = 82
+
+  /**
+   * A real bonshō rings in two voices that a generic struck-bell sample
+   * flattens into one:
+   *
+   *  - the STRIKE TONE (tsuki-oto): a bright metallic clang the instant the
+   *    beam lands, made of high inharmonic partials that die within a second;
+   *  - the HUM TONE (oshi-oto): a low, almost pure drone that swells slightly
+   *    AFTER the strike and rings for many seconds, with a slow beat from two
+   *    near-identical partials fighting each other.
+   *
+   * The partial ratios below are inharmonic on purpose — a bell is not a
+   * string, and the wrongness against the tempered scale is the sound.
+   */
+
+  // ── the hum: root plus a near-unison that beats about twice a second ──
+  for (const [mult, lvl, det, dur] of [
+    [1, 1.0, 0, 11],
+    [1.0028, 0.85, 0, 11], // ~0.23 Hz beat against the root
+    [2.0, 0.3, -4, 8],
+  ] as const) {
     const o = context.createOscillator()
     o.type = 'sine'
-    o.frequency.value = 82 * mult
+    o.frequency.value = root * mult
     o.detune.value = det
     const g = context.createGain()
     g.gain.setValueAtTime(0, t)
-    g.gain.linearRampToValueAtTime(gain * lvl, t + 0.004)
-    g.gain.exponentialRampToValueAtTime(0.0001, t + 7 / mult)
+    // the hum swells in over ~120ms — it arrives just behind the strike
+    g.gain.linearRampToValueAtTime(gain * lvl, t + 0.12)
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
     o.connect(g).connect(master)
     o.start(t)
-    o.stop(t + 8)
+    o.stop(t + dur + 0.2)
+  }
+
+  // ── the strike: bright inharmonic partials, gone within a second ──
+  for (const [mult, lvl, det] of [
+    [2.71, 0.34, 5],
+    [5.42, 0.2, -7],
+    [8.98, 0.12, 11],
+    [13.4, 0.06, -13],
+  ] as const) {
+    const o = context.createOscillator()
+    o.type = 'sine'
+    o.frequency.value = root * mult
+    o.detune.value = det
+    const g = context.createGain()
+    g.gain.setValueAtTime(0, t)
+    g.gain.linearRampToValueAtTime(gain * lvl, t + 0.003)
+    // the higher the partial, the faster it dies — that is the clang decaying
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4 / Math.sqrt(mult))
+    o.connect(g).connect(master)
+    o.start(t)
+    o.stop(t + 1.6)
   }
 }

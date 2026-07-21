@@ -13,7 +13,10 @@ import { blank, blit, outline, sprite, vary, type Palette, type Sprite } from '.
  *   Mu    — a hole; the background shows through
  */
 
+import { SPECIES_PAL_EXTRA, speciesFor } from './species'
+
 export const YOKAI_PAL: Palette = {
+  ...SPECIES_PAL_EXTRA,
   K: '#0b0908',
   // kozō — grey-green, damp
   G: '#4e5a4a',
@@ -188,15 +191,67 @@ const KING_HEAD = sprite([
   '..ssssss..',
 ])
 
-const EBOSHI = sprite([
+// ── the Ten Kings (Jūō) ────────────────────────────────────────────────
+// One seated, staring body; ten identities laid over it. Each king differs in
+// headdress, in what he holds, and in the colour of his lacquer — enough that
+// you know which court you are standing in without a label.
+
+// headdresses, one per court
+const CROWN_MITRE = sprite([
+  '.DDDDDDDD.',
+  'DDDDDDDDDD',
+  'DDDDDDDDDD',
+  '.DDDDDDDD.',
+  '..D.DD.D..',
+])
+const CROWN_FLAT = sprite([
+  'llllllllll',
+  'lDDDDDDDDl',
+  'llllllllll',
+])
+const CROWN_BEADS = sprite([
   '..KKKKKK..',
-  '.KKKKKKKK.',
+  '.KDDDDDDK.',
+  'KDDDDDDDDK',
+  'K.D.DD.D.K',
+  '.D..DD..D.',
+])
+const CROWN_HOOD = sprite([
   '.KKKKKKKK.',
   'KKKKKKKKKK',
   'KKKKKKKKKK',
+  'KKKKKKKKKK',
+  'KKK.KK.KKK',
 ])
 
-const TABLET = sprite(['PPPP', 'PllP', 'PllP', 'PllP', 'PPPP'])
+// attributes held in the left hand — how each court judges
+const ATTR_TABLET = sprite(['PPPP', 'PllP', 'PllP', 'PllP', 'PPPP'])
+const ATTR_BRUSH = sprite(['..H.', '..H.', '..H.', '.HH.', 'PPPP'])
+const ATTR_MIRROR = sprite(['.UU.', 'UWWU', 'UWWU', '.UU.', '..l.'])
+const ATTR_SCROLL = sprite(['PP..', 'PPPP', 'PPPP', 'llll'])
+const ATTR_SCALES = sprite(['.D..D.', 'DDDDDD', '.D..D.', 'W....W', 'W....W'])
+
+type KingLook = {
+  crown: ReturnType<typeof sprite>
+  attr: ReturnType<typeof sprite> | null
+  // remap the robe: L/l lacquer to a court colour
+  robe: Record<string, string>
+}
+
+// L=#5c2b25 lacquer, l=#3c1a16. Courts recolour through remap to A/a (blue),
+// M (dead green), o/N (rust), D/t (gold), U/u (cold), p (teal).
+const KINGS: KingLook[] = [
+  { crown: CROWN_MITRE, attr: ATTR_TABLET, robe: {} }, // Shinkō — vermilion
+  { crown: CROWN_FLAT, attr: ATTR_MIRROR, robe: { L: 'I', l: 'i' } }, // Shokō — iron, the mirror
+  { crown: CROWN_BEADS, attr: ATTR_BRUSH, robe: { L: 'A', l: 'a' } }, // Sōtei — blue
+  { crown: CROWN_HOOD, attr: ATTR_SCALES, robe: { L: 'N', l: 'l' } }, // Gokan — the scales
+  { crown: CROWN_MITRE, attr: ATTR_SCROLL, robe: { L: 'o', l: 'N' } }, // Enma — rust, the register
+  { crown: CROWN_BEADS, attr: ATTR_TABLET, robe: { L: 'p', l: 'a' } }, // Henjō — teal
+  { crown: CROWN_FLAT, attr: ATTR_BRUSH, robe: { L: 'M', l: 'p' } }, // Taizan — dead green
+  { crown: CROWN_HOOD, attr: ATTR_MIRROR, robe: { L: 'u', l: 'p' } }, // Byōdō — cold
+  { crown: CROWN_MITRE, attr: ATTR_SCROLL, robe: { L: 'D', l: 't' } }, // Toshi — gold
+  { crown: CROWN_BEADS, attr: ATTR_SCALES, robe: { L: 't', l: 'N' } }, // Godō — the last court
+]
 
 // ── composition ────────────────────────────────────────────────────────
 
@@ -205,7 +260,20 @@ export const YOKAI_H = 48
 
 export type YokaiKind = 'chaff' | 'organs' | 'returned' | 'warden' | 'nothing'
 
-export function yokaiFrame(kind: YokaiKind, seed: number, phase: number): Sprite {
+export function yokaiFrame(
+  kind: YokaiKind,
+  seed: number,
+  phase: number,
+  rank = 1,
+): Sprite {
+  // Species first: a Kozō and a Karakasa are both chaff, and they should not
+  // look remotely alike. The returned and the nothing have their own tables
+  // now too; only the wardens (the Ten Kings) are authored separately below.
+  if (kind !== 'warden') {
+    const sp = speciesFor(kind, rank, seed)
+    if (sp) return sp.build(seed, phase)
+  }
+
   const s = blank(YOKAI_W, YOKAI_H)
   const t = phase * Math.PI * 2
   const cx = 16
@@ -266,10 +334,12 @@ export function yokaiFrame(kind: YokaiKind, seed: number, phase: number): Sprite
     }
 
     case 'warden': {
-      // It does not move. Nothing here is a function of t.
-      blit(s, KING_BODY, cx - 3, 18)
-      blit(s, TABLET, cx + 12, 26)
-      blit(s, EBOSHI, cx + 1, 2)
+      // The Ten Kings. Which court this is, is fixed by the seed; none of it is
+      // a function of t, because a king does not move — he waits, and reads.
+      const king = KINGS[vary(seed, KINGS.length)]
+      blit(s, KING_BODY, cx - 3, 18, { remap: king.robe })
+      if (king.attr) blit(s, king.attr, cx + 12, 26)
+      blit(s, king.crown, cx + 1, 2)
       blit(s, KING_HEAD, cx + 1, 7)
       break
     }
