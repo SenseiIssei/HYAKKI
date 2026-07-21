@@ -54,6 +54,14 @@ export function serialize(g: GameState): string {
     lastAsh: s(g.lastAsh),
     orders: g.orders,
 
+    names: g.names,
+    namesSpent: g.namesSpent,
+    interments: g.interments,
+    ashSpentThisAscension: s(g.ashSpentThisAscension),
+    wardenNames: g.wardenNames,
+    purchases: g.purchases,
+    vows: g.vows,
+
     equipped: g.equipped,
     inventory: g.inventory,
     slotBonus: g.slotBonus,
@@ -121,6 +129,24 @@ const MIGRATIONS: Record<number, Migration> = {
     v: 4,
     lastAsh: '0',
     orders: { enabled: false, ashMultiple: 1.5, stallMinutes: 5 },
+  }),
+  // v4 predates Interment, Names and Vows. Ash already spent this Ascension is
+  // credited, so an existing save arrives at Interment rather than starting over.
+  4: (b) => ({
+    ...b,
+    v: 5,
+    names: 0,
+    namesSpent: 0,
+    interments: 0,
+    ashSpentThisAscension: b.ashSpentTotal ?? '0',
+    wardenNames: 0,
+    purchases: {},
+    vows: [],
+    orders: {
+      ...(b.orders as Record<string, unknown>),
+      autoBuy: false,
+      priority: [],
+    },
   }),
 }
 

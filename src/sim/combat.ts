@@ -5,7 +5,7 @@ import { DEATH_LINES } from '../content/names'
 import { keystoneFlags } from '../content/tree'
 import { WARDEN_BY_ID } from '../content/wardens'
 import { INVENTORY_CAP } from '../content/relics'
-import { currentTarget, spawnForRank, spawnGuard } from './enemies'
+import { currentTarget, spawnFor, spawnGuard } from './enemies'
 import { equippedFlags, meltValue, relicSeed, rollRelic } from './relics'
 import { maxEchoes } from './ghosts'
 import {
@@ -13,6 +13,7 @@ import {
   enemiesPerRank,
   isStandRank,
   mitigation,
+  setGrowthExtra,
   standTimerTicks,
 } from './formulas'
 import { Rng } from './rng'
@@ -410,7 +411,16 @@ function onEnemyKilled(s: GameState, st: StatBlock, f: Flags, overkill: Decimal,
     s.standTimer = 0
     s.seen[`warden.${s.rank}`] = true
     const def = e.wardenId ? WARDEN_BY_ID[e.wardenId] : undefined
-    if (def) s.events.push({ t: 'standWon', line: def.defeatLine })
+    if (def) {
+      s.events.push({ t: 'standWon', line: def.defeatLine })
+      // The first time you put a Warden down, ever, it gives up a Name.
+      const key = `named.${def.id}`
+      if (!s.seen[key]) {
+        s.seen[key] = true
+        s.wardenNames += 1
+        s.events.push({ t: 'log', text: `It had a name. You have it now.` })
+      }
+    }
   }
 
   const carry = e.burn * B.BURN_CARRY
@@ -603,6 +613,11 @@ export function tick(s: GameState, st: StatBlock, f: Flags, rf: Flags, rng: Rng)
 
 /** Advance `ticks` ticks. Returns the stat block used, for the UI. */
 export function step(s: GameState, ticks: number): StatBlock {
+  // Vow of the Long Count reshapes the enemy curve itself, so it is set on the
+  // formula module before anything reads it.
+  setGrowthExtra(
+    s.vows.includes('longcount') ? B.VOW_LONGCOUNT_GROWTH / B.GROWTH : 1,
+  )
   let st = computeStats(s)
   const f = keystoneFlags(s.treeLevels)
   const rf = equippedFlags(s.equipped)

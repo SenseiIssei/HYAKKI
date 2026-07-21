@@ -1,6 +1,6 @@
 ﻿import Decimal from 'break_infinity.js'
 import { DEFAULT_CLASS } from '../content/classes'
-import { spawnForRank } from './enemies'
+import { spawnFor } from './enemies'
 import { enemiesPerRank } from './formulas'
 import { hashSeed } from './rng'
 import { maxEchoes } from './ghosts'
@@ -36,6 +36,7 @@ export function resetRun(s: GameState): void {
   s.killSpdStacks = 0
   s.killSpdTicks = 0
   s.freshEnemy = true
+  s.silencedTicks = 0
   s.echoes = maxEchoes(s)
 
   s.bone = new Decimal(0)
@@ -62,7 +63,11 @@ export function createInitialState(classId = DEFAULT_CLASS, seed?: number): Game
     bestRankEver: 1,
     enemyIndex: 0,
     enemiesThisRank: enemiesPerRank(1),
-    enemy: spawnForRank(1, 0, soldierSeed, 0),
+    enemy: spawnFor(
+      { soldierSeed, reveilles: 0, standsThisRun: 0, ghosts: [], interments: 0 },
+      1,
+      0,
+    ),
     soldier: { hp: new Decimal(0), cooldown: 1, resolve: 0, shield: new Decimal(0) },
     dead: false,
     deathCause: '',
@@ -85,6 +90,7 @@ export function createInitialState(classId = DEFAULT_CLASS, seed?: number): Game
     killSpdStacks: 0,
     killSpdTicks: 0,
     freshEnemy: true,
+    silencedTicks: 0,
     echoes: 0,
 
     equipped: [null, null],

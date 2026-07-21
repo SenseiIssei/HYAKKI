@@ -1307,6 +1307,99 @@ button {
   color: var(--bone-dim);
 }
 
+/* ── the returned ───────────────────────────────────────────── */
+
+.enemy-name.returned {
+  color: var(--ichor);
+  font-style: normal;
+  letter-spacing: 0.08em;
+}
+
+.returned-note {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12.5px;
+  color: var(--ichor);
+  opacity: 0.75;
+  margin-top: 4px;
+}
+
+/* ── the bargain ────────────────────────────────────────────── */
+
+.bargain-grid {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.1fr;
+  gap: 16px;
+  padding: 16px 20px;
+  align-content: start;
+}
+
+.inter-award {
+  text-align: center;
+  margin: 12px 0 8px;
+}
+
+.inter-number {
+  display: block;
+  font-family: var(--mono);
+  font-size: 38px;
+  color: var(--ichor);
+  letter-spacing: 0.1em;
+}
+
+.bargain-grid .ash-total,
+.drawer-head-right .ash-total {
+  color: var(--ichor);
+}
+
+.vow {
+  text-align: left;
+  width: 100%;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.vow:hover:not(:disabled) {
+  border-color: var(--ash);
+}
+
+.vow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.vow.sworn {
+  border-color: var(--gold);
+  background: #191712;
+}
+
+.vow-mult {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--gold);
+}
+
+.vow-down {
+  font-size: 10.5px;
+  color: var(--blood);
+  line-height: 1.5;
+  margin-top: 3px;
+}
+
+.vow-bonus {
+  font-size: 10px;
+  color: var(--ichor);
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 980px) {
+  .bargain-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── log strip ──────────────────────────────────────────────── */
 
 .logstrip {

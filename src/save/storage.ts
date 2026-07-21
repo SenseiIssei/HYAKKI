@@ -1,5 +1,5 @@
 import LZString from 'lz-string'
-import { spawnForRank } from '../sim/enemies'
+import { spawnFor } from '../sim/enemies'
 import { createInitialState } from '../sim/state'
 import type { GameState } from '../sim/types'
 import { deserialize, serialize, toDecimal, type SaveBlob } from './serialize'
@@ -66,7 +66,18 @@ function hydrate(b: SaveBlob): GameState {
       enabled: !!(b.orders as GameState['orders'])?.enabled,
       ashMultiple: (b.orders as GameState['orders'])?.ashMultiple ?? 1.5,
       stallMinutes: (b.orders as GameState['orders'])?.stallMinutes ?? 5,
+      autoBuy: !!(b.orders as GameState['orders'])?.autoBuy,
+      priority: (b.orders as GameState['orders'])?.priority ?? [],
     },
+
+    names: n('names'),
+    namesSpent: n('namesSpent'),
+    interments: n('interments'),
+    ashSpentThisAscension: toDecimal(b.ashSpentThisAscension),
+    wardenNames: n('wardenNames'),
+    purchases: (b.purchases as Record<string, number>) ?? {},
+    vows: Array.isArray(b.vows) ? (b.vows as string[]) : [],
+    silencedTicks: 0,
 
     equipped: Array.isArray(b.equipped) ? (b.equipped as GameState['equipped']) : [null, null],
     inventory: Array.isArray(b.inventory) ? (b.inventory as GameState['inventory']) : [],
@@ -84,12 +95,7 @@ function hydrate(b: SaveBlob): GameState {
     seen: (b.seen as Record<string, boolean>) ?? {},
   }
   // Enemies are regenerated, never stored.
-  g.enemy = spawnForRank(
-    g.rank,
-    g.enemyIndex,
-    (g.soldierSeed + g.reveilles * 7919) >>> 0,
-    g.standsThisRun,
-  )
+  g.enemy = spawnFor(g, g.rank, g.enemyIndex)
   return g
 }
 

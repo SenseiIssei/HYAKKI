@@ -119,7 +119,15 @@ export function Column() {
         <div className="rank-label">Rank</div>
         <div className="rank-number">{fmtInt(g.rank)}</div>
         <div className="rank-rule" />
-        <div className="enemy-name">{target.name}</div>
+        <div className={`enemy-name ${target.ghost ? 'returned' : ''}`}>{target.name}</div>
+        {/* The whole thesis of the game, stated quietly. */}
+        {target.ghost && (
+          <div className="returned-note">
+            {target.ghost.soldierNumber === g.soldierNumber
+              ? 'Its coat says the same as yours.'
+              : `It got as far as Rank ${fmtInt(target.ghost.deepestRank)}. You were it.`}
+          </div>
+        )}
       </div>
 
       <StandBanner />

@@ -103,8 +103,11 @@ export const BALANCE = {
   RELIC_DROP_STAND: 0.6,
 
   // ── names (prestige tier 2) ──
-  /** Ash-spent divisor before the square root. Calibrated in scripts/interment.ts */
-  NAMES_DIV: 4e5,
+  /**
+   * Names per order of magnitude of Ash spent. Ash is exponential in depth, so
+   * log10 makes Names linear in depth. Calibrated in scripts/interment.ts.
+   */
+  NAMES_PER_DECADE: 0.25,
 
   // ── vows ──
   /** Vow of the Long Count: enemy growth 1.145 -> 1.16 */

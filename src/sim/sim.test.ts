@@ -8,8 +8,18 @@ import { CLASSES, classUnlocked } from '../content/classes'
 import { compareRelic } from './evaluate'
 import { maxEchoes } from './ghosts'
 import { rollRelic } from './relics'
-import { catchUp, offlineWindowMs, shouldReveille } from './offline'
-import { canReveille, projectedAsh, recant, reveille } from './prestige'
+import { VOWS, vowAshMult } from '../content/vows'
+import { spawnEnemy } from './enemies'
+import { catchUp, offlineEfficiency, offlineWindowMs, shouldReveille } from './offline'
+import {
+  canInter,
+  canReveille,
+  interment,
+  projectedAsh,
+  projectedNames,
+  recant,
+  reveille,
+} from './prestige'
 import { createInitialState } from './state'
 import { step } from './combat'
 import {
@@ -482,7 +492,7 @@ describe('offline catch-up', () => {
     const s = createInitialState('hoplite', 4242)
     s.treeLevels = { edge: 30, meat: 30, clot: 15, scar: 10, tithe: 10 }
     s.reveilles = 40
-    s.orders = { enabled: true, ashMultiple: 1.5, stallMinutes: 5 }
+    s.orders = { enabled: true, ashMultiple: 1.5, stallMinutes: 5, autoBuy: false, priority: [] }
     Object.assign(s, over)
     s.soldier.hp = computeStats(s).hp
     return s
@@ -538,7 +548,9 @@ describe('offline catch-up', () => {
   })
 
   it('never runs without Standing Orders enabled', () => {
-    const s = ready({ orders: { enabled: false, ashMultiple: 1.5, stallMinutes: 5 } })
+    const s = ready({
+      orders: { enabled: false, ashMultiple: 1.5, stallMinutes: 5, autoBuy: false, priority: [] },
+    })
     const r = catchUp(s, 12 * 3600_000)
     // it still marches, but it cannot wake itself, so it stops at the first death
     expect(r.reveilles).toBe(0)
@@ -561,7 +573,7 @@ describe('standing orders', () => {
     s.reveilles = 40
     s.bestRank = 60
     s.lastAsh = new Decimal(100)
-    s.orders = { enabled: true, ashMultiple: 1.5, stallMinutes: 5 }
+    s.orders = { enabled: true, ashMultiple: 1.5, stallMinutes: 5, autoBuy: false, priority: [] }
     return s
   }
 
@@ -591,6 +603,189 @@ describe('standing orders', () => {
     s.lastAsh = projectedAsh(s).mul(100)
     expect(shouldReveille(s, 0)).toBe(false)
     expect(shouldReveille(s, 5 * 60 * BALANCE.TICKS_PER_SEC)).toBe(true)
+  })
+})
+
+describe('interment and names', () => {
+  const deep = () => {
+    const s = createInitialState('hoplite', 17)
+    s.ashSpentThisAscension = new Decimal('1e20')
+    s.treeLevels = { edge: 40, meat: 40 }
+    s.ash = new Decimal(500)
+    s.reveilles = 40
+    return s
+  }
+
+  it('names stay a currency you can count', () => {
+    // The original sqrt(ash) formula produced 9e128 Names over 100 Reveilles.
+    const s = deep()
+    s.ashSpentThisAscension = new Decimal('1e250')
+    expect(projectedNames(s)).toBeLessThan(1000)
+    expect(projectedNames(s)).toBeGreaterThan(10)
+  })
+
+  it('names grow linearly with depth, not explosively', () => {
+    const a = deep()
+    const b = deep()
+    a.ashSpentThisAscension = new Decimal('1e20')
+    b.ashSpentThisAscension = new Decimal('1e40')
+    // doubling the exponent should roughly double the Names
+    const ratio = projectedNames(b) / projectedNames(a)
+    expect(ratio).toBeGreaterThan(1.5)
+    expect(ratio).toBeLessThan(2.5)
+  })
+
+  it('Wardens alone do not open Interment', () => {
+    const s = createInitialState('hoplite', 1)
+    s.wardenNames = 6
+    expect(projectedNames(s)).toBe(6)
+    expect(canInter(s)).toBe(false)
+  })
+
+  it('interment burns the tree and keeps the Names', () => {
+    const s = deep()
+    s.wardenNames = 3
+    const expected = projectedNames(s)
+    const gained = interment(s)
+
+    expect(gained).toBe(expected)
+    expect(s.names).toBe(expected)
+    expect(s.treeLevels).toEqual({})
+    expect(s.ash.eq(0)).toBe(true)
+    expect(s.ashSpentThisAscension.eq(0)).toBe(true)
+    expect(s.wardenNames).toBe(0)
+    expect(s.interments).toBe(1)
+    expect(s.rank).toBe(1)
+    // ghosts and relics survive being buried
+    expect(s.ghosts).toBeDefined()
+  })
+})
+
+describe('vows', () => {
+  const sworn = (...ids: string[]) => {
+    const s = createInitialState('hoplite', 23)
+    s.vows = ids
+    return s
+  }
+
+  it('every vow multiplies Ash', () => {
+    for (const v of VOWS) expect(v.ashMult).toBeGreaterThan(1)
+  })
+
+  it('vows stack multiplicatively', () => {
+    expect(vowAshMult(['salt', 'silence'])).toBeCloseTo(2.2 * 1.8, 5)
+  })
+
+  it('Vow of Salt actually closes the Bone upgrades', () => {
+    const free = createInitialState('hoplite', 23)
+    free.boneLevels = { reinforce: 20 }
+    const vowed = sworn('salt')
+    vowed.boneLevels = { reinforce: 20 }
+    expect(computeStats(vowed).atk.lt(computeStats(free).atk)).toBe(true)
+  })
+
+  it('Vow of the Open Coat actually zeroes Armor', () => {
+    const s = sworn('opencoat')
+    s.treeLevels = { scar: 50 }
+    expect(computeStats(s).arm.eq(0)).toBe(true)
+  })
+
+  it('Vow of Poverty actually ignores relics', () => {
+    const s = sworn('poverty')
+    s.equipped = [{ ...rollRelic(1, 100), affixes: [{ id: 'whetted', value: 0.3 }] }, null]
+    const bare = createInitialState('hoplite', 23)
+    expect(computeStats(s).atk.eq(computeStats(bare).atk)).toBe(true)
+  })
+
+  it('Vow of the Waking actually stops offline progress', () => {
+    const s = sworn('waking')
+    expect(offlineEfficiency(s)).toBe(0)
+    const r = catchUp(s, 12 * 3600_000)
+    expect(r.ranksCleared).toBe(0)
+  })
+
+  it('Vow of the Long Count actually makes enemies grow faster', () => {
+    const plain = createInitialState('hoplite', 23)
+    step(plain, 10)
+    const plainHp = plain.enemy.maxHp
+    const s = sworn('longcount')
+    step(s, 10)
+    // same rank, harder enemy
+    expect(s.rank).toBe(plain.rank)
+    expect(s.enemy.maxHp.gt(plainHp)).toBe(true)
+  })
+
+  it('Vow of Silence actually stops the Signature', () => {
+    const s = sworn('silence')
+    s.soldier.resolve = 100
+    step(s, 40)
+    expect(s.sigKind).toBe('')
+  })
+
+  it('vows raise the Ash payout', () => {
+    const plain = createInitialState('hoplite', 23)
+    plain.bestRank = 60
+    const vowed = sworn('longcount', 'salt')
+    vowed.bestRank = 60
+    expect(projectedAsh(vowed).gt(projectedAsh(plain))).toBe(true)
+  })
+})
+
+describe('the returned', () => {
+  const withGhosts = (n: number) => {
+    const s = createInitialState('hoplite', 31)
+    for (let i = 0; i < n; i++) {
+      s.ghosts.push({
+        soldierNumber: i + 1,
+        classId: 'hoplite',
+        deepestRank: 40 + i * 3,
+        seed: 1000 + i,
+        diedTo: 'something',
+        affix: { id: 'whetted', value: 0.2 },
+      })
+    }
+    return s
+  }
+
+  it('does not appear before there is anyone to reissue', () => {
+    const none = createInitialState('hoplite', 31)
+    for (let i = 0; i < 300; i++) {
+      expect(spawnEnemy(200, i, 7, 0, none.ghosts).family).not.toBe('returned')
+    }
+  })
+
+  it('does not appear in the shallows', () => {
+    const s = withGhosts(20)
+    for (let i = 0; i < 200; i++) {
+      expect(spawnEnemy(20, i, 7, 0, s.ghosts).family).not.toBe('returned')
+    }
+  })
+
+  it('wears a real past number, scaled to here', () => {
+    const s = withGhosts(30)
+    let found = null
+    for (let i = 0; i < 400 && !found; i++) {
+      const e = spawnEnemy(300, i, 7, 0, s.ghosts)
+      if (e.family === 'returned') found = e
+    }
+    expect(found).not.toBeNull()
+    expect(found!.ghost).toBeDefined()
+    expect(found!.name).toMatch(/^Soldier #/)
+    // its identity is old; its numbers are from HERE
+    const chaffHere = spawnEnemy(300, 1, 7, 0, [])
+    expect(found!.maxHp.gt(chaffHere.maxHp.div(10))).toBe(true)
+    // and it carries an affix it had
+    expect(found!.atk.gt(0)).toBe(true)
+  })
+
+  it('a run leaves exactly one ghost behind, with what it carried', () => {
+    const s = createInitialState('hoplite', 31)
+    s.equipped = [{ ...rollRelic(9, 80), affixes: [{ id: 'heavy', value: 0.25 }] }, null]
+    step(s, 60 * 60 * 3)
+    const before = s.ghosts.length
+    reveille(s)
+    expect(s.ghosts.length).toBe(before + 1)
+    expect(s.ghosts[s.ghosts.length - 1].affix?.id).toBe('heavy')
   })
 })
 

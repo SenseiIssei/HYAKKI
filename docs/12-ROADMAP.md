@@ -86,6 +86,26 @@ Seven phases. Each has a hard **definition of done** — a thing you can watch h
 
 **DoD:** a player fights an enemy wearing their own number from thirty runs ago, and notices.
 
+> **Met.** Live at Rank 301:
+> ```
+> Soldier #67
+> It got as far as Rank 20. You were it.
+> ```
+> The Returned appear from Rank 40 once ghosts exist, at 6-30% of spawns rising with
+> depth. They take their **identity** from a real past run (number, sigil seed, one affix
+> it carried) and their **numbers from the present Rank** — an old ghost's raw statline
+> would be harmless by Rank 900.
+
+### Known plateau (measured, and deliberate)
+
+Over 100 Reveilles the curve is: slow start → rapid climb around Reveille 20-30 →
+**hard wall at ~Rank 6,800**, where `hardening`'s third gear (`1.05^(r-1000)`) outruns
+anything the tree can buy. Depth then sits flat for dozens of runs.
+
+That wall is the content gap Phases 5 and 6 exist to break — Descents for a second power
+axis, and Ichor for rule changes that edit the curve itself. It is not a balance bug, but
+it does mean **the game currently has an endgame ceiling at ~Rank 6,800**.
+
 ---
 
 ## Phase 5 — THE DEPTH

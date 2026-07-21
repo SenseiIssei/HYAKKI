@@ -1,9 +1,9 @@
 import Decimal from 'break_infinity.js'
 import { BALANCE as B } from '../content/balance'
-import { keystoneFlags } from '../content/tree'
+import { TREE_BY_ID, keystoneFlags } from '../content/tree'
 import { step } from './combat'
-import { spawnEnemy, spawnForRank } from './enemies'
-import { boneFromKill, enemiesPerRank, isStandRank } from './formulas'
+import { spawnEnemy, spawnFor } from './enemies'
+import { boneFromKill, costOfNext, enemiesPerRank, isStandRank } from './formulas'
 import { canReveille, projectedAsh, reveille } from './prestige'
 import { computeStats } from './stats'
 import type { GameState, StatBlock } from './types'
@@ -48,7 +48,36 @@ export function offlineWindowMs(s: GameState, st: StatBlock): number {
 }
 
 export function offlineEfficiency(s: GameState): number {
+  // Vow of the Waking: the Column does not march without you at all.
+  if (s.vows.includes('waking')) return 0
   return keystoneFlags(s.treeLevels).has('vigil25') ? 1 : B.OFFLINE_EFFICIENCY
+}
+
+/**
+ * Standing Orders tier 2: spend Ash down the player's priority list.
+ * Only ever buys what they explicitly ranked — it never guesses a build.
+ */
+export function autoBuy(s: GameState): number {
+  if (!s.orders.enabled || !s.orders.autoBuy) return 0
+  let bought = 0
+  for (let guard = 0; guard < 500; guard++) {
+    let did = false
+    for (const id of s.orders.priority) {
+      const node = TREE_BY_ID[id]
+      if (!node) continue
+      const cost = costOfNext(node.base, B.TREE_NODE_SCALE, s.treeLevels[id] ?? 0, 1)
+      if (s.ash.lt(cost)) continue
+      s.ash = s.ash.sub(cost)
+      s.ashSpentTotal = s.ashSpentTotal.add(cost)
+      s.ashSpentThisAscension = s.ashSpentThisAscension.add(cost)
+      s.treeLevels[id] = (s.treeLevels[id] ?? 0) + 1
+      bought++
+      did = true
+      break // always restart at the top of the list
+    }
+    if (!did) break
+  }
+  return bought
 }
 
 /** Auto-Reveille, shared by the offline catch-up and the live loop. */
@@ -85,7 +114,7 @@ function placeAtRank(s: GameState, rank: number) {
   s.enemyIndex = 0
   s.enemiesThisRank = enemiesPerRank(rank)
   s.standTimer = 0
-  s.enemy = spawnForRank(rank, 0, (s.soldierSeed + s.reveilles * 7919) >>> 0, s.standsThisRun)
+  s.enemy = spawnFor(s, rank, 0)
   s.freshEnemy = true
 }
 
@@ -125,12 +154,14 @@ export function catchUp(s: GameState, elapsedMs: number): OfflineReport {
       if (!s.orders.enabled || !canReveille(s)) break
       s.lastAsh = projectedAsh(s)
       reveille(s)
+      autoBuy(s)
       continue
     }
 
     if (shouldReveille(s, idleTicks)) {
       s.lastAsh = projectedAsh(s)
       reveille(s)
+      autoBuy(s)
       idleTicks = 0
       continue
     }

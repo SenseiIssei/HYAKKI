@@ -210,10 +210,34 @@ Minimum meaningful gain: the button is disabled below `ashOnReveille < 1`, with 
 ## 7. Names (prestige tier 2)
 
 ```
-namesOnInterment = floor( (totalAshEverSpent / 5e6) ^ 0.5 ) + wardenNamesEarned
+namesFromAsh = floor( (log10(ashSpentThisAscension) - 2) * 0.25 )
+names        = floor(namesFromAsh * vowNameMult) + vowExtraNames + wardenNames
 ```
 
-Square-root scaling: Names are *slow*, and that's correct. A player should feel each one. Target: **first Interment at ~8-14 hours played, yielding 3-5 Names.** Total Names available at 100h: ~40.
+**Logarithmic, not square-root.** Same trap as § 6, one level up: the doc originally
+specified `sqrt(ashSpent / 5e6)`, but Ash is itself exponential in depth, so its square
+root is still astronomical. Measured over 100 Reveilles that formula produced
+**9 × 10¹²⁸ Names** — for a currency whose entire design brief is "a player should feel
+each one".
+
+`log10` of an exponential is linear, so Names grow steadily with **depth**. And because
+they are drawn from Ash spent *this Ascension*, they come from going deeper rather than
+from grinding a plateau.
+
+**Wardens alone do not open Interment.** Each Warden's first-ever kill grants a Name, but
+`canInter` tests `namesFromAsh >= 1` — otherwise the first Stand offers to burn a
+five-level tree, which reads as a bug rather than a bargain.
+
+### Measured (`npx tsx scripts/interment.ts`)
+
+| | |
+|---|---|
+| First Interment possible | run 19, **3.9h played**, worth 7 Names (6 from Wardens) |
+| At 105h / 60 Reveilles | **73 Names** |
+
+The original 8-14h target was a guess; 3.9h is the measured reality and is a better
+pace. Names asymptote once depth plateaus, which is intended — see the plateau note in
+[12 — Roadmap](12-ROADMAP.md).
 
 Names buy things that are not numbers:
 

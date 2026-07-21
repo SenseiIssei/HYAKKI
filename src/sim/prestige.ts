@@ -18,17 +18,34 @@ export const boughtSlots = (s: GameState) => s.purchases.slot ?? 0
 export const vowSlots = (s: GameState) => 1 + (s.purchases.vowslot ?? 0)
 
 /**
- * NAMES. Square-root scaling on the Ash spent this Ascension: Names are slow,
- * and that is correct. A player should feel each one.
+ * NAMES — LOGARITHMIC in the Ash spent this Ascension.
+ *
+ * The design doc specified `sqrt(ashSpent / 5e6)`. That is unshippable for the
+ * same reason the original Ash formula was: Ash is itself exponential in depth,
+ * so a square root of it is still astronomical. Measured over 100 Reveilles it
+ * produced **9e128 Names** — a currency you were supposed to feel one at a time.
+ *
+ * log10 of an exponential is linear, so this makes Names grow steadily with
+ * DEPTH, which is what "a player should feel each one" actually requires.
  */
+export function namesFromAsh(s: GameState): number {
+  const spent = s.ashSpentThisAscension
+  if (spent.lte(100)) return 0
+  return Math.max(0, Math.floor((spent.log10() - 2) * B.NAMES_PER_DECADE))
+}
+
 export function projectedNames(s: GameState): number {
-  const base = Math.floor(Math.sqrt(s.ashSpentThisAscension.div(B.NAMES_DIV).toNumber()))
+  const base = namesFromAsh(s)
   const withVows = Math.floor(base * vowNameMult(s.vows)) + vowExtraNames(s.vows)
   return Math.max(0, withVows) + s.wardenNames
 }
 
+/**
+ * Wardens alone do not open Interment — otherwise the very first Stand offers
+ * to burn a five-level tree, which reads as a bug rather than a bargain.
+ */
 export function canInter(s: GameState): boolean {
-  return projectedNames(s) >= 1
+  return namesFromAsh(s) >= 1
 }
 
 /**

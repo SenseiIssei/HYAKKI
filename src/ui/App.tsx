@@ -4,12 +4,14 @@ import { CLASS_BY_ID } from '../content/classes'
 import {
   chooseClass,
   game,
+  intermentReady,
   ordersUnlocked,
   reveal,
   saveNow,
   soundReveille,
   useUI,
 } from '../store/gameStore'
+import { Bargain } from './Bargain'
 import { Orders } from './Orders'
 import { Report } from './Report'
 import { fmtInt } from '../format'
@@ -43,6 +45,8 @@ export function App() {
   const setPicker = useUI((s) => s.setPicker)
   const ordersOpen = useUI((s) => s.ordersOpen)
   const setOrdersOpen = useUI((s) => s.setOrders)
+  const bargainOpen = useUI((s) => s.bargainOpen)
+  const setBargain = useUI((s) => s.setBargain)
   const report = useUI((s) => s.report)
   const fontScale = useUI((s) => s.fontScale)
 
@@ -62,13 +66,15 @@ export function App() {
         ui.setOrders(false)
         ui.setPicker(false)
         ui.setSettings(false)
+        ui.setBargain(false)
         return
       }
       const map: Record<string, () => void> = {
         '1': () => ui.setTree(true),
         '2': () => ui.setRelics(true),
         '3': () => ui.setOrders(true),
-        '4': () => ui.setSettings(true),
+        '4': () => ui.setBargain(true),
+        '5': () => ui.setSettings(true),
       }
       map[e.key]?.()
     }
@@ -141,6 +147,12 @@ export function App() {
               Orders
               {ordersUnlocked() && !g.orders.enabled && <span className="dot" />}
             </button>
+            {(g.reveilles >= 10 || g.interments > 0 || g.names > 0) && (
+              <button className="small-btn" onClick={() => setBargain(true)}>
+                The Bargain
+                {(intermentReady() || g.names > 0) && <span className="dot" />}
+              </button>
+            )}
             {(g.inventory.length > 0 || g.equipped.some(Boolean)) && (
               <button className="small-btn" onClick={() => setRelics(true)}>
                 Carried {g.inventory.length > 0 && <span className="dot" />}
@@ -160,6 +172,7 @@ export function App() {
       {treeOpen && <Tree />}
       {relicsOpen && <Relics />}
       {ordersOpen && <Orders />}
+      {bargainOpen && <Bargain />}
       {pickerOpen && (
         <Opening
           seed={g.soldierSeed}

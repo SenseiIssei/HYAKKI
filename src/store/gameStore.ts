@@ -7,8 +7,18 @@ import { slotsFor, type Rarity } from '../content/relics'
 import { compareRelic } from '../sim/evaluate'
 import { meltValue, rarityRank, relicLabel } from '../sim/relics'
 import { affordableLevels, costOfNext } from '../sim/formulas'
-import { canReveille, projectedAsh, recant, reveille } from '../sim/prestige'
-import { createInitialState } from '../sim/state'
+import { NAME_SHOP_BY_ID, nameCost } from '../content/nameshop'
+import {
+  canInter,
+  canReveille,
+  interment,
+  projectedAsh,
+  projectedNames,
+  recant,
+  reveille,
+  vowSlots,
+} from '../sim/prestige'
+import { createInitialState, resetRun } from '../sim/state'
 import { computeStats } from '../sim/stats'
 import type { OfflineReport } from '../sim/offline'
 import type { GameState, SimEvent, StatBlock } from '../sim/types'
@@ -130,6 +140,8 @@ type UIState = {
   setPicker: (v: boolean) => void
   ordersOpen: boolean
   setOrders: (v: boolean) => void
+  bargainOpen: boolean
+  setBargain: (v: boolean) => void
   report: OfflineReport | null
   setReport: (r: OfflineReport | null) => void
   /** low-end / high-legibility mode: combat as a text log, no sigils */
@@ -156,6 +168,8 @@ export const useUI = create<UIState>((set) => ({
   setPicker: (v) => set({ pickerOpen: v }),
   ordersOpen: false,
   setOrders: (v) => set({ ordersOpen: v }),
+  bargainOpen: false,
+  setBargain: (v) => set({ bargainOpen: v }),
   report: null,
   setReport: (r) => set({ report: r }),
   numbersOnly: localStorage.getItem('myriad.numbersOnly') === '1',
@@ -227,6 +241,7 @@ export function buyTree(id: string, mode: 1 | 10 | 'max'): boolean {
   const prevMaxHp = ST.hp
   G.ash = G.ash.sub(cost)
   G.ashSpentTotal = G.ashSpentTotal.add(cost)
+  G.ashSpentThisAscension = G.ashSpentThisAscension.add(cost)
   G.treeLevels[id] = (G.treeLevels[id] ?? 0) + count
   refreshStats()
   const gained = ST.hp.sub(prevMaxHp)
@@ -234,6 +249,65 @@ export function buyTree(id: string, mode: 1 | 10 | 'max'): boolean {
   useUI.getState().bump()
   saveNow()
   return true
+}
+
+// ── interment, names, vows ──
+
+export const namesProjection = () => projectedNames(G)
+export const intermentReady = () => canInter(G)
+
+export function doInterment() {
+  const gained = interment(G)
+  refreshStats()
+  floaters = []
+  useUI.getState().setAutopsy(false)
+  useUI.getState().bump()
+  saveNow()
+  return gained
+}
+
+export function buyName(id: string): boolean {
+  const p = NAME_SHOP_BY_ID[id]
+  if (!p) return false
+  const owned = G.purchases[id] ?? 0
+  if (owned >= p.max) return false
+  const cost = nameCost(p, owned)
+  if (G.names < cost) return false
+  G.names -= cost
+  G.namesSpent += cost
+  G.purchases[id] = owned + 1
+  if (id === 'slot') G.slotBonus = G.purchases[id]
+  if (id === 'orders2') G.orders.autoBuy = true
+  refreshStats()
+  useUI.getState().bump()
+  saveNow()
+  return true
+}
+
+export const vowSlotCount = () => vowSlots(G)
+
+export function toggleVow(id: string): boolean {
+  const i = G.vows.indexOf(id)
+  if (i >= 0) {
+    G.vows.splice(i, 1)
+  } else {
+    if (G.vows.length >= vowSlots(G)) return false
+    G.vows.push(id)
+  }
+  // A Vow reshapes the run it is sworn on, so the run restarts around it.
+  resetRun(G)
+  refreshStats()
+  G.soldier.hp = ST.hp
+  floaters = []
+  useUI.getState().bump()
+  saveNow()
+  return true
+}
+
+export function setPriority(list: string[]) {
+  G.orders.priority = list
+  useUI.getState().bump()
+  saveNow()
 }
 
 export function doRecant() {

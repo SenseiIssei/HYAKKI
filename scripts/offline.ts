@@ -16,7 +16,7 @@ function fresh(hours: number): GameState {
   const s = createInitialState('hoplite', 4242)
   s.treeLevels = { edge: 30, meat: 30, clot: 15, scar: 10, tithe: 10 }
   s.reveilles = 40
-  s.orders = { enabled: true, ashMultiple: 1.5, stallMinutes: 5 }
+  s.orders = { enabled: true, ashMultiple: 1.5, stallMinutes: 5, autoBuy: false, priority: [] }
   s.soldier.hp = computeStats(s).hp
   void hours
   return s

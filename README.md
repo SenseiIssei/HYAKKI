@@ -53,15 +53,16 @@ You are Soldier #1 of the Myriad. You march. You fight automatically. Eventually
 
 ## Status
 
-**Phases 0-3 complete and playable.** Design complete for all seven phases.
+**Phases 0-4 complete and playable.** Design complete for all seven phases.
 
 ```
 npm install
 npm run dev      # http://localhost:5180
-npm test         # 52 tests, incl. the balance-band and compounding design tests
+npm test         # 69 tests, incl. the balance-band and compounding design tests
 npx tsx scripts/balance.ts hoplite 25     # headless TTK curve, one run
 npx tsx scripts/prestige.ts hoplite 16 15 # does it compound? 16 Reveilles
 npx tsx scripts/offline.ts                # offline catch-up: speed and accuracy
+npx tsx scripts/interment.ts hoplite 60   # the Names economy over 60 Reveilles
 ```
 
 Working today: class select (Hoplite / Lampbearer / Augur, each with a real damage
@@ -86,5 +87,10 @@ Reveille 25), keyboard navigation, a **numbers-only mode**, and font scaling.
 
 Measured: eight hours away returns **632 Ranks, 190 Stands, 33 Reveilles, 726 Ash**.
 
-Next: [Phase 4 — The Bargain](docs/12-ROADMAP.md) (Interment, Names, Vows, and the
-Returned — the enemies wearing your own past numbers).
+Phase 4 is the bargain: **Interment and Names**, the **Name shop**, **all 10 Vows**
+(every downside genuinely enforced), **Standing Orders tier 2** (auto-spend down a
+priority list), Wardens 6-8 with **T2 evolutions**, and **THE RETURNED** — enemies built
+from your own past runs, wearing their real coat numbers.
+
+Next: [Phase 5 — The Depth](docs/12-ROADMAP.md) (Descents: Keys, branching route maps,
+and the five Layers).
