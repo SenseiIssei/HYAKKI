@@ -2,7 +2,14 @@ import type { StatKey } from './upgrades'
 
 /** docs/06-RELICS.md */
 
-export type Rarity = 'issued' | 'kept' | 'named' | 'myth' | 'truename'
+export type Rarity =
+  | 'issued'
+  | 'kept'
+  | 'named'
+  | 'blessed'
+  | 'cursed'
+  | 'myth'
+  | 'truename'
 
 /**
  * The six places a thing can be worn. Typed slots, RPG-style: an item goes in
@@ -43,18 +50,37 @@ export const STAT_SLOT: Record<string, EquipSlot> = {
 
 export const RARITIES: Record<
   Rarity,
-  { label: string; affixes: number; weight: number; colorVar: string; meltValue: number }
+  {
+    label: string
+    kanji: string
+    affixes: number
+    weight: number
+    color: string
+    meltValue: number
+    /** Cursed: rolls strong, but also carries one negative affix. */
+    curse?: boolean
+  }
 > = {
-  issued: { label: 'Issued', affixes: 1, weight: 60, colorVar: '--ash', meltValue: 1 },
-  kept: { label: 'Kept', affixes: 2, weight: 27, colorVar: '--bone', meltValue: 3 },
-  named: { label: 'Named', affixes: 3, weight: 10, colorVar: '--blood', meltValue: 10 },
-  myth: { label: 'Myth', affixes: 3, weight: 2.7, colorVar: '--gold', meltValue: 40 },
-  truename: { label: 'True Name', affixes: 4, weight: 0.3, colorVar: '--ichor', meltValue: 150 },
+  issued: { label: 'Issued', kanji: '支給', affixes: 1, weight: 1000, color: '#8a8271', meltValue: 1 },
+  kept: { label: 'Kept', kanji: '所持', affixes: 2, weight: 420, color: '#6f9358', meltValue: 3 },
+  named: { label: 'Named', kanji: '銘', affixes: 3, weight: 160, color: '#46707a', meltValue: 10 },
+  blessed: { label: 'Blessed', kanji: '加護', affixes: 4, weight: 55, color: '#c39a34', meltValue: 45 },
+  cursed: { label: 'Cursed', kanji: '呪', affixes: 4, weight: 22, color: '#8a6ba0', meltValue: 60, curse: true },
+  myth: { label: 'Myth', kanji: '神話', affixes: 3, weight: 6, color: '#cf4436', meltValue: 120 },
+  truename: { label: 'True Name', kanji: '真名', affixes: 4, weight: 1, color: '#e4dccb', meltValue: 400 },
 }
 
-export const RARITY_ORDER: Rarity[] = ['issued', 'kept', 'named', 'myth', 'truename']
+export const RARITY_ORDER: Rarity[] = [
+  'issued',
+  'kept',
+  'named',
+  'blessed',
+  'cursed',
+  'myth',
+  'truename',
+]
 
-export type AffixTag = 'offense' | 'defense' | 'crit' | 'sustain' | 'economy' | 'utility'
+export type AffixTag = 'offense' | 'defense' | 'crit' | 'sustain' | 'economy' | 'utility' | 'curse'
 
 export type AffixDef = {
   id: string
@@ -84,8 +110,24 @@ export const AFFIXES: AffixDef[] = [
   { id: 'ominous', label: 'Ominous', tag: 'economy', stat: 'omen', kind: 'add', min: 0.05, max: 0.25 },
 ]
 
+/**
+ * Curses. Only ever roll on a Cursed relic, always in addition to four strong
+ * affixes — the folklore bargain: real power for a real price. Their values are
+ * negative, so the sim's ordinary affix pipeline applies them as a penalty with
+ * no special-casing.
+ */
+export const CURSES: AffixDef[] = [
+  { id: 'brittle', label: 'Brittle', tag: 'curse', stat: 'hp', kind: 'add', min: -0.35, max: -0.12 },
+  { id: 'blunt', label: 'Blunt', tag: 'curse', stat: 'atk', kind: 'add', min: -0.28, max: -0.1 },
+  { id: 'lame', label: 'Lame', tag: 'curse', stat: 'spd', kind: 'add', min: -0.2, max: -0.06 },
+  { id: 'exposed', label: 'Exposed', tag: 'curse', stat: 'arm', kind: 'flat', min: -55, max: -12 },
+  { id: 'wasting', label: 'Wasting', tag: 'curse', stat: 'reg', kind: 'flat', min: -5, max: -1 },
+  { id: 'hunted', label: 'Hunted', tag: 'curse', stat: 'eva', kind: 'flat', min: -0.08, max: -0.02 },
+]
+
+/** Every affix the sim might have to resolve — normal lines and curses alike. */
 export const AFFIX_BY_ID: Record<string, AffixDef> = Object.fromEntries(
-  AFFIXES.map((a) => [a.id, a]),
+  [...AFFIXES, ...CURSES].map((a) => [a.id, a]),
 )
 
 /**

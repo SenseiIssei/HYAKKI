@@ -10,7 +10,7 @@ import { KEGARE_BANDS, bandFor, kegareFromKill, purificationCost } from '../cont
 import { OFUDA, OFUDA_BY_ID, wardFailChance } from '../content/ofuda'
 import { SPECIES } from '../pixel/species'
 import { yokaiFrame } from '../pixel/yokai'
-import { SLOT_ORDER, STAT_SLOT } from '../content/relics'
+import { SLOT_ORDER, STAT_SLOT, RARITIES, RARITY_ORDER, CURSES } from '../content/relics'
 import { slotForRelic, emptyEquip } from '../sim/relics'
 import { migrate } from '../save/serialize'
 import { worldStage, worldHue, worldSat } from '../content/worldStage'
@@ -1747,5 +1747,62 @@ describe('equipment slots', () => {
     // body is taken, so it stays in the bag rather than being lost)
     const uids = new Set(all.map((r) => r.uid))
     expect(uids).toEqual(new Set(['a', 'b', 'c', 'd']))
+  })
+})
+
+describe('seven rarities', () => {
+  it('there are seven tiers, ordered common to rare, each with a colour and kanji', () => {
+    expect(RARITY_ORDER).toEqual(['issued', 'kept', 'named', 'blessed', 'cursed', 'myth', 'truename'])
+    for (const r of RARITY_ORDER) {
+      expect(RARITIES[r].kanji.length).toBeGreaterThan(0)
+      expect(RARITIES[r].color).toMatch(/^#[0-9a-f]{6}$/i)
+    }
+    // weights only fall as rarity climbs — rarer is genuinely rarer
+    for (let i = 1; i < RARITY_ORDER.length; i++) {
+      expect(RARITIES[RARITY_ORDER[i]].weight).toBeLessThan(RARITIES[RARITY_ORDER[i - 1]].weight)
+    }
+  })
+
+  it('rolls at roughly the table weights over many drops', () => {
+    const counts: Record<string, number> = {}
+    for (let seed = 1; seed <= 6000; seed++) {
+      const r = rollRelic(seed, 300)
+      counts[r.rarity] = (counts[r.rarity] ?? 0) + 1
+    }
+    // common dominates, true names are near-mythical
+    expect(counts.issued).toBeGreaterThan(counts.kept)
+    expect(counts.kept).toBeGreaterThan(counts.named)
+    expect(counts.named).toBeGreaterThan(counts.blessed ?? 0)
+    expect(counts.issued).toBeGreaterThan((counts.myth ?? 0) * 20)
+    // every tier that isn't vanishingly rare should actually appear
+    expect(counts.blessed).toBeGreaterThan(0)
+    expect(counts.cursed).toBeGreaterThan(0)
+  })
+
+  it('a Cursed relic pays for its power with exactly one curse', () => {
+    // find a cursed roll
+    let cursed = null
+    for (let seed = 1; seed < 60000 && !cursed; seed++) {
+      const r = rollRelic(seed, 400)
+      if (r.rarity === 'cursed') cursed = r
+    }
+    expect(cursed).not.toBeNull()
+    const curses = cursed!.affixes.filter((a) => CURSES.some((c) => c.id === a.id))
+    expect(curses).toHaveLength(1)
+    // the curse is a genuine penalty
+    expect(curses[0].value).toBeLessThan(0)
+    // and it still carries its four strong affixes on top
+    expect(cursed!.affixes.length).toBe(RARITIES.cursed.affixes + 1)
+  })
+
+  it('a Blessed relic rolls high and clean — no curse', () => {
+    let blessed = null
+    for (let seed = 1; seed < 20000 && !blessed; seed++) {
+      const r = rollRelic(seed, 400)
+      if (r.rarity === 'blessed') blessed = r
+    }
+    expect(blessed).not.toBeNull()
+    expect(blessed!.affixes.length).toBe(RARITIES.blessed.affixes)
+    expect(blessed!.affixes.every((a) => a.value > 0)).toBe(true)
   })
 })

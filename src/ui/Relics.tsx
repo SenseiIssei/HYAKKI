@@ -20,7 +20,6 @@ import {
   unequipRelic,
   useUI,
 } from '../store/gameStore'
-import { COLORS } from '../render/presets'
 import { Sigil } from './Sigil'
 
 const relicSigil = {
@@ -29,25 +28,22 @@ const relicSigil = {
 }
 
 function rarityColor(r: Rarity) {
-  switch (r) {
-    case 'myth': return COLORS.gold
-    case 'truename': return COLORS.ichor
-    case 'named': return COLORS.blood
-    case 'kept': return COLORS.bone
-    default: return COLORS.ash
-  }
+  return RARITIES[r].color
 }
 
 function affixLine(a: { id: string; value: number }) {
   const def = AFFIX_BY_ID[a.id]
   if (!def) return null
-  const v =
+  const neg = a.value < 0
+  const mag = Math.abs(a.value)
+  const sign = neg ? '−' : '+'
+  const num =
     def.kind === 'add'
-      ? `+${fmtPct(a.value, 0)}`
+      ? `${sign}${fmtPct(mag, 0)}`
       : def.stat === 'cc' || def.stat === 'eva' || def.stat === 'ls' || def.stat === 'pen'
-        ? `+${fmtPct(a.value, 1)}`
-        : `+${a.value.toFixed(1)}`
-  return `${def.label} · ${v} ${def.stat.toUpperCase()}`
+        ? `${sign}${fmtPct(mag, 1)}`
+        : `${sign}${mag.toFixed(1)}`
+  return { text: `${def.label} · ${num} ${def.stat.toUpperCase()}`, curse: def.tag === 'curse' }
 }
 
 function RelicCard({
@@ -85,11 +81,15 @@ function RelicCard({
           {` · ${SLOT_META[relic.slot].kanji} ${SLOT_META[relic.slot].label}`}
           {` · found at Ri ${fmtInt(relic.dropRank)}`}
         </span>
-        {relic.affixes.map((a) => (
-          <span key={a.id} className="relic-affix">
-            {affixLine(a)}
-          </span>
-        ))}
+        {relic.affixes.map((a) => {
+          const line = affixLine(a)
+          if (!line) return null
+          return (
+            <span key={a.id} className={`relic-affix ${line.curse ? 'curse' : ''}`}>
+              {line.text}
+            </span>
+          )
+        })}
         {u?.cost && <span className="relic-cost">{u.cost}</span>}
         {u && <span className="relic-line">{u.line}</span>}
       </span>

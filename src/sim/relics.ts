@@ -1,6 +1,7 @@
 import {
   AFFIXES,
   AFFIX_BY_ID,
+  CURSES,
   RARITIES,
   RARITY_ORDER,
   SLOT_ORDER,
@@ -85,16 +86,23 @@ export function rollRelic(seed: number, dropRank: number, rarityBonus = 0): Reli
   // Affixes are distinct — a relic never rolls the same line twice.
   const pool = [...AFFIXES]
   const affixes: RolledAffix[] = []
+  const highBand = rarity === 'blessed' || rarity === 'cursed' || rarity === 'myth' || rarity === 'truename'
   for (let i = 0; i < def.affixes && pool.length; i++) {
     const idx = rng.int(0, pool.length)
     const a = pool.splice(idx, 1)[0]
-    // Issued rolls in the low half; Myth and above roll in the high half.
+    // Issued rolls in the low half; Blessed and above roll in the high half.
     let t = rng.next()
     if (rarity === 'issued') t *= 0.5
-    else if (rarity === 'myth' || rarity === 'truename') t = 0.5 + t * 0.5
+    else if (highBand) t = 0.5 + t * 0.5
     else if (rarity === 'named' && i === 0) t = 0.6 + t * 0.4
-    const roll = t * quality + (rarity === 'truename' ? (1 - quality) : 0)
+    const roll = t * quality + (rarity === 'truename' ? 1 - quality : 0)
     affixes.push({ id: a.id, value: a.min + (a.max - a.min) * Math.min(1, roll) })
+  }
+
+  // A Cursed relic carries one curse in addition — bigger numbers, a real price.
+  if (def.curse) {
+    const c = rng.pick(CURSES)
+    affixes.push({ id: c.id, value: c.min + (c.max - c.min) * rng.next() })
   }
 
   const relic: Relic = {

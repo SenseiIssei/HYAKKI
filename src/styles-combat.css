@@ -327,3 +327,9 @@
   font-size: 13px;
   color: var(--ash);
 }
+
+/* a cursed relic's downside, marked in blood */
+.relic-affix.curse {
+  color: var(--blood);
+  font-style: italic;
+}
