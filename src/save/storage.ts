@@ -1,0 +1,156 @@
+import LZString from 'lz-string'
+import { spawnForRank } from '../sim/enemies'
+import { createInitialState } from '../sim/state'
+import type { GameState } from '../sim/types'
+import { deserialize, serialize, toDecimal, type SaveBlob } from './serialize'
+
+const KEY = 'myriad.save'
+const BAK = (i: number) => `myriad.save.bak${i}`
+const BAK_SLOTS = 3
+const BAK_INTERVAL_MS = 60 * 60 * 1000
+
+function hydrate(b: SaveBlob): GameState {
+  const n = (k: string, dflt = 0) => (typeof b[k] === 'number' ? (b[k] as number) : dflt)
+  const seed = typeof b.soldierSeed === 'number' ? b.soldierSeed : undefined
+  const classId = typeof b.classId === 'string' ? b.classId : undefined
+  const base = createInitialState(classId, seed)
+
+  const g: GameState = {
+    ...base,
+    classId: classId ?? base.classId,
+    soldierNumber: n('soldierNumber', 1),
+    soldierSeed: seed ?? base.soldierSeed,
+    reveilles: n('reveilles'),
+
+    rank: n('rank', 1),
+    bestRank: n('bestRank', 1),
+    bestRankEver: n('bestRankEver', n('bestRank', 1)),
+    enemyIndex: n('enemyIndex'),
+    enemiesThisRank: n('enemiesThisRank', base.enemiesThisRank),
+    soldier: {
+      hp: toDecimal(b.soldierHp),
+      cooldown: n('soldierCooldown', 1),
+      resolve: n('resolve'),
+      shield: toDecimal(b.shield),
+    },
+    dead: !!b.dead,
+    deathCause: typeof b.deathCause === 'string' ? b.deathCause : '',
+    runTicks: n('runTicks'),
+    killsThisRun: n('killsThisRun'),
+
+    standTimer: n('standTimer'),
+    standTimerMax: n('standTimerMax'),
+    standFails: n('standFails'),
+    standsThisRun: n('standsThisRun'),
+
+    revivesUsed: n('revivesUsed'),
+    immuneTicks: 0,
+    sigKind: typeof b.sigKind === 'string' ? b.sigKind : '',
+    sigTicks: n('sigTicks'),
+    sigCharges: n('sigCharges'),
+    sigStored: toDecimal(b.sigStored),
+    nonCritStreak: 0,
+    hitCounter: 0,
+    killSpdStacks: 0,
+    killSpdTicks: 0,
+    freshEnemy: true,
+
+    bone: toDecimal(b.bone),
+    boneLevels: (b.boneLevels as Record<string, number>) ?? {},
+    ash: toDecimal(b.ash),
+    treeLevels: (b.treeLevels as Record<string, number>) ?? {},
+    ashSpentTotal: toDecimal(b.ashSpentTotal),
+    bestAsh: toDecimal(b.bestAsh),
+    lastAsh: toDecimal(b.lastAsh),
+    orders: {
+      enabled: !!(b.orders as GameState['orders'])?.enabled,
+      ashMultiple: (b.orders as GameState['orders'])?.ashMultiple ?? 1.5,
+      stallMinutes: (b.orders as GameState['orders'])?.stallMinutes ?? 5,
+    },
+
+    equipped: Array.isArray(b.equipped) ? (b.equipped as GameState['equipped']) : [null, null],
+    inventory: Array.isArray(b.inventory) ? (b.inventory as GameState['inventory']) : [],
+    slotBonus: n('slotBonus'),
+    ghosts: Array.isArray(b.ghosts) ? (b.ghosts as GameState['ghosts']) : [],
+    echoes: n('echoes'),
+
+    totalTicks: n('totalTicks'),
+    totalKills: n('totalKills'),
+    totalDeaths: n('totalDeaths'),
+    firstPlayedAt: n('firstPlayedAt', Date.now()),
+    lastSeenAt: n('lastSeenAt', Date.now()),
+    rngState: n('rngState', base.rngState),
+    events: [],
+    seen: (b.seen as Record<string, boolean>) ?? {},
+  }
+  // Enemies are regenerated, never stored.
+  g.enemy = spawnForRank(
+    g.rank,
+    g.enemyIndex,
+    (g.soldierSeed + g.reveilles * 7919) >>> 0,
+    g.standsThisRun,
+  )
+  return g
+}
+
+export function save(g: GameState): void {
+  try {
+    const packed = LZString.compressToBase64(serialize(g))
+    localStorage.setItem(KEY, packed)
+    rotateBackup(packed)
+  } catch (err) {
+    // A full quota must never take the game down mid-run.
+    console.error('[myriad] save failed', err)
+  }
+}
+
+let lastBackupAt = 0
+function rotateBackup(packed: string) {
+  const now = Date.now()
+  if (now - lastBackupAt < BAK_INTERVAL_MS) return
+  lastBackupAt = now
+  for (let i = BAK_SLOTS - 1; i > 0; i--) {
+    const prev = localStorage.getItem(BAK(i - 1))
+    if (prev) localStorage.setItem(BAK(i), prev)
+  }
+  localStorage.setItem(BAK(0), packed)
+}
+
+export function load(): GameState | null {
+  const raw = localStorage.getItem(KEY)
+  if (!raw) return null
+  try {
+    const json = LZString.decompressFromBase64(raw)
+    if (!json) throw new Error('empty after decompress')
+    return deserialize(json, hydrate)
+  } catch (err) {
+    console.error('[myriad] load failed, trying backups', err)
+    for (let i = 0; i < BAK_SLOTS; i++) {
+      const bak = localStorage.getItem(BAK(i))
+      if (!bak) continue
+      try {
+        const json = LZString.decompressFromBase64(bak)
+        if (json) return deserialize(json, hydrate)
+      } catch {
+        /* next slot */
+      }
+    }
+    return null
+  }
+}
+
+/** A player must always be able to get their save out. */
+export function exportSave(g: GameState): string {
+  return LZString.compressToBase64(serialize(g))
+}
+
+export function importSave(blob: string): GameState {
+  const json = LZString.decompressFromBase64(blob.trim())
+  if (!json) throw new Error('That is not a MYRIAD save.')
+  return deserialize(json, hydrate)
+}
+
+export function hardReset(): void {
+  localStorage.removeItem(KEY)
+  for (let i = 0; i < BAK_SLOTS; i++) localStorage.removeItem(BAK(i))
+}
