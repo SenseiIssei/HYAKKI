@@ -9,7 +9,23 @@ import { compareRelic } from './evaluate'
 import { maxEchoes } from './ghosts'
 import { rollRelic } from './relics'
 import { VOWS, vowAshMult } from '../content/vows'
+import { LAYER_BY_ID } from '../content/layers'
 import { spawnEnemy } from './enemies'
+import {
+  addKeyTime,
+  autoRoute,
+  descentDurationMs,
+  descentRank,
+  descentReady,
+  estimateClear,
+  generateMap,
+  keyCap,
+  newDescent,
+  resolveDescent,
+  validRoute,
+  wholeKeys,
+} from './descent'
+import { hashSeed } from './rng'
 import { catchUp, offlineEfficiency, offlineWindowMs, shouldReveille } from './offline'
 import {
   canInter,
@@ -786,6 +802,137 @@ describe('the returned', () => {
     reveille(s)
     expect(s.ghosts.length).toBe(before + 1)
     expect(s.ghosts[s.ghosts.length - 1].affix?.id).toBe('heavy')
+  })
+})
+
+describe('descents', () => {
+  const diver = () => {
+    const s = createInitialState('hoplite', 4242)
+    s.bestRankEver = 400
+    s.treeLevels = { edge: 60, meat: 60, clot: 30 }
+    s.interments = 1
+    s.layerNames = 14
+    s.keys = 3
+    s.soldier.hp = computeStats(s).hp
+    return s
+  }
+
+  it('maps are deterministic and fully connected', () => {
+    for (let seed = 0; seed < 40; seed++) {
+      const a = generateMap('ossuary', 8, seed)
+      const b = generateMap('ossuary', 8, seed)
+      expect(JSON.stringify(a)).toBe(JSON.stringify(b))
+
+      // every non-final room leads somewhere, every non-entry room is reachable
+      const reachable = new Set(a.entrances)
+      for (const r of a.rooms) {
+        if (r.floor < a.floors - 1) expect(r.next.length).toBeGreaterThan(0)
+        for (const n of r.next) reachable.add(n)
+      }
+      for (const r of a.rooms) expect(reachable.has(r.id)).toBe(true)
+    }
+  })
+
+  it('the last room is always the Warden, and only the last', () => {
+    const map = generateMap('choir', 20, 5)
+    const wardens = map.rooms.filter((r) => r.type === 'warden')
+    expect(wardens.length).toBe(1)
+    expect(wardens[0].floor).toBe(map.floors - 1)
+  })
+
+  it('rejects routes that are not walkable', () => {
+    const map = generateMap('ossuary', 10, 3)
+    const good = autoRoute(map)
+    expect(validRoute(map, good)).toBe(true)
+    expect(validRoute(map, [])).toBe(false)
+    // stopping short of the Warden is not a route
+    expect(validRoute(map, good.slice(0, good.length - 1))).toBe(false)
+    // teleporting is not a route
+    const jump = [map.entrances[0], map.rooms[map.rooms.length - 1].id]
+    expect(validRoute(map, jump)).toBe(false)
+  })
+
+  it('resolves deterministically, so the estimate is a promise', () => {
+    const s = diver()
+    const map = generateMap('ossuary', 6, 11)
+    const route = autoRoute(map)
+    const a = resolveDescent(s, map, route, 999)
+    const b = resolveDescent(s, map, route, 999)
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b))
+  })
+
+  it('never disturbs the live game', () => {
+    const s = diver()
+    const before = JSON.stringify({
+      rank: s.rank,
+      hp: s.soldier.hp.toString(),
+      kills: s.totalKills,
+      inv: s.inventory.length,
+    })
+    const map = generateMap('ossuary', 6, 12)
+    estimateClear(s, map, autoRoute(map), 4)
+    expect(
+      JSON.stringify({
+        rank: s.rank,
+        hp: s.soldier.hp.toString(),
+        kills: s.totalKills,
+        inv: s.inventory.length,
+      }),
+    ).toBe(before)
+  })
+
+  it('the estimate matches what actually happens', () => {
+    const s = diver()
+    const map = generateMap('ossuary', 6, 13)
+    const route = autoRoute(map)
+    const shown = estimateClear(s, map, route, 12)
+    let wins = 0
+    for (let i = 0; i < 40; i++) {
+      if (resolveDescent(s, map, route, hashSeed('t', i)).cleared) wins++
+    }
+    expect(Math.abs(shown - wins / 40)).toBeLessThan(0.2)
+  })
+
+  it('depth raises the Rank and the reward together', () => {
+    const s = diver()
+    const layer = LAYER_BY_ID.ossuary
+    expect(descentRank(s, layer, 40)).toBeGreaterThan(descentRank(s, layer, 1))
+    expect(descentDurationMs(20)).toBeGreaterThan(descentDurationMs(1))
+    expect(descentDurationMs(999)).toBeLessThanOrEqual(25 * 60_000)
+  })
+
+  it('a Key is spent and given back over time', () => {
+    const s = diver()
+    s.keys = 1
+    const map = generateMap('ossuary', 3, 14)
+    const d = newDescent(s, map, autoRoute(map))
+    expect(d.result).toBeDefined()
+    s.keys -= 1
+    expect(wholeKeys(s)).toBe(0)
+    addKeyTime(s, 20 * 60_000)
+    expect(wholeKeys(s)).toBe(1)
+    addKeyTime(s, 100 * 60_000)
+    expect(wholeKeys(s)).toBeLessThanOrEqual(keyCap(s))
+  })
+
+  it('is not ready until its clock runs out', () => {
+    const s = diver()
+    const map = generateMap('ossuary', 3, 15)
+    const d = newDescent(s, map, autoRoute(map))
+    expect(descentReady(d, d.startedAt)).toBe(false)
+    expect(descentReady(d, d.startedAt + d.durationMs)).toBe(true)
+  })
+
+  it('dying still brings back what was found on the way down', () => {
+    const s = diver()
+    s.bestRankEver = 40 // hopelessly out of depth
+    const map = generateMap('choir', 40, 16)
+    const r = resolveDescent(s, map, autoRoute(map), 21)
+    if (!r.cleared) {
+      expect(r.diedAt).not.toBeNull()
+      expect(r.names).toBe(0)
+      expect(new Decimal(r.ash).eq(0)).toBe(true)
+    }
   })
 })
 

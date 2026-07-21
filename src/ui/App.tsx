@@ -5,13 +5,16 @@ import {
   chooseClass,
   game,
   intermentReady,
+  keysHeld,
   ordersUnlocked,
+  readyDescents,
   reveal,
   saveNow,
   soundReveille,
   useUI,
 } from '../store/gameStore'
 import { Bargain } from './Bargain'
+import { Descend, DescentReport } from './Descend'
 import { Orders } from './Orders'
 import { Report } from './Report'
 import { fmtInt } from '../format'
@@ -47,6 +50,8 @@ export function App() {
   const setOrdersOpen = useUI((s) => s.setOrders)
   const bargainOpen = useUI((s) => s.bargainOpen)
   const setBargain = useUI((s) => s.setBargain)
+  const descendOpen = useUI((s) => s.descendOpen)
+  const setDescend = useUI((s) => s.setDescend)
   const report = useUI((s) => s.report)
   const fontScale = useUI((s) => s.fontScale)
 
@@ -67,6 +72,7 @@ export function App() {
         ui.setPicker(false)
         ui.setSettings(false)
         ui.setBargain(false)
+        ui.setDescend(false)
         return
       }
       const map: Record<string, () => void> = {
@@ -74,7 +80,8 @@ export function App() {
         '2': () => ui.setRelics(true),
         '3': () => ui.setOrders(true),
         '4': () => ui.setBargain(true),
-        '5': () => ui.setSettings(true),
+        '5': () => ui.setDescend(true),
+        '6': () => ui.setSettings(true),
       }
       map[e.key]?.()
     }
@@ -153,6 +160,12 @@ export function App() {
                 {(intermentReady() || g.names > 0) && <span className="dot" />}
               </button>
             )}
+            {g.interments > 0 && (
+              <button className="small-btn" onClick={() => setDescend(true)}>
+                Descend
+                {(keysHeld() >= 1 || readyDescents().length > 0) && <span className="dot" />}
+              </button>
+            )}
             {(g.inventory.length > 0 || g.equipped.some(Boolean)) && (
               <button className="small-btn" onClick={() => setRelics(true)}>
                 Carried {g.inventory.length > 0 && <span className="dot" />}
@@ -173,6 +186,11 @@ export function App() {
       {relicsOpen && <Relics />}
       {ordersOpen && <Orders />}
       {bargainOpen && <Bargain />}
+      {descendOpen && <Descend />}
+      {/* A finished Descent announces itself rather than waiting to be noticed. */}
+      {!report && !descendOpen && readyDescents()[0] && (
+        <DescentReport id={readyDescents()[0].id} />
+      )}
       {pickerOpen && (
         <Opening
           seed={g.soldierSeed}

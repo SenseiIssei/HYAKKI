@@ -15,6 +15,21 @@ Unlocked at first Interment. Descents are the game's second axis: where the Colu
 5. **Confirm.** The Descent runs in real time (5-25 min depending on Depth) whether the game is open or not.
 6. **Return** to a report and rewards.
 
+**How resolution actually works:** the whole Descent is resolved deterministically **at
+commit time**, seeded, and revealed when the clock runs out. The estimate the player was
+shown is therefore *exactly* what happens, and nothing can be gamed by buying upgrades
+while it runs. The real-time wait is presentational — which also makes offline completion
+free.
+
+Resolution forks the real combat sim, so crits, Burn, Signatures, the armour softcap and
+the class pipeline all behave as they do in the Column. A test asserts the fork never
+disturbs the live game.
+
+**One trap worth recording:** enemy health and attack must be scaled *separately*. Scaling
+both by the same multiplier made the Descent Warden (`×8`) five times deadlier than the
+Warden of the same name in the Column, which uses `×8` health and `×1.6` attack — so every
+Descent ended at the last room, at every depth.
+
 You may run 1 Descent concurrently (→ 4 with Names). Descents run while the Column also runs. They never interrupt each other.
 
 ```
@@ -93,10 +108,38 @@ Each Layer has an enemy family bias, a mechanical twist, a palette shift, and it
 ## Depth scaling
 
 ```
-descentPower(layer, depth) = layerBase[layer] * 1.19 ^ depth
-duration(depth)            = 5min + 40s * depth, capped 25min
-rewardMult(depth)          = 1.10 ^ depth
+descentRank(layer, depth) = bestRankEver * 0.97 * layerBase * 1.0012 ^ depth
+duration(depth)           = 5min + 40s * depth, capped 25min
+rewardMult(depth)         = 1.10 ^ depth
 ```
+
+> ### The tuning window is far narrower than it looks
+>
+> The original spec was `layerBase * 1.19 ^ depth`, with Layer multipliers from 1.0 to 3.4.
+> Both are wildly out of range, and it took three passes to find out why.
+>
+> Enemy power is **exponential in Rank**, so the entire span from "trivial" to
+> "impossible" is about **20% of Rank**. Measured against a real player whose Column wall
+> was Rank 6,679:
+>
+> | Descent Rank | Clear |
+> |---|---|
+> | 6,478 | **100%** |
+> | 7,973 | **0%** |
+>
+> So the whole depth slider *and* every Layer's difficulty has to fit between roughly
+> **1.0× and 1.2× of the player's deepest Rank**. Layer multipliers are therefore
+> 1.0 / 1.005 / 1.01 / 1.015 — the Layers are differentiated by their **twist**, not by
+> raw Rank. Anything wider is not "harder", it is a wall or a walkover.
+>
+> Note the base is ~1× rather than well below: the Column wall is set by Stand **timers**,
+> so a player's raw 1v1 killing power reaches deeper than their best Rank suggests. An
+> earlier `0.6×` base made every Descent a guaranteed clear.
+
+**Known limitation, honestly:** because the transition is a cliff rather than a slope, the
+estimate is usually 100% or 0% and only lands in between for a narrow band of depths. The
+estimate is *accurate* — 0pp error against 100 real resolutions — it just rarely has an
+interesting number to show.
 
 The player chooses Depth manually with a slider, and the UI shows a **live win-probability estimate** computed by running the headless sim over the plotted route 50 times. Not a hidden number — show it: `Estimated clear: 71%`.
 

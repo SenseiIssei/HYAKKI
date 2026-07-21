@@ -1,7 +1,16 @@
 import { BALANCE as B } from '../content/balance'
-import { fmt, fmtTime } from '../format'
+import { TREE, TREE_BY_ID } from '../content/tree'
+import { fmt, fmtInt, fmtTime } from '../format'
 import { offlineEfficiency, offlineWindowMs } from '../sim/offline'
-import { ashProjection, game, ordersUnlocked, setOrders, stats, useUI } from '../store/gameStore'
+import {
+  ashProjection,
+  game,
+  ordersUnlocked,
+  setOrders,
+  setPriority,
+  stats,
+  useUI,
+} from '../store/gameStore'
 
 /**
  * Standing Orders — the single most important quality-of-life feature in the
@@ -16,6 +25,14 @@ export function Orders() {
   const o = g.orders
   const windowMs = offlineWindowMs(g, stats())
   const eff = offlineEfficiency(g)
+
+  const move = (i: number, dir: -1 | 1) => {
+    const next = [...g.orders.priority]
+    const j = i + dir
+    if (j < 0 || j >= next.length) return
+    ;[next[i], next[j]] = [next[j], next[i]]
+    setPriority(next)
+  }
 
   return (
     <div className="overlay dark" onClick={() => close(false)}>
@@ -80,6 +97,66 @@ export function Orders() {
                   aria-label="Minutes stalled before waking"
                 />
               </div>
+            </div>
+          </>
+        )}
+
+        {unlocked && g.orders.autoBuy && (
+          <>
+            <h2>What to spend it on</h2>
+            <p className="hint">
+              Ash is spent from the top down, and always restarts at the top. Nothing not on
+              this list is ever bought — Standing Orders never guess a build.
+            </p>
+            <div className="priority">
+              {g.orders.priority.map((id, i) => {
+                const node = TREE_BY_ID[id]
+                if (!node) return null
+                return (
+                  <div key={id} className="pri-row">
+                    <span className="pri-n">{i + 1}</span>
+                    <span className="pri-name">{node.label}</span>
+                    <span className="pri-lvl">L{fmtInt(g.treeLevels[id] ?? 0)}</span>
+                    <button
+                      className="small-btn"
+                      disabled={i === 0}
+                      aria-label={`Move ${node.label} up`}
+                      onClick={() => move(i, -1)}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      className="small-btn"
+                      disabled={i === g.orders.priority.length - 1}
+                      aria-label={`Move ${node.label} down`}
+                      onClick={() => move(i, 1)}
+                    >
+                      ↓
+                    </button>
+                    <button
+                      className="small-btn"
+                      aria-label={`Remove ${node.label}`}
+                      onClick={() => setPriority(g.orders.priority.filter((x) => x !== id))}
+                    >
+                      ×
+                    </button>
+                  </div>
+                )
+              })}
+              {g.orders.priority.length === 0 && (
+                <div className="hint">Nothing listed. Nothing will be bought.</div>
+              )}
+            </div>
+            <div className="panel-row">
+              {TREE.filter((n) => !n.requires && !g.orders.priority.includes(n.id)).map((n) => (
+                <button
+                  key={n.id}
+                  className="small-btn"
+                  onClick={() => setPriority([...g.orders.priority, n.id])}
+                >
+                  + {n.label}
+                </button>
+              ))}
             </div>
           </>
         )}

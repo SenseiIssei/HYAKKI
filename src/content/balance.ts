@@ -97,6 +97,10 @@ export const BALANCE = {
   OFFLINE_WINDOW_H_BASE: 12,
   OFFLINE_EFFICIENCY: 0.7,
 
+  // ── descents ──
+  KEY_REGEN_MIN: 20,
+  KEY_CAP_BASE: 3,
+
   // ── relics ──
   RELIC_DROP_BASE: 0.012,
   /** Wardens are the intended source — a Stand should usually be worth something. */

@@ -2,6 +2,7 @@ import Decimal from 'break_infinity.js'
 import { BALANCE as B } from '../content/balance'
 import { TREE_BY_ID, keystoneFlags } from '../content/tree'
 import { step } from './combat'
+import { addKeyTime } from './descent'
 import { spawnEnemy, spawnFor } from './enemies'
 import { boneFromKill, costOfNext, enemiesPerRank, isStandRank } from './formulas'
 import { canReveille, projectedAsh, reveille } from './prestige'
@@ -131,6 +132,10 @@ export function catchUp(s: GameState, elapsedMs: number): OfflineReport {
   const windowMs = offlineWindowMs(s, st0)
   const credited = Math.max(0, Math.min(elapsedMs, windowMs))
   let ticksLeft = Math.floor((credited * offlineEfficiency(s)) / B.TICK_MS)
+
+  // Keys accrue over the whole absence, not just the credited window — being
+  // away should never cost you Keys.
+  addKeyTime(s, elapsedMs)
 
   const before = {
     kills: s.totalKills,

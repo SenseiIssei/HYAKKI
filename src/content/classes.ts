@@ -164,6 +164,25 @@ export const CLASSES: ClassDef[] = [
   },
 ]
 
+/** Bought with a Name. Only meaningful below. */
+export const CARTOGRAPHER: ClassDef = {
+  id: 'cartographer',
+  name: 'CARTOGRAPHER',
+  epithet: 'has been down there and drawn it',
+  line: 'It is accurate. It updates. You have never seen it update.',
+  pipeline: () => 0.6,
+  curse: {},
+  passive: { omen: 2 },
+  signature: {
+    id: 'exhume',
+    label: 'SURVEY',
+    text: 'Take the measure of the room.',
+  },
+  curseText: 'Poor in the Column. It was never meant to be up here.',
+  wants: 'Descents, and nothing else',
+  sigil: { symmetry: 4, rings: 3, strokeWeight: 1.1, density: 0.7, coreFill: 'hollow', jitter: 0.2, openness: 0.25 },
+}
+
 export function classUnlocked(
   c: ClassDef,
   s: { totalDeaths: number; reveilles: number; totalKills: number },
@@ -189,7 +208,7 @@ export function unlockProgress(
 }
 
 export const CLASS_BY_ID: Record<string, ClassDef> = Object.fromEntries(
-  CLASSES.map((c) => [c.id, c]),
+  [...CLASSES, CARTOGRAPHER].map((c) => [c.id, c]),
 )
 
 export const DEFAULT_CLASS = 'hoplite'

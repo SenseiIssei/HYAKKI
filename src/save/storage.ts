@@ -79,6 +79,11 @@ function hydrate(b: SaveBlob): GameState {
     vows: Array.isArray(b.vows) ? (b.vows as string[]) : [],
     silencedTicks: 0,
 
+    keys: typeof b.keys === 'number' ? b.keys : 1,
+    layerNames: n('layerNames'),
+    descents: Array.isArray(b.descents) ? (b.descents as GameState['descents']) : [],
+    descentsCleared: n('descentsCleared'),
+
     equipped: Array.isArray(b.equipped) ? (b.equipped as GameState['equipped']) : [null, null],
     inventory: Array.isArray(b.inventory) ? (b.inventory as GameState['inventory']) : [],
     slotBonus: n('slotBonus'),

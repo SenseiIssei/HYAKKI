@@ -92,6 +92,62 @@ export type Ghost = {
   affix?: RolledAffix
 }
 
+export type DescentRoom = {
+  id: number
+  type: import('../content/layers').RoomType
+  floor: number
+  /** lane within the floor, for drawing */
+  lane: number
+  /** room ids reachable from here */
+  next: number[]
+}
+
+export type DescentMap = {
+  layerId: string
+  depth: number
+  seed: number
+  rooms: DescentRoom[]
+  /** room ids on the first floor */
+  entrances: number[]
+  floors: number
+}
+
+export type RoomOutcome = {
+  roomId: number
+  type: import('../content/layers').RoomType
+  /** what happened, in one line, in voice */
+  text: string
+  hpAfter: string
+  died: boolean
+}
+
+export type DescentResult = {
+  cleared: boolean
+  diedAt: number | null
+  rooms: RoomOutcome[]
+  ash: string
+  relics: Relic[]
+  names: number
+  fragment?: string
+}
+
+export type ActiveDescent = {
+  id: string
+  layerId: string
+  depth: number
+  seed: number
+  route: number[]
+  startedAt: number
+  durationMs: number
+  /**
+   * Resolved deterministically at commit time and revealed when the clock runs
+   * out. The estimate the player was shown is therefore exactly what happens,
+   * and nothing can be gamed by upgrading mid-Descent.
+   */
+  result: DescentResult
+  collected: boolean
+}
+
 export type SimEvent =
   | { t: 'hit'; target: 'enemy' | 'soldier'; amount: Decimal; crit: boolean }
   | { t: 'miss'; target: 'enemy' | 'soldier' }
@@ -190,6 +246,15 @@ export type GameState = {
   purchases: Record<string, number>
   /** Vows sworn for this Ascension */
   vows: string[]
+
+  // ── descents ──
+  /** fractional; whole Keys are spendable */
+  keys: number
+  /** Names spent opening Layers */
+  layerNames: number
+  /** running and finished-but-uncollected Descents */
+  descents: ActiveDescent[]
+  descentsCleared: number
 
   /**
    * Standing Orders: the rule that makes MYRIAD genuinely idle. Automating a

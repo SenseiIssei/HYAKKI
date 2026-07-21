@@ -1400,6 +1400,266 @@ button {
   }
 }
 
+/* ── descents ───────────────────────────────────────────────── */
+
+.descend-grid {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  gap: 16px;
+  padding: 16px 20px;
+  align-content: start;
+}
+
+.keys {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--ichor);
+}
+
+.key-bar {
+  display: block;
+  width: 42px;
+  height: 2px;
+  background: var(--void-edge);
+}
+
+.key-fill {
+  display: block;
+  height: 100%;
+  background: var(--ichor);
+}
+
+.running {
+  flex: none;
+  display: flex;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--void-edge);
+  flex-wrap: wrap;
+}
+
+.run-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--void-edge);
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+.run-chip.done {
+  border-color: var(--ichor);
+}
+
+.run-name {
+  letter-spacing: var(--label);
+}
+
+.run-depth,
+.run-left {
+  font-family: var(--mono);
+  color: var(--bone-dim);
+}
+
+.layer {
+  text-align: left;
+  width: 100%;
+}
+
+.layer.sel {
+  border-color: var(--ash);
+  background: #191922;
+}
+
+.layer.locked {
+  opacity: 0.45;
+}
+
+.layer-flavour {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--bone-dim);
+  line-height: 1.5;
+}
+
+.layer-flavour.empty-desc {
+  min-height: 18px;
+}
+
+.layer-twist {
+  font-size: 10.5px;
+  color: var(--ash);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.layer-locked {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ichor);
+  margin-top: 6px;
+}
+
+.depth-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.depth-row input[type='range'] {
+  width: 100%;
+  accent-color: var(--ichor);
+}
+
+.map {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--void-edge);
+  background: var(--void-lift);
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.map-floor {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.room {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--void-edge);
+  color: var(--ash);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1;
+  transition: all 120ms ease;
+}
+
+.room.can {
+  border-color: var(--ash);
+  color: var(--bone-dim);
+}
+
+.room.on {
+  border-color: var(--ichor);
+  color: var(--ichor);
+  background: #101a1a;
+}
+
+.room.t-warden {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.room.t-elite {
+  color: var(--blood);
+}
+
+.route-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 10px;
+  color: var(--ash);
+  letter-spacing: 0.04em;
+  margin: 4px 0 8px;
+}
+
+.odds {
+  font-family: var(--mono);
+  font-size: 40px;
+  letter-spacing: 0.06em;
+}
+
+.odds.good {
+  color: var(--ichor);
+}
+.odds.fair {
+  color: var(--gold);
+}
+.odds.bad {
+  color: var(--blood);
+}
+
+.room-log {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 16px 0;
+  text-align: left;
+  max-height: 34vh;
+  overflow-y: auto;
+}
+
+.room-line {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--bone-dim);
+}
+
+.room-line span:first-child {
+  font-family: var(--mono);
+  color: var(--ash);
+}
+
+.room-line.died {
+  color: var(--blood);
+}
+
+/* ── standing orders priority ───────────────────────────────── */
+
+.priority {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pri-row {
+  display: grid;
+  grid-template-columns: 22px 1fr auto auto auto auto;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--void-edge);
+  padding: 5px 8px;
+}
+
+.pri-n,
+.pri-lvl {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ash);
+}
+
+.pri-name {
+  font-size: 11px;
+  letter-spacing: var(--label);
+}
+
+.pri-row .small-btn {
+  padding: 3px 7px;
+}
+
+@media (max-width: 1100px) {
+  .descend-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── log strip ──────────────────────────────────────────────── */
 
 .logstrip {

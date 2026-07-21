@@ -62,6 +62,11 @@ export function serialize(g: GameState): string {
     purchases: g.purchases,
     vows: g.vows,
 
+    keys: g.keys,
+    layerNames: g.layerNames,
+    descents: g.descents,
+    descentsCleared: g.descentsCleared,
+
     equipped: g.equipped,
     inventory: g.inventory,
     slotBonus: g.slotBonus,
@@ -147,6 +152,15 @@ const MIGRATIONS: Record<number, Migration> = {
       autoBuy: false,
       priority: [],
     },
+  }),
+  // v5 predates Descents.
+  5: (b) => ({
+    ...b,
+    v: 6,
+    keys: 1,
+    layerNames: 0,
+    descents: [],
+    descentsCleared: 0,
   }),
 }
 

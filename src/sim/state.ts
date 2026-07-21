@@ -7,7 +7,7 @@ import { maxEchoes } from './ghosts'
 import { computeStats } from './stats'
 import type { GameState } from './types'
 
-export const SAVE_VERSION = 5
+export const SAVE_VERSION = 6
 
 /** Everything that a Reveille wipes. Kept in one place so nothing is missed. */
 export function resetRun(s: GameState): void {
@@ -114,6 +114,11 @@ export function createInitialState(classId = DEFAULT_CLASS, seed?: number): Game
     wardenNames: 0,
     purchases: {},
     vows: [],
+
+    keys: 1,
+    layerNames: 0,
+    descents: [],
+    descentsCleared: 0,
 
     totalTicks: 0,
     totalKills: 0,

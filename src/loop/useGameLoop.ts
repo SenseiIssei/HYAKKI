@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BALANCE as B } from '../content/balance'
 import { step } from '../sim/combat'
+import { addKeyTime } from '../sim/descent'
 import { catchUp, shouldReveille } from '../sim/offline'
 import { projectedAsh, reveille } from '../sim/prestige'
 import {
@@ -70,6 +71,7 @@ export function useGameLoop() {
         if (ticks > MAX_TICKS_PER_PUMP) ticks = MAX_TICKS_PER_PUMP
         if (ticks > 0) {
           const s = game()
+          addKeyTime(s, ticks * B.TICK_MS)
           step(s, ticks)
           idleTicks = s.rank === lastRank ? idleTicks + ticks : 0
           lastRank = s.rank

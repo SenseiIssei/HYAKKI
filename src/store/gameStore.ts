@@ -3,11 +3,21 @@ import { create } from 'zustand'
 import { BALANCE as B } from '../content/balance'
 import { BONE_UPGRADE_BY_ID } from '../content/upgrades'
 import { TREE_BY_ID } from '../content/tree'
-import { slotsFor, type Rarity } from '../content/relics'
+import { INVENTORY_CAP, slotsFor, type Rarity } from '../content/relics'
 import { compareRelic } from '../sim/evaluate'
 import { meltValue, rarityRank, relicLabel } from '../sim/relics'
 import { affordableLevels, costOfNext } from '../sim/formulas'
 import { NAME_SHOP_BY_ID, nameCost } from '../content/nameshop'
+import { LAYER_BY_ID } from '../content/layers'
+import {
+  concurrentCap,
+  descentReady,
+  keyCap,
+  newDescent,
+  validRoute,
+  wholeKeys,
+} from '../sim/descent'
+import type { DescentMap } from '../sim/types'
 import {
   canInter,
   canReveille,
@@ -142,6 +152,8 @@ type UIState = {
   setOrders: (v: boolean) => void
   bargainOpen: boolean
   setBargain: (v: boolean) => void
+  descendOpen: boolean
+  setDescend: (v: boolean) => void
   report: OfflineReport | null
   setReport: (r: OfflineReport | null) => void
   /** low-end / high-legibility mode: combat as a text log, no sigils */
@@ -170,6 +182,8 @@ export const useUI = create<UIState>((set) => ({
   setOrders: (v) => set({ ordersOpen: v }),
   bargainOpen: false,
   setBargain: (v) => set({ bargainOpen: v }),
+  descendOpen: false,
+  setDescend: (v) => set({ descendOpen: v }),
   report: null,
   setReport: (r) => set({ report: r }),
   numbersOnly: localStorage.getItem('myriad.numbersOnly') === '1',
@@ -302,6 +316,69 @@ export function toggleVow(id: string): boolean {
   useUI.getState().bump()
   saveNow()
   return true
+}
+
+// ── descents ──
+
+export const keysHeld = () => wholeKeys(G)
+export const keysCap = () => keyCap(G)
+export const keyFraction = () => G.keys - Math.floor(G.keys)
+export const descentSlots = () => concurrentCap(G)
+export const running = () => G.descents.filter((d) => !d.collected)
+export const readyDescents = () =>
+  G.descents.filter((d) => !d.collected && descentReady(d, Date.now()))
+
+export function openLayer(layerId: string): boolean {
+  const l = LAYER_BY_ID[layerId]
+  if (!l || l.cost === 0) return false
+  if (G.layerNames >= l.cost) return false
+  const need = l.cost - G.layerNames
+  if (G.names < need) return false
+  G.names -= need
+  G.namesSpent += need
+  G.layerNames += need
+  useUI.getState().bump()
+  saveNow()
+  return true
+}
+
+export function commitDescent(map: DescentMap, route: number[]): boolean {
+  if (wholeKeys(G) < 1) return false
+  if (running().length >= concurrentCap(G)) return false
+  if (!validRoute(map, route)) return false
+  G.keys -= 1
+  G.descents.push(newDescent(G, map, route))
+  useUI.getState().bump()
+  saveNow()
+  return true
+}
+
+export function collectDescent(id: string) {
+  const d = G.descents.find((x) => x.id === id)
+  if (!d || d.collected || !descentReady(d, Date.now())) return
+  d.collected = true
+  const r = d.result
+
+  G.ash = G.ash.add(new Decimal(r.ash))
+  for (const relic of r.relics) {
+    if (G.inventory.length >= INVENTORY_CAP) G.ash = G.ash.add(meltValue(relic))
+    else G.inventory.push(relic)
+  }
+  if (r.names > 0) {
+    G.names += r.names
+    G.seen[`layer.${d.layerId}`] = true
+  }
+  if (r.cleared) G.descentsCleared += 1
+
+  // finished Descents do not linger in the save
+  G.descents = G.descents.filter((x) => !x.collected)
+  pushLog(
+    r.cleared
+      ? `You came back up. ${r.relics.length} carried.`
+      : 'You did not come back up. What you found came with you anyway.',
+  )
+  useUI.getState().bump()
+  saveNow()
 }
 
 export function setPriority(list: string[]) {
