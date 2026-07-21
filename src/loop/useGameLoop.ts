@@ -5,6 +5,7 @@ import { addKeyTime } from '../sim/descent'
 import { catchUp, shouldReveille } from '../sim/offline'
 import { projectedAsh, reveille } from '../sim/prestige'
 import {
+  checkFragments,
   drainEvents,
   game,
   refreshStats,
@@ -87,6 +88,7 @@ export function useGameLoop() {
         }
       }
 
+      checkFragments()
       const changed = drainEvents(now)
       if (now - lastRender >= RENDER_MS && changed) {
         lastRender = now

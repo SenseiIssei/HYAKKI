@@ -259,8 +259,12 @@ Names buy things that are not numbers:
 ## 8. Ichor (prestige tier 3)
 
 ```
-ichorOnApotheosis = floor( namesEverSpent ^ 1.4 / 3 )
+ichorOnApotheosis = floor( namesSpentThisAscension ^ 1.4 / 3 )
 ```
+
+A power law is **safe here**, unlike § 6 and § 7: Names are already bounded and
+logarithmic, so this is not derived from an exponential. Measured: 30 Names spent →
+38 Ichor, which is the right order for a shop whose most expensive rule costs 40.
 
 Ichor buys **rules**, not stats:
 - *"Armor's `K` no longer scales with Rank."* (breaks the softcap)

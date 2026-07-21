@@ -13,10 +13,23 @@ import type { Enemy } from './types'
  * Family mix by Rank band. Phase 1 ships CHAFF plus the Wardens; the table is
  * here so the other families slot in without touching spawn logic.
  */
-function familyFor(rank: number, index: number, seed: number, ghosts: number): Family {
+function familyFor(
+  rank: number,
+  index: number,
+  seed: number,
+  ghosts: number,
+  ascended: boolean,
+): Family {
   if (rank < 15) return 'chaff'
   const r = new Rng(seed ^ 0x5bf0).next()
   void index
+
+  // THE NOTHING. Past Rank 500, once you have ascended once and know what this
+  // place is for. They have no names and they do not care what you are wearing.
+  if (ascended && rank >= 500) {
+    const nothingChance = Math.min(0.35, 0.05 + (rank - 500) / 6000)
+    if (r < nothingChance) return 'nothing'
+  }
 
   // THE RETURNED need someone to have died first. From Rank 40 the Hollow
   // starts reissuing your own corpses. docs/07-ENEMIES.md
@@ -52,9 +65,10 @@ export function spawnEnemy(
   runSeed: number,
   carryBurn = 0,
   ghosts: Ghost[] = [],
+  ascended = false,
 ): Enemy {
   const seed = enemySeed(rank, index, runSeed)
-  const family = familyFor(rank, index, seed, ghosts.length)
+  const family = familyFor(rank, index, seed, ghosts.length, ascended)
   const maxHp = enemyHp(rank, family)
   const spd = B.ENEMY_SPD_BASE * FAMILY_MODS[family].spd
 
@@ -132,7 +146,10 @@ export function spawnGuard(rank: number, n: number, runSeed: number): Enemy {
  * ghosts, which is how the Returned stop appearing.
  */
 export function spawnFor(
-  s: Pick<GameState, 'soldierSeed' | 'reveilles' | 'standsThisRun' | 'ghosts' | 'interments'>,
+  s: Pick<
+    GameState,
+    'soldierSeed' | 'reveilles' | 'standsThisRun' | 'ghosts' | 'interments' | 'apotheoses'
+  >,
   rank: number,
   index: number,
   carryBurn = 0,
@@ -145,6 +162,7 @@ export function spawnFor(
     carryBurn,
     s.ghosts,
     s.interments,
+    s.apotheoses > 0,
   )
 }
 
@@ -160,8 +178,9 @@ export function spawnForRank(
   carryBurn = 0,
   ghosts: Ghost[] = [],
   interments = 0,
+  ascended = false,
 ): Enemy {
   return isStandRank(rank)
     ? spawnWarden(rank, standsCleared, carryBurn, interments)
-    : spawnEnemy(rank, index, runSeed, carryBurn, ghosts)
+    : spawnEnemy(rank, index, runSeed, carryBurn, ghosts, ascended)
 }

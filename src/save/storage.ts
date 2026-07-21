@@ -84,6 +84,15 @@ function hydrate(b: SaveBlob): GameState {
     descents: Array.isArray(b.descents) ? (b.descents as GameState['descents']) : [],
     descentsCleared: n('descentsCleared'),
 
+    ichor: n('ichor'),
+    ichorSpent: n('ichorSpent'),
+    apotheoses: n('apotheoses'),
+    namesSpentTotal: n('namesSpentTotal', n('namesSpent')),
+    rules: (b.rules as Record<string, number>) ?? {},
+    myriadFelled: !!b.myriadFelled,
+    fragments: Array.isArray(b.fragments) ? (b.fragments as number[]) : [],
+    authored: (b.authored as GameState['authored']) ?? null,
+
     equipped: Array.isArray(b.equipped) ? (b.equipped as GameState['equipped']) : [null, null],
     inventory: Array.isArray(b.inventory) ? (b.inventory as GameState['inventory']) : [],
     slotBonus: n('slotBonus'),

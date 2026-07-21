@@ -39,6 +39,30 @@ The god's death is stuck because the god is *becoming you*, ten thousand times o
 
 The final encounter, **THE MYRIAD**, is ten thousand small sigils arranged in the shape of one enormous soldier. Its statline is the literal sum of every Ghost you have ever recorded. **You fight everything you have ever been, at once.**
 
+> ### It is a threshold, not a duel — and it cannot be anything else
+>
+> Tree nodes are multiplicative, so player damage moves in enormous jumps. Measured
+> against a MYRIAD built from 40 ghosts (2.68 × 10²¹ health):
+>
+> | EDGE levels | Your damage | Result |
+> |---|---|---|
+> | 400 | 2.46 × 10⁸ | ~13 orders of magnitude short |
+> | 800 | 5.75 × 10²⁷ | ~6 orders of magnitude past |
+>
+> There is no build that comes *close*. `progress` is 0% or 100% and essentially
+> nothing in between, so the panel does **not** show a percentage — it shows how many
+> **orders of magnitude** short you are. That is the honest number, and counting
+> orders of magnitude suits this game.
+>
+> Its attack was also originally `0.95 × your wall × 2.2`, which removed a player's
+> entire health bar in one swing: the encounter resolved in two seconds with no fight
+> in it at all. It is now `0.8 × wall × 1.1` — the check that matters is its
+> **health**, which is your whole history.
+
+**Implementation note that cost an hour:** the combat sim spawns a replacement the
+instant anything dies, so reading `enemy.hp` after the fight reports a *win* as
+"96% of the way through". Watch the kill count, not the health bar.
+
 > **Fragment 58 — The Last Order**
 > *There was never a tenth thousandth. There were nine thousand nine hundred and ninety-nine, and a space at the end of the line, and an instruction to fill it. You have been filling it. You are almost finished.*
 

@@ -78,6 +78,72 @@ export function interment(s: GameState): number {
   return gained
 }
 
+/**
+ * ICHOR. Names are already bounded and slow, so a power law on them is safe
+ * here — unlike Ash and Names, this is not derived from an exponential.
+ */
+export function projectedIchor(s: GameState): number {
+  if (s.namesSpentTotal <= 0) return 0
+  return Math.floor(Math.pow(s.namesSpentTotal, 1.4) / 3)
+}
+
+export function canAscend(s: GameState): boolean {
+  return projectedIchor(s) >= 1
+}
+
+/**
+ * APOTHEOSIS — prestige tier 3. Burns everything: the tree, the Names, the
+ * classes and slots they bought, the Layers. Keeps Ichor, the rules it buys,
+ * the fragments you have read, and the ghosts.
+ *
+ * Also authors a Warden from the Ascension that just ended. The Hollow reissues
+ * its dead; you are the Hollow now. docs/14-NARRATIVE.md
+ */
+export function apotheosis(s: GameState): number {
+  const gained = projectedIchor(s)
+  s.ichor += gained
+  s.apotheoses += 1
+
+  // the Ascension that just ended becomes something later ones must get past
+  s.authored = {
+    soldierNumber: s.soldierNumber,
+    classId: s.classId,
+    deepestRank: s.bestRankEver,
+    seed: s.soldierSeed,
+    vows: [...s.vows],
+    ascension: s.apotheoses,
+  }
+
+  s.names = 0
+  s.namesSpent = 0
+  s.namesSpentTotal = 0
+  s.wardenNames = 0
+  s.purchases = {}
+  s.layerNames = 0
+  s.interments = 0
+  s.slotBonus = 0
+  s.equipped = [null, null]
+  s.vows = []
+  s.treeLevels = {}
+  s.ash = new Decimal(0)
+  s.ashSpentTotal = new Decimal(0)
+  s.ashSpentThisAscension = new Decimal(0)
+  s.bestAsh = new Decimal(0)
+  s.lastAsh = new Decimal(0)
+  s.bestRank = 1
+  s.bestRankEver = 1
+  s.totalDeaths = 0
+  s.orders = { ...s.orders, autoBuy: false }
+
+  resetRun(s)
+  s.bone = new Decimal(0)
+  s.events.push({
+    t: 'log',
+    text: 'You ascend. The Column does not notice. It has done this before.',
+  })
+  return gained
+}
+
 export function projectedAsh(s: GameState): Decimal {
   const st = computeStats(s)
   const f = keystoneFlags(s.treeLevels)

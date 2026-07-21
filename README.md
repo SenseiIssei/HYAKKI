@@ -53,12 +53,13 @@ You are Soldier #1 of the Myriad. You march. You fight automatically. Eventually
 
 ## Status
 
-**Phases 0-5 complete and playable.** Design complete for all seven phases.
+**Phases 0-6 complete and playable — the game is finishable.** Design complete for all
+seven phases; Phase 7 is polish (audio, achievements, Tauri, deploy).
 
 ```
 npm install
 npm run dev      # http://localhost:5180
-npm test         # 79 tests, incl. the balance-band and compounding design tests
+npm test         # 101 tests, incl. the balance-band and compounding design tests
 npx tsx scripts/balance.ts hoplite 25     # headless TTK curve, one run
 npx tsx scripts/prestige.ts hoplite 16 15 # does it compound? 16 Reveilles
 npx tsx scripts/offline.ts                # offline catch-up: speed and accuracy
@@ -97,5 +98,11 @@ types, four Layers with their twists, the **live win estimate** (the real sim ru
 over your plotted route), offline completion, CARTOGRAPHER, and the **Standing Orders
 priority list**.
 
-Next: [Phase 6 — The Turn](docs/12-ROADMAP.md) (Apotheosis, Ichor, the Nothing, and
-THE MYRIAD).
+Phase 6 is the turn: **Apotheosis and Ichor** (7 rule modifiers that edit the game's own
+curves), **THE NOTHING** (erasure damage that ignores Armor and Evasion, and has no name),
+**30 fragments** with an Archive, **Warden authoring**, and **THE MYRIAD** — statted from
+every run you have ever recorded. Felling it locks your coat number at **#10,000** and
+there is no number after that one.
+
+Next: [Phase 7 — Polish](docs/12-ROADMAP.md) (audio, achievements-as-observations, a
+statistics screen, the Tauri build, and deploy).

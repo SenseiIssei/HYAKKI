@@ -27,11 +27,15 @@ import {
 } from './descent'
 import { hashSeed } from './rng'
 import { catchUp, offlineEfficiency, offlineWindowMs, shouldReveille } from './offline'
+import { FRAGMENTS, newFragments } from '../content/fragments'
+import { fightMyriad, myriadHp, myriadReady } from './myriad'
 import {
+  apotheosis,
   canInter,
   canReveille,
   interment,
   projectedAsh,
+  projectedIchor,
   projectedNames,
   recant,
   reveille,
@@ -41,6 +45,7 @@ import { step } from './combat'
 import {
   armorK,
   ashOnReveille,
+  boneFromKill,
   costOfNext,
   enemiesPerRank,
   growth,
@@ -933,6 +938,272 @@ describe('descents', () => {
       expect(r.names).toBe(0)
       expect(new Decimal(r.ash).eq(0)).toBe(true)
     }
+  })
+})
+
+describe('apotheosis', () => {
+  const ascendable = () => {
+    const s = createInitialState('hoplite', 71)
+    s.namesSpentTotal = 30
+    s.names = 5
+    s.interments = 4
+    s.treeLevels = { edge: 50 }
+    s.ash = new Decimal(9999)
+    s.layerNames = 14
+    s.purchases = { slot: 2 }
+    s.slotBonus = 2
+    s.bestRankEver = 3000
+    s.vows = ['salt']
+    return s
+  }
+
+  it('ichor stays a small, countable number', () => {
+    const s = ascendable()
+    expect(projectedIchor(s)).toBeGreaterThan(0)
+    expect(projectedIchor(s)).toBeLessThan(500)
+  })
+
+  it('burns everything Names bought and keeps what Ichor is', () => {
+    const s = ascendable()
+    s.ghosts.push({
+      soldierNumber: 5, classId: 'hoplite', deepestRank: 100, seed: 1, diedTo: 'x',
+    })
+    s.fragments.push(1, 2)
+    const expected = projectedIchor(s)
+    const gained = apotheosis(s)
+
+    expect(gained).toBe(expected)
+    expect(s.ichor).toBe(expected)
+    expect(s.apotheoses).toBe(1)
+    // gone
+    expect(s.names).toBe(0)
+    expect(s.namesSpentTotal).toBe(0)
+    expect(s.purchases).toEqual({})
+    expect(s.layerNames).toBe(0)
+    expect(s.interments).toBe(0)
+    expect(s.treeLevels).toEqual({})
+    expect(s.vows).toEqual([])
+    expect(s.bestRankEver).toBe(1)
+    // kept
+    expect(s.ghosts.length).toBe(1)
+    expect(s.fragments).toEqual([1, 2])
+  })
+
+  it('authors a Warden from the Ascension that just ended', () => {
+    const s = ascendable()
+    s.soldierNumber = 4102
+    apotheosis(s)
+    expect(s.authored).not.toBeNull()
+    expect(s.authored!.soldierNumber).toBe(4102)
+    expect(s.authored!.deepestRank).toBe(3000)
+    expect(s.authored!.ascension).toBe(1)
+  })
+})
+
+describe('ichor rules actually edit the curves', () => {
+  const withRule = (id: string, n = 1) => {
+    const s = createInitialState('hoplite', 3)
+    s.rules[id] = n
+    return s
+  }
+
+  it('THE COAT REMEMBERS stops the armor softcap chasing you', () => {
+    const plain = createInitialState('hoplite', 3)
+    step(plain, 1)
+    const plainK = armorK(2000)
+    step(withRule('softcap'), 1)
+    expect(armorK(2000).lt(plainK)).toBe(true)
+  })
+
+  it('A THINNER FLOOR lowers the damage floor', () => {
+    step(createInitialState('hoplite', 3), 1)
+    const before = mitigation(new Decimal('1e40'), 1)
+    step(withRule('floor'), 1)
+    const after = mitigation(new Decimal('1e40'), 1)
+    expect(before).toBeCloseTo(0.05, 4)
+    expect(after).toBeCloseTo(0.02, 4)
+  })
+
+  it('IT LEARNS SLOWER moves the deep wall', () => {
+    step(createInitialState('hoplite', 3), 1)
+    const before = growth(5000)
+    step(withRule('hardening', 3), 1)
+    expect(growth(5000).lt(before)).toBe(true)
+  })
+
+  it('DEEPER POCKETS raises Bone growth', () => {
+    step(createInitialState('hoplite', 3), 1)
+    const before = boneFromKill(100, 'chaff', 1)
+    step(withRule('bone', 2), 1)
+    expect(boneFromKill(100, 'chaff', 1).gt(before)).toBe(true)
+  })
+})
+
+describe('the nothing', () => {
+  it('does not exist until you have ascended', () => {
+    for (let i = 0; i < 300; i++) {
+      expect(spawnEnemy(3000, i, 5, 0, [], false).family).not.toBe('nothing')
+    }
+  })
+
+  it('does not exist above Rank 500', () => {
+    for (let i = 0; i < 300; i++) {
+      expect(spawnEnemy(400, i, 5, 0, [], true).family).not.toBe('nothing')
+    }
+  })
+
+  it('turns up in the deep once you know what this place is', () => {
+    let found = 0
+    for (let i = 0; i < 400; i++) {
+      if (spawnEnemy(3000, i, 5, 0, [], true).family === 'nothing') found++
+    }
+    expect(found).toBeGreaterThan(0)
+  })
+
+  it('has no name at all — every other thing here was given one', () => {
+    for (let i = 0; i < 400; i++) {
+      const e = spawnEnemy(3000, i, 5, 0, [], true)
+      if (e.family === 'nothing') {
+        expect(e.name).toBe('')
+        return
+      }
+    }
+  })
+
+  it('erases: Armor does not apply to it', () => {
+    const armoured = createInitialState('hoplite', 9)
+    armoured.treeLevels = { scar: 80 }
+    armoured.apotheoses = 1
+    armoured.rank = 600
+    armoured.soldier.hp = computeStats(armoured).hp
+
+    const hpBefore = armoured.soldier.hp
+    // force a Nothing in front of them
+    let e = null
+    for (let i = 0; i < 400 && !e; i++) {
+      const c = spawnEnemy(600, i, 5, 0, [], true)
+      if (c.family === 'nothing') e = c
+    }
+    expect(e).not.toBeNull()
+    armoured.enemy = e!
+    armoured.enemiesThisRank = 999999
+    step(armoured, 300)
+    expect(armoured.soldier.hp.lt(hpBefore)).toBe(true)
+  })
+})
+
+describe('the myriad', () => {
+  const veteran = (ghosts: number) => {
+    const s = createInitialState('hoplite', 88)
+    s.apotheoses = 1
+    s.bestRankEver = 300
+    s.treeLevels = { edge: 60, meat: 60 }
+    // ghosts near where the player actually got — that is what a real history
+    // looks like, and it is what the fight is made of
+    for (let i = 0; i < ghosts; i++) {
+      s.ghosts.push({
+        soldierNumber: i + 1, classId: 'hoplite', deepestRank: 240 + (i % 60),
+        seed: 500 + i, diedTo: 'something',
+      })
+    }
+    s.soldier.hp = computeStats(s).hp
+    return s
+  }
+
+  it('waits until there is enough of you', () => {
+    expect(myriadReady(veteran(5))).toBe(false)
+    expect(myriadReady(veteran(40))).toBe(true)
+    const unascended = veteran(40)
+    unascended.apotheoses = 0
+    expect(myriadReady(unascended)).toBe(false)
+  })
+
+  it('is literally made of every run you have recorded', () => {
+    const few = veteran(20)
+    const many = veteran(60)
+    expect(myriadHp(many).gt(myriadHp(few))).toBe(true)
+  })
+
+  it('resolves deterministically and never disturbs the live game', () => {
+    const s = veteran(40)
+    const before = JSON.stringify({ rank: s.rank, hp: s.soldier.hp.toString(), kills: s.totalKills })
+    const a = fightMyriad(s, 5)
+    const b = fightMyriad(s, 5)
+    expect(a.felled).toBe(b.felled)
+    expect(a.hp).toBe(b.hp)
+    expect(JSON.stringify({ rank: s.rank, hp: s.soldier.hp.toString(), kills: s.totalKills }))
+      .toBe(before)
+  })
+
+  it('reports how far through yourself you got', () => {
+    const r = fightMyriad(veteran(40), 3)
+    expect(r.progress).toBeGreaterThanOrEqual(0)
+    expect(r.progress).toBeLessThanOrEqual(1)
+    expect(r.line.length).toBeGreaterThan(0)
+  })
+
+  it('a kill is reported as a kill, not as 96% of one', () => {
+    // The sim spawns a replacement the instant anything dies, so reading the
+    // enemy's health after the fact reports a win as a near-miss.
+    const strong = veteran(40)
+    strong.treeLevels = { edge: 800, meat: 400, clot: 200 }
+    strong.soldier.hp = computeStats(strong).hp
+    const r = fightMyriad(strong, 4)
+    expect(r.felled).toBe(true)
+    expect(r.progress).toBe(1)
+    expect(new Decimal(r.hp).eq(0)).toBe(true)
+  })
+
+  it('reports the gap in orders of magnitude, because there is no near-miss', () => {
+    // Tree nodes multiply, so 400 EDGE is ~13 orders short and 800 is ~6 past.
+    // A percentage would read 0% or 100% forever and tell the player nothing.
+    const weak = veteran(40)
+    weak.treeLevels = { edge: 400 }
+    weak.soldier.hp = computeStats(weak).hp
+    const strong = veteran(40)
+    strong.treeLevels = { edge: 800 }
+    strong.soldier.hp = computeStats(strong).hp
+
+    expect(fightMyriad(weak, 4).shortBy).toBeGreaterThan(0)
+    expect(fightMyriad(strong, 4).shortBy).toBeLessThan(0)
+  })
+
+  it('cannot be won by a soldier who has only just ascended', () => {
+    const fresh = veteran(40)
+    fresh.treeLevels = {}
+    fresh.soldier.hp = computeStats(fresh).hp
+    expect(fightMyriad(fresh, 4).felled).toBe(false)
+  })
+})
+
+describe('fragments', () => {
+  it('unlock by depth of play and never repeat', () => {
+    const s = createInitialState('hoplite', 12)
+    // nothing is given away before the first waking
+    expect(newFragments(s).length).toBe(0)
+    s.reveilles = 1
+    expect(newFragments(s).length).toBeGreaterThan(0)
+    for (const f of newFragments(s)) s.fragments.push(f.n)
+    expect(newFragments(s).length).toBe(0)
+
+    s.reveilles = 40
+    const later = newFragments(s)
+    expect(later.length).toBeGreaterThan(0)
+  })
+
+  it('every fragment has a unique number and real text', () => {
+    const ns = FRAGMENTS.map((f) => f.n)
+    expect(new Set(ns).size).toBe(ns.length)
+    for (const f of FRAGMENTS) {
+      expect(f.text.length).toBeGreaterThan(40)
+      expect(f.text).not.toContain('!')
+    }
+  })
+
+  it('the act three fragments need act three progress', () => {
+    const fresh = createInitialState('hoplite', 12)
+    const act3 = FRAGMENTS.filter((f) => f.act === 3)
+    for (const f of act3) expect(f.when(fresh)).toBe(false)
   })
 })
 

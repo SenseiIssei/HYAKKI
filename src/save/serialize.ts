@@ -67,6 +67,15 @@ export function serialize(g: GameState): string {
     descents: g.descents,
     descentsCleared: g.descentsCleared,
 
+    ichor: g.ichor,
+    ichorSpent: g.ichorSpent,
+    apotheoses: g.apotheoses,
+    namesSpentTotal: g.namesSpentTotal,
+    rules: g.rules,
+    myriadFelled: g.myriadFelled,
+    fragments: g.fragments,
+    authored: g.authored,
+
     equipped: g.equipped,
     inventory: g.inventory,
     slotBonus: g.slotBonus,
@@ -161,6 +170,20 @@ const MIGRATIONS: Record<number, Migration> = {
     layerNames: 0,
     descents: [],
     descentsCleared: 0,
+  }),
+  // v6 predates Apotheosis. Names already spent are credited so an existing
+  // save arrives at the third layer rather than starting it from nothing.
+  6: (b) => ({
+    ...b,
+    v: 7,
+    ichor: 0,
+    ichorSpent: 0,
+    apotheoses: 0,
+    namesSpentTotal: (b.namesSpent as number) ?? 0,
+    rules: {},
+    myriadFelled: false,
+    fragments: [],
+    authored: null,
   }),
 }
 

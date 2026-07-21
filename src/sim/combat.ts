@@ -14,6 +14,7 @@ import {
   isStandRank,
   mitigation,
   setGrowthExtra,
+  setRules,
   standTimerTicks,
 } from './formulas'
 import { Rng } from './rng'
@@ -511,7 +512,9 @@ export function tick(s: GameState, st: StatBlock, f: Flags, rf: Flags, rng: Rng)
   }
 
   // ── burn ──
+  // The Nothing does not catch.
   const target = currentTarget(s.enemy)
+  if (s.enemy.family === 'nothing') s.enemy.burn = 0
   if (s.enemy.burn > 0.01 && s.enemy.untargetable === 0) {
     let per = B.BURN_PER_STACK
     if (f.has('edge75')) per *= 1.05
@@ -572,13 +575,17 @@ export function tick(s: GameState, st: StatBlock, f: Flags, rf: Flags, rng: Rng)
     s.enemy.cooldown = attackCooldown(s.enemy.spd)
     if (s.immuneTicks > 0) {
       s.events.push({ t: 'miss', target: 'soldier' })
-    } else if (rng.chance(st.eva)) {
+    } else if (s.enemy.family !== 'nothing' && rng.chance(st.eva)) {
       s.events.push({ t: 'miss', target: 'soldier' })
     } else {
       let raw = s.enemy.atk.mul(s.enemy.atkMult)
       if (f.has('awl100')) raw = raw.mul(Math.max(0.2, 1 - st.pen))
-      const kScale = f.has('scar75') ? 0.95 : 1
-      raw = raw.mul(mitigation(st.arm, s.rank, kScale))
+      // THE NOTHING erases. Armor and Evasion are not consulted, because there
+      // is nothing there to consult them about.
+      if (s.enemy.family !== 'nothing') {
+        const kScale = f.has('scar75') ? 0.95 : 1
+        raw = raw.mul(mitigation(st.arm, s.rank, kScale))
+      }
 
       if (s.sigKind === 'brace') {
         // Take nothing. Remember all of it.
@@ -618,6 +625,13 @@ export function step(s: GameState, ticks: number): StatBlock {
   setGrowthExtra(
     s.vows.includes('longcount') ? B.VOW_LONGCOUNT_GROWTH / B.GROWTH : 1,
   )
+  // Rule modifiers bought with Ichor edit the curves themselves.
+  setRules({
+    softcap: (s.rules.softcap ?? 0) > 0,
+    floor: (s.rules.floor ?? 0) > 0 ? 0.02 : B.DAMAGE_FLOOR,
+    hardenEase: (s.rules.hardening ?? 0) * 0.01,
+    boneGrowth: B.BONE_GROWTH + (s.rules.bone ?? 0) * 0.02,
+  })
   let st = computeStats(s)
   const f = keystoneFlags(s.treeLevels)
   const rf = equippedFlags(s.equipped)

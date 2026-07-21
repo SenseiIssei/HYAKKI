@@ -18,10 +18,16 @@ import {
   wholeKeys,
 } from '../sim/descent'
 import type { DescentMap } from '../sim/types'
+import { ICHOR_BY_ID, ichorCost } from '../content/ichor'
+import { newFragments } from '../content/fragments'
+import { fightMyriad, myriadReady } from '../sim/myriad'
 import {
+  apotheosis,
+  canAscend,
   canInter,
   canReveille,
   interment,
+  projectedIchor,
   projectedAsh,
   projectedNames,
   recant,
@@ -154,6 +160,8 @@ type UIState = {
   setBargain: (v: boolean) => void
   descendOpen: boolean
   setDescend: (v: boolean) => void
+  ascendOpen: boolean
+  setAscend: (v: boolean) => void
   report: OfflineReport | null
   setReport: (r: OfflineReport | null) => void
   /** low-end / high-legibility mode: combat as a text log, no sigils */
@@ -184,6 +192,8 @@ export const useUI = create<UIState>((set) => ({
   setBargain: (v) => set({ bargainOpen: v }),
   descendOpen: false,
   setDescend: (v) => set({ descendOpen: v }),
+  ascendOpen: false,
+  setAscend: (v) => set({ ascendOpen: v }),
   report: null,
   setReport: (r) => set({ report: r }),
   numbersOnly: localStorage.getItem('myriad.numbersOnly') === '1',
@@ -289,6 +299,7 @@ export function buyName(id: string): boolean {
   if (G.names < cost) return false
   G.names -= cost
   G.namesSpent += cost
+  G.namesSpentTotal += cost
   G.purchases[id] = owned + 1
   if (id === 'slot') G.slotBonus = G.purchases[id]
   if (id === 'orders2') G.orders.autoBuy = true
@@ -318,6 +329,65 @@ export function toggleVow(id: string): boolean {
   return true
 }
 
+// ── apotheosis, ichor, the myriad ──
+
+export const ichorProjection = () => projectedIchor(G)
+export const ascendReady = () => canAscend(G)
+
+export function doApotheosis() {
+  const gained = apotheosis(G)
+  refreshStats()
+  floaters = []
+  pushLog(`You ascend. +${gained} Ichor.`)
+  useUI.getState().setAutopsy(false)
+  useUI.getState().bump()
+  saveNow()
+  return gained
+}
+
+export function buyRule(id: string): boolean {
+  const r = ICHOR_BY_ID[id]
+  if (!r) return false
+  const owned = G.rules[id] ?? 0
+  if (owned >= r.max) return false
+  const cost = ichorCost(r, owned)
+  if (G.ichor < cost) return false
+  G.ichor -= cost
+  G.ichorSpent += cost
+  G.rules[id] = owned + 1
+  refreshStats()
+  useUI.getState().bump()
+  saveNow()
+  return true
+}
+
+export const canFightMyriad = () => myriadReady(G)
+
+export function challengeMyriad() {
+  const result = fightMyriad(G, (G.soldierSeed + G.apotheoses) >>> 0)
+  if (result.felled) {
+    G.myriadFelled = true
+    G.soldierNumber = 10000
+    pushLog('It comes apart. Every one of them is wearing your coat.')
+  } else {
+    pushLog(result.line)
+  }
+  useUI.getState().bump()
+  saveNow()
+  return result
+}
+
+/** Fragments unlock silently; the log mentions one landed, nothing more. */
+export function checkFragments() {
+  const found = newFragments(G)
+  if (!found.length) return
+  for (const f of found) {
+    G.fragments.push(f.n)
+    pushLog(`A fragment. #${f.n}.`)
+  }
+  useUI.getState().bump()
+}
+
 // ── descents ──
 
 export const keysHeld = () => wholeKeys(G)
@@ -336,6 +406,7 @@ export function openLayer(layerId: string): boolean {
   if (G.names < need) return false
   G.names -= need
   G.namesSpent += need
+  G.namesSpentTotal += need
   G.layerNames += need
   useUI.getState().bump()
   saveNow()

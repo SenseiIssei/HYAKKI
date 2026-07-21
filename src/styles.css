@@ -1660,6 +1660,100 @@ button {
   }
 }
 
+/* ── apotheosis ─────────────────────────────────────────────── */
+
+.ichor-total {
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--ichor);
+}
+
+.ichor-number {
+  display: block;
+  font-family: var(--mono);
+  font-size: 38px;
+  color: var(--ichor);
+  letter-spacing: 0.08em;
+}
+
+.myriad-node {
+  border-color: var(--gold);
+}
+
+.myriad-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  border-bottom: 1px solid var(--void-edge);
+  padding-bottom: 4px;
+  margin-top: 4px;
+}
+
+.myriad-stat span:first-child {
+  letter-spacing: var(--label);
+  text-transform: uppercase;
+  color: var(--ash);
+  font-size: 10px;
+}
+
+.myriad-stat span:last-child {
+  font-family: var(--mono);
+  color: var(--gold);
+}
+
+/* ── the archive ────────────────────────────────────────────── */
+
+.archive {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.archive-act {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fragment {
+  border-left: 1px solid var(--void-edge);
+  padding-left: 14px;
+}
+
+.frag-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.frag-n {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ash);
+}
+
+.frag-title {
+  font-size: 10px;
+  letter-spacing: var(--label);
+  text-transform: uppercase;
+  color: var(--bone-dim);
+}
+
+.frag-text {
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--bone-dim);
+  max-width: 62ch;
+}
+
 /* ── log strip ──────────────────────────────────────────────── */
 
 .logstrip {

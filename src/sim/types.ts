@@ -92,6 +92,16 @@ export type Ghost = {
   affix?: RolledAffix
 }
 
+export type AuthoredWarden = {
+  soldierNumber: number
+  classId: string
+  deepestRank: number
+  seed: number
+  vows: string[]
+  /** the Ascension it came from */
+  ascension: number
+}
+
 export type DescentRoom = {
   id: number
   type: import('../content/layers').RoomType
@@ -255,6 +265,24 @@ export type GameState = {
   /** running and finished-but-uncollected Descents */
   descents: ActiveDescent[]
   descentsCleared: number
+
+  // ── prestige tier 3: Apotheosis ──
+  ichor: number
+  ichorSpent: number
+  apotheoses: number
+  /** Names spent across the whole Ascension chain — what Ichor is drawn from */
+  namesSpentTotal: number
+  /** rule modifiers bought with Ichor */
+  rules: Record<string, number>
+  /** THE MYRIAD has fallen. There is no number after this one. */
+  myriadFelled: boolean
+  /** fragment numbers read */
+  fragments: number[]
+  /**
+   * Your best Ascension, kept as a Warden for the Ascensions after it.
+   * The Hollow reissues its dead; you are the Hollow now.
+   */
+  authored: AuthoredWarden | null
 
   /**
    * Standing Orders: the rule that makes MYRIAD genuinely idle. Automating a

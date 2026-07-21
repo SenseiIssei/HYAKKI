@@ -3,6 +3,7 @@ import { useGameLoop } from '../loop/useGameLoop'
 import { CLASS_BY_ID } from '../content/classes'
 import {
   chooseClass,
+  ascendReady,
   game,
   intermentReady,
   keysHeld,
@@ -14,6 +15,7 @@ import {
   useUI,
 } from '../store/gameStore'
 import { Bargain } from './Bargain'
+import { Ascend } from './Ascend'
 import { Descend, DescentReport } from './Descend'
 import { Orders } from './Orders'
 import { Report } from './Report'
@@ -52,6 +54,8 @@ export function App() {
   const setBargain = useUI((s) => s.setBargain)
   const descendOpen = useUI((s) => s.descendOpen)
   const setDescend = useUI((s) => s.setDescend)
+  const ascendOpen = useUI((s) => s.ascendOpen)
+  const setAscend = useUI((s) => s.setAscend)
   const report = useUI((s) => s.report)
   const fontScale = useUI((s) => s.fontScale)
 
@@ -73,6 +77,7 @@ export function App() {
         ui.setSettings(false)
         ui.setBargain(false)
         ui.setDescend(false)
+        ui.setAscend(false)
         return
       }
       const map: Record<string, () => void> = {
@@ -81,7 +86,8 @@ export function App() {
         '3': () => ui.setOrders(true),
         '4': () => ui.setBargain(true),
         '5': () => ui.setDescend(true),
-        '6': () => ui.setSettings(true),
+        '6': () => ui.setAscend(true),
+        '7': () => ui.setSettings(true),
       }
       map[e.key]?.()
     }
@@ -166,6 +172,12 @@ export function App() {
                 {(keysHeld() >= 1 || readyDescents().length > 0) && <span className="dot" />}
               </button>
             )}
+            {(g.interments >= 1 || g.apotheoses > 0 || g.fragments.length > 0) && (
+              <button className="small-btn" onClick={() => setAscend(true)}>
+                Apotheosis
+                {(ascendReady() || g.ichor > 0) && <span className="dot" />}
+              </button>
+            )}
             {(g.inventory.length > 0 || g.equipped.some(Boolean)) && (
               <button className="small-btn" onClick={() => setRelics(true)}>
                 Carried {g.inventory.length > 0 && <span className="dot" />}
@@ -187,6 +199,7 @@ export function App() {
       {ordersOpen && <Orders />}
       {bargainOpen && <Bargain />}
       {descendOpen && <Descend />}
+      {ascendOpen && <Ascend />}
       {/* A finished Descent announces itself rather than waiting to be noticed. */}
       {!report && !descendOpen && readyDescents()[0] && (
         <DescentReport id={readyDescents()[0].id} />

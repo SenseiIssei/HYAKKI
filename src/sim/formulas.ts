@@ -10,9 +10,12 @@ const D = (n: number | string | Decimal) => new Decimal(n)
  * docs/03-COMBAT-MATH.md § 4
  */
 export function hardening(rank: number): Decimal {
+  // IT LEARNS SLOWER eases the third gear — the only thing that moves the
+  // ~Rank 6,800 wall.
+  const g1000 = Math.max(1.001, B.HARDEN_1000 - rules.hardenEase)
   let h = D(1)
   if (rank >= 100) h = h.mul(Decimal.pow(B.HARDEN_100, Math.min(rank, 1000) - 100))
-  if (rank >= 1000) h = h.mul(Decimal.pow(B.HARDEN_1000, Math.min(rank, 10000) - 1000))
+  if (rank >= 1000) h = h.mul(Decimal.pow(g1000, Math.min(rank, 10000) - 1000))
   if (rank >= 10000) h = h.mul(Decimal.pow(B.HARDEN_10000, rank - 10000))
   return h
 }
@@ -78,8 +81,28 @@ export function enemiesPerRank(rank: number): number {
  * midgame. At A === K you take exactly half damage. Never reaches 1.0, and the
  * 5% damage floor in `mitigate` guarantees you always take something.
  */
+/**
+ * Rule modifiers bought with Ichor. Set once per `step`, like the Vow growth
+ * factor, so nothing has to thread them through every call.
+ */
+type Rules = { softcap: boolean; floor: number; hardenEase: number; boneGrowth: number }
+let rules: Rules = {
+  softcap: false,
+  floor: B.DAMAGE_FLOOR,
+  hardenEase: 0,
+  boneGrowth: B.BONE_GROWTH,
+}
+export function setRules(r: Partial<Rules>) {
+  rules = { ...rules, ...r }
+}
+export function currentRules() {
+  return rules
+}
+
 export function armorK(rank: number, kScale = 1): Decimal {
-  return D(B.ARMOR_K_BASE).mul(Decimal.pow(B.ARMOR_K_GROWTH, rank * kScale))
+  // THE COAT REMEMBERS: the softcap stops chasing you down the Column.
+  const effective = rules.softcap ? Math.min(rank, 100) : rank
+  return D(B.ARMOR_K_BASE).mul(Decimal.pow(B.ARMOR_K_GROWTH, effective * kScale))
 }
 
 /** Returns the fraction of damage that GETS THROUGH, in [FLOOR, 1]. */
@@ -87,7 +110,7 @@ export function mitigation(armor: Decimal, rank: number, kScale = 1): number {
   if (armor.lte(0)) return 1
   const k = armorK(rank, kScale)
   const reduced = armor.div(armor.add(k)).toNumber()
-  return Math.max(B.DAMAGE_FLOOR, 1 - reduced)
+  return Math.max(rules.floor, 1 - reduced)
 }
 
 export function isStandRank(rank: number): boolean {
@@ -107,7 +130,7 @@ export function standTimerTicks(rank: number, firstSeen: boolean): number {
 
 export function boneFromKill(rank: number, family: Family, bf: number): Decimal {
   return D(B.BONE_BASE)
-    .mul(Decimal.pow(B.BONE_GROWTH, rank))
+    .mul(Decimal.pow(rules.boneGrowth, rank))
     .mul(FAMILY_MODS[family].bone)
     .mul(bf)
 }
