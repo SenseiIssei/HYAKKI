@@ -1,0 +1,393 @@
+/* 百鬼 — the walker, the yōkai, and the road.
+   Every animation here is CSS, not requestAnimationFrame: rAF is suspended in a
+   hidden window and the figures must not freeze while the sim keeps running. */
+
+/* ── the walker ─────────────────────────────────────────────── */
+
+.walker {
+  width: clamp(120px, 24vw, 190px);
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.55));
+}
+
+.fig-root {
+  animation: bob calc(var(--gait) / 2) ease-in-out infinite;
+  transform-origin: 60px 100px;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translate(60px, 0); }
+  50%      { transform: translate(60px, -3.5px); }
+}
+
+/* legs swing from the hip, arms counter-swing from the shoulder */
+.fig-leg  { transform-box: fill-box; transform-origin: 50% 4%; }
+.fig-arm  { transform-box: fill-box; transform-origin: 50% 4%; }
+
+.st-walk .fig-leg.front { animation: stride var(--gait) ease-in-out infinite; }
+.st-walk .fig-leg.back  { animation: stride var(--gait) ease-in-out infinite;
+                          animation-delay: calc(var(--gait) / -2); }
+.st-walk .fig-arm.back  { animation: swing var(--gait) ease-in-out infinite; }
+.st-walk .fig-arm.front { animation: swing var(--gait) ease-in-out infinite;
+                          animation-delay: calc(var(--gait) / -2); }
+
+@keyframes stride {
+  0%, 100% { transform: rotate(20deg); }
+  50%      { transform: rotate(-20deg); }
+}
+@keyframes swing {
+  0%, 100% { transform: rotate(-14deg); }
+  50%      { transform: rotate(14deg); }
+}
+
+/* the strike: wind up, then through */
+.st-strike .fig-arm.front { animation: strike calc(var(--gait) * 0.55) ease-out infinite; }
+.st-strike .fig-leg.front,
+.st-strike .fig-leg.back  { animation: stride calc(var(--gait) * 1.6) ease-in-out infinite; }
+
+@keyframes strike {
+  0%   { transform: rotate(-46deg); }
+  30%  { transform: rotate(-64deg); }
+  55%  { transform: rotate(48deg); }
+  100% { transform: rotate(-46deg); }
+}
+
+/* KONGŌ — he plants and takes nothing */
+.st-brace .fig-root { animation: none; transform: translate(60px, 2px); }
+.st-brace .fig-leg.front { transform: rotate(16deg); }
+.st-brace .fig-leg.back  { transform: rotate(-18deg); }
+.st-brace .fig-arm.front { transform: rotate(-84deg); }
+.st-brace .fig-arm.back  { transform: rotate(-30deg); }
+
+.st-still .fig-root,
+.st-still .fig-leg,
+.st-still .fig-arm { animation: none; }
+
+.st-hit .fig-root { animation: recoil 240ms ease-out; }
+@keyframes recoil {
+  0%   { transform: translate(60px, 0) rotate(0deg); }
+  30%  { transform: translate(54px, -2px) rotate(-5deg); }
+  100% { transform: translate(60px, 0) rotate(0deg); }
+}
+
+.walker-flash .fig-body path,
+.walker-flash .fig-leg path { fill: var(--blood) !important; }
+
+.walker-aura {
+  opacity: calc(var(--aura) * 0.55);
+  animation: aura 2.6s ease-in-out infinite;
+}
+@keyframes aura {
+  0%, 100% { opacity: calc(var(--aura) * 0.35); transform: scaleX(1); }
+  50%      { opacity: calc(var(--aura) * 0.7);  transform: scaleX(1.12); }
+}
+
+.fig-blade-fire {
+  opacity: 0.55;
+  animation: blade-fire 620ms ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+@keyframes blade-fire {
+  from { opacity: 0.25; transform: scaleY(1); }
+  to   { opacity: 0.7;  transform: scaleY(1.09); }
+}
+
+.fig-mino { animation: mino calc(var(--gait) * 2) ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 0; }
+@keyframes mino {
+  0%, 100% { transform: skewX(2deg); }
+  50%      { transform: skewX(-3deg); }
+}
+
+/* ── the yōkai ──────────────────────────────────────────────── */
+
+.yokai {
+  width: clamp(130px, 26vw, 205px);
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+}
+
+.yk-root { transform-box: fill-box; }
+
+/* kozō scuttles */
+.fam-chaff .yk-root { animation: scuttle 0.62s ease-in-out infinite; }
+@keyframes scuttle {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50%      { transform: translateY(-4px) rotate(1.5deg); }
+}
+.fam-chaff .yk-limb { transform-box: fill-box; transform-origin: 50% 0; animation: scurry 0.31s linear infinite; }
+.fam-chaff .yk-limb.l2 { animation-delay: -0.155s; }
+@keyframes scurry {
+  0%, 100% { transform: rotate(11deg); }
+  50%      { transform: rotate(-11deg); }
+}
+.fam-chaff .yk-arm { transform-box: fill-box; transform-origin: 0 0; animation: twitch 1.9s ease-in-out infinite; }
+.fam-chaff .yk-arm.a3 { animation-delay: -0.9s; }
+@keyframes twitch {
+  0%, 88%, 100% { transform: rotate(0deg); }
+  92%           { transform: rotate(-9deg); }
+}
+.fam-chaff .yk-eye { animation: blink 4.3s step-end infinite; }
+@keyframes blink { 0%, 96%, 100% { opacity: 1; } 97%, 99% { opacity: 0.05; } }
+
+/* oni is heavy and slow, and swings the club on its own time */
+.fam-organs .yk-root { animation: lumber 1.5s ease-in-out infinite; }
+@keyframes lumber {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-3px) rotate(1deg); }
+}
+.oni-club { transform-box: fill-box; transform-origin: 50% 0; animation: club 2.4s ease-in-out infinite; }
+@keyframes club {
+  0%, 60%, 100% { transform: rotate(6deg); }
+  72%           { transform: rotate(-38deg); }
+  80%           { transform: rotate(24deg); }
+}
+
+/* yūrei does not walk. It is nearer than it was. */
+.yurei-root { animation: hover 3.6s ease-in-out infinite; }
+@keyframes hover {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-7px) scale(1.015); }
+}
+.yr-arm { transform-box: fill-box; transform-origin: 0 0; animation: reach 3.6s ease-in-out infinite; }
+.yr-arm.a2 { animation-delay: -1.8s; }
+@keyframes reach {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(7deg); }
+}
+
+/* the Kings do not move. That is the point. */
+.king-root { animation: none; }
+.king-halo { animation: halo 7s linear infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+@keyframes halo { to { transform: rotate(360deg); } }
+
+/* mu is a hole. holes do not move. */
+.mu-root { animation: none; }
+
+.yokai-flash path { fill: var(--blood) !important; }
+.yokai-dying { animation: come-apart 600ms ease-in forwards; }
+@keyframes come-apart {
+  to { opacity: 0; transform: translateY(10px) scale(0.94); filter: blur(2px); }
+}
+
+/* ── the road ───────────────────────────────────────────────── */
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.bd-sky { position: absolute; inset: 0; transition: opacity 3s linear; }
+
+.bd-moon {
+  position: absolute;
+  top: 9%;
+  right: 13%;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 36%, #e8e2d0, #b8ae97 62%, transparent 72%);
+  filter: blur(0.4px);
+  transition: opacity 4s linear;
+}
+
+.bd-band {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  height: 46%;
+  display: flex;
+  animation: scroll var(--sp) linear infinite;
+  transition: opacity 3s linear;
+}
+.bd-band svg { width: 50%; height: 100%; display: block; }
+
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.bd-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 12%;
+  transition: background 3s linear;
+}
+
+.bd-motes { position: absolute; inset: 0; }
+.bd-motes span {
+  position: absolute;
+  top: -6%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: fall var(--dur) linear infinite;
+  animation-delay: var(--del);
+}
+.motes-petals span { width: 5px; height: 4px; border-radius: 60% 40% 55% 45%; opacity: 0.32; }
+.motes-embers span { box-shadow: 0 0 5px currentColor; opacity: 0.6; }
+
+@keyframes fall {
+  from { transform: translate(0, -10vh) rotate(0deg); }
+  to   { transform: translate(-40px, 108vh) rotate(360deg); }
+}
+
+.backdrop.still .bd-band,
+.backdrop.still .bd-motes span { animation-play-state: paused; }
+
+/* ── the main menu ──────────────────────────────────────────── */
+
+.menu {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.menu-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+  animation: menu-in 900ms ease-out;
+}
+
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.menu-title { text-align: center; }
+
+.menu-kanji {
+  font-family: var(--jp);
+  font-size: clamp(58px, 13vw, 118px);
+  line-height: 1;
+  letter-spacing: 0.1em;
+  color: var(--bone);
+  text-shadow: 0 0 42px rgba(193, 55, 43, 0.32);
+}
+
+.menu-romaji {
+  font-family: var(--serif);
+  font-size: clamp(13px, 2.2vw, 17px);
+  letter-spacing: 0.62em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  margin-top: 6px;
+}
+
+.menu-tag {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ash);
+  margin-top: 14px;
+}
+
+.menu-walker {
+  margin: -4px 0 2px;
+  opacity: 0.95;
+}
+.menu-walker .walker { width: clamp(96px, 15vw, 128px); }
+
+.menu-nav,
+.menu-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(340px, 86vw);
+}
+
+.menu-btn {
+  border: 1px solid var(--void-edge);
+  background: rgba(10, 9, 8, 0.55);
+  backdrop-filter: blur(2px);
+  padding: 13px 18px;
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  transition: all 160ms ease;
+}
+
+.menu-btn:hover {
+  color: var(--bone);
+  border-color: var(--ash);
+  background: rgba(20, 17, 15, 0.8);
+  transform: translateX(3px);
+}
+
+.menu-btn.primary {
+  border-color: var(--blood);
+  color: var(--bone);
+}
+.menu-btn.primary:hover { background: rgba(193, 55, 43, 0.14); }
+
+.menu-btn.danger:hover {
+  border-color: var(--blood);
+  color: var(--blood);
+}
+
+.menu-btn.quiet { opacity: 0.55; }
+
+.menu-sub {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--ash);
+}
+
+.menu-row { display: flex; gap: 8px; }
+.menu-row .menu-btn { flex: 1; text-align: center; }
+
+.menu-warn {
+  font-family: var(--serif);
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--bone-dim);
+  text-align: center;
+}
+
+.menu-foot {
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  font-size: 10px;
+  letter-spacing: var(--label);
+  color: var(--ash);
+  opacity: 0.5;
+}
+
+/* ── respect the setting ────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .fig-root, .fig-leg, .fig-arm, .fig-mino, .walker-aura, .fig-blade-fire,
+  .yk-root, .yk-limb, .yk-arm, .yk-eye, .oni-club, .yr-arm, .king-halo,
+  .bd-band, .bd-motes span {
+    animation: none !important;
+  }
+}

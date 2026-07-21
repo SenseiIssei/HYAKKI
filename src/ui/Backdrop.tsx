@@ -1,0 +1,266 @@
+import { useMemo } from 'react'
+import { COLORS } from '../render/presets'
+import { Rng } from '../sim/rng'
+
+/**
+ * The road through Yomi, moving.
+ *
+ * Four parallax bands, each scrolling at its own rate, all generated. The BAND
+ * changes with depth — bamboo, then the village, then the river, then the
+ * hells, then nothing — and each band cross-fades into the next so the world
+ * changes under you rather than cutting.
+ *
+ * Adding a new region is one entry in REGIONS. Nothing else has to know.
+ */
+
+export type Region = {
+  id: string
+  /** lowest Ri at which this region begins */
+  from: number
+  name: string
+  sky: [string, string]
+  far: string
+  mid: string
+  near: string
+  /** what stands along the road */
+  motif: 'bamboo' | 'torii' | 'lanterns' | 'stones' | 'pillars' | 'none'
+  /** ambient particles: petals, ash, embers, snow, none */
+  motes: 'petals' | 'ash' | 'embers' | 'none'
+}
+
+export const REGIONS: Region[] = [
+  {
+    id: 'bamboo', from: 0, name: 'The Bamboo Road',
+    sky: ['#0d1310', '#0a0908'], far: '#141c18', mid: '#1b2620', near: '#0c100e',
+    motif: 'bamboo', motes: 'petals',
+  },
+  {
+    id: 'village', from: 60, name: 'The Emptied Village',
+    sky: ['#141013', '#0a0908'], far: '#1d181c', mid: '#251d20', near: '#100c0e',
+    motif: 'lanterns', motes: 'ash',
+  },
+  {
+    id: 'shrine', from: 160, name: 'The Thousand Gates',
+    sky: ['#170f0e', '#0a0908'], far: '#26150f', mid: '#331a12', near: '#140b09',
+    motif: 'torii', motes: 'ash',
+  },
+  {
+    id: 'sanzu', from: 320, name: 'The River',
+    sky: ['#0c1416', '#0a0908'], far: '#122024', mid: '#16292e', near: '#0a1113',
+    motif: 'stones', motes: 'none',
+  },
+  {
+    id: 'jigoku', from: 700, name: 'The Burning Ground',
+    sky: ['#1a0c08', '#0a0908'], far: '#2c1109', mid: '#3d160a', near: '#160806',
+    motif: 'pillars', motes: 'embers',
+  },
+  {
+    id: 'muken', from: 2000, name: 'Without Interval',
+    sky: ['#0a0a0c', '#050505'], far: '#0e0e11', mid: '#121216', near: '#070708',
+    motif: 'none', motes: 'none',
+  },
+]
+
+export function regionFor(ri: number): Region {
+  let out = REGIONS[0]
+  for (const r of REGIONS) if (ri >= r.from) out = r
+  return out
+}
+
+/** 0..1 through the current region, for cross-fading into the next. */
+function blendTo(ri: number): { next: Region | null; t: number } {
+  const i = REGIONS.findIndex((r) => r === regionFor(ri))
+  const next = REGIONS[i + 1] ?? null
+  if (!next) return { next: null, t: 0 }
+  const span = next.from - REGIONS[i].from
+  const into = ri - REGIONS[i].from
+  // only the last 25% of a region bleeds into the next
+  const t = Math.max(0, (into / span - 0.75) / 0.25)
+  return { next, t: Math.min(1, t) }
+}
+
+// ── silhouettes, generated ─────────────────────────────────────────────
+
+function bamboo(seed: number, n: number, h: number): string {
+  const r = new Rng(seed)
+  let d = ''
+  for (let i = 0; i < n; i++) {
+    const x = (i / n) * 400 + r.range(-8, 8)
+    const w = r.range(2.5, 5)
+    const top = r.range(h * 0.15, h * 0.5)
+    d += `M ${x} 200 L ${x} ${top} L ${x + w} ${top} L ${x + w} 200 Z `
+    for (let y = top + 14; y < 200; y += r.range(18, 30)) {
+      d += `M ${x - 1} ${y} L ${x + w + 1} ${y} L ${x + w + 1} ${y + 2} L ${x - 1} ${y + 2} Z `
+    }
+  }
+  return d
+}
+
+function torii(seed: number, n: number): string {
+  const r = new Rng(seed)
+  let d = ''
+  for (let i = 0; i < n; i++) {
+    const x = (i / n) * 400 + r.range(-10, 10)
+    const s = r.range(0.7, 1.25)
+    const w = 46 * s
+    const hh = 78 * s
+    const y = 200
+    d +=
+      `M ${x - w / 2 - 5} ${y - hh} L ${x + w / 2 + 5} ${y - hh} L ${x + w / 2 + 5} ${y - hh + 7} L ${x - w / 2 - 5} ${y - hh + 7} Z ` +
+      `M ${x - w / 2} ${y - hh + 14} L ${x + w / 2} ${y - hh + 14} L ${x + w / 2} ${y - hh + 20} L ${x - w / 2} ${y - hh + 20} Z ` +
+      `M ${x - w / 2} ${y - hh + 7} L ${x - w / 2 + 6} ${y - hh + 7} L ${x - w / 2 + 9} ${y} L ${x - w / 2 - 3} ${y} Z ` +
+      `M ${x + w / 2} ${y - hh + 7} L ${x + w / 2 - 6} ${y - hh + 7} L ${x + w / 2 - 9} ${y} L ${x + w / 2 + 3} ${y} Z `
+  }
+  return d
+}
+
+function lanterns(seed: number, n: number): string {
+  const r = new Rng(seed)
+  let d = ''
+  for (let i = 0; i < n; i++) {
+    const x = (i / n) * 400 + r.range(-14, 14)
+    const top = r.range(40, 96)
+    d += `M ${x - 1.5} 200 L ${x - 1.5} ${top} L ${x + 1.5} ${top} L ${x + 1.5} 200 Z `
+    d += `M ${x - 9} ${top + 6} C ${x - 11} ${top + 20} ${x + 11} ${top + 20} ${x + 9} ${top + 6} C ${x + 6} ${top} ${x - 6} ${top} ${x - 9} ${top + 6} Z `
+  }
+  return d
+}
+
+function stones(seed: number, n: number): string {
+  const r = new Rng(seed)
+  let d = ''
+  for (let i = 0; i < n; i++) {
+    const x = (i / n) * 400 + r.range(-12, 12)
+    let y = 200
+    const stack = r.int(2, 7)
+    for (let s = 0; s < stack; s++) {
+      const w = r.range(7, 15) * (1 - s * 0.08)
+      const h = r.range(4, 8)
+      d += `M ${x - w / 2} ${y} L ${x + w / 2} ${y} L ${x + w / 2 - 1} ${y - h} L ${x - w / 2 + 1} ${y - h} Z `
+      y -= h + 1
+    }
+  }
+  return d
+}
+
+function pillars(seed: number, n: number): string {
+  const r = new Rng(seed)
+  let d = ''
+  for (let i = 0; i < n; i++) {
+    const x = (i / n) * 400 + r.range(-10, 10)
+    const top = r.range(20, 110)
+    const w = r.range(10, 22)
+    d += `M ${x} 200 L ${x + r.range(-4, 4)} ${top} L ${x + w} ${top + r.range(-6, 6)} L ${x + w} 200 Z `
+  }
+  return d
+}
+
+function motif(kind: Region['motif'], seed: number, n: number, h: number): string {
+  switch (kind) {
+    case 'bamboo': return bamboo(seed, n, h)
+    case 'torii': return torii(seed, n)
+    case 'lanterns': return lanterns(seed, n)
+    case 'stones': return stones(seed, n)
+    case 'pillars': return pillars(seed, n)
+    default: return ''
+  }
+}
+
+/** One scrolling band. Two copies side by side make the loop seamless. */
+function Band({
+  d, fill, speed, y, opacity = 1,
+}: {
+  d: string; fill: string; speed: number; y: number; opacity?: number
+}) {
+  return (
+    <div className="bd-band" style={{ ['--sp' as string]: `${speed}s`, bottom: `${y}%`, opacity }}>
+      <svg viewBox="0 0 400 200" preserveAspectRatio="none">
+        <path d={d} fill={fill} />
+      </svg>
+      <svg viewBox="0 0 400 200" preserveAspectRatio="none">
+        <path d={d} fill={fill} />
+      </svg>
+    </div>
+  )
+}
+
+export function Backdrop({ ri, still = false }: { ri: number; still?: boolean }) {
+  const region = regionFor(ri)
+  const { next, t } = blendTo(ri)
+
+  const layers = useMemo(() => {
+    const s = (n: number) => (region.id.charCodeAt(0) * 7919 + n) >>> 0
+    return {
+      far: motif(region.motif, s(1), 7, 150),
+      mid: motif(region.motif, s(2), 11, 120),
+      near: motif(region.motif, s(3), 5, 90),
+    }
+  }, [region])
+
+  const nextLayers = useMemo(() => {
+    if (!next) return null
+    const s = (n: number) => (next.id.charCodeAt(0) * 7919 + n) >>> 0
+    return {
+      far: motif(next.motif, s(1), 7, 150),
+      mid: motif(next.motif, s(2), 11, 120),
+      near: motif(next.motif, s(3), 5, 90),
+    }
+  }, [next])
+
+  return (
+    <div className={`backdrop ${still ? 'still' : ''}`} aria-hidden="true">
+      <div
+        className="bd-sky"
+        style={{ background: `linear-gradient(to bottom, ${region.sky[0]}, ${region.sky[1]})` }}
+      />
+      {next && (
+        <div
+          className="bd-sky"
+          style={{
+            background: `linear-gradient(to bottom, ${next.sky[0]}, ${next.sky[1]})`,
+            opacity: t,
+          }}
+        />
+      )}
+
+      {/* the moon, always there, never quite the same size */}
+      <div className="bd-moon" style={{ opacity: region.id === 'muken' ? 0 : 0.5 }} />
+
+      <Band d={layers.far} fill={region.far} speed={190} y={22} />
+      <Band d={layers.mid} fill={region.mid} speed={96} y={12} />
+      <Band d={layers.near} fill={region.near} speed={44} y={0} />
+
+      {nextLayers && t > 0 && (
+        <>
+          <Band d={nextLayers.far} fill={next!.far} speed={190} y={22} opacity={t} />
+          <Band d={nextLayers.mid} fill={next!.mid} speed={96} y={12} opacity={t} />
+          <Band d={nextLayers.near} fill={next!.near} speed={44} y={0} opacity={t} />
+        </>
+      )}
+
+      {/* the ground he actually walks on */}
+      <div className="bd-ground" style={{ background: region.near }} />
+
+      {region.motes !== 'none' && (
+        <div className={`bd-motes motes-${region.motes}`}>
+          {Array.from({ length: 14 }).map((_, i) => (
+            <span
+              key={i}
+              style={{
+                left: `${(i * 7.3) % 100}%`,
+                ['--dur' as string]: `${9 + ((i * 3) % 11)}s`,
+                ['--del' as string]: `${-(i * 1.7)}s`,
+                background:
+                  region.motes === 'embers'
+                    ? COLORS.blood
+                    : region.motes === 'petals'
+                      ? '#C98A9B'
+                      : COLORS.ash,
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

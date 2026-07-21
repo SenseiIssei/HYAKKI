@@ -1,6 +1,7 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles.css'
+import './styles-figures.css'
 
 // Dev-only inspection handle. The sim lives outside React, so without this
 // there is no way to see its state from a console.

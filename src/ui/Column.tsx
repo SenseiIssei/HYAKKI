@@ -4,10 +4,11 @@ import { BALANCE as B } from '../content/balance'
 import { CLASS_BY_ID } from '../content/classes'
 import { WARDEN_BY_ID } from '../content/wardens'
 import { currentTarget } from '../sim/enemies'
-import { FAMILY_PRESETS, COLORS, rankTint } from '../render/presets'
+import { Backdrop } from './Backdrop'
+import { Walker } from './Walker'
+import { Yokai } from './Yokai'
 import { game, getFloaters, getLog, stats, useUI } from '../store/gameStore'
 import { fmt, fmtInt } from '../format'
-import { Sigil } from './Sigil'
 
 function pct(cur: Decimal, max: Decimal): number {
   if (max.lte(0)) return 0
@@ -93,7 +94,6 @@ export function Column() {
   const g = game()
   const st = stats()
   const cls = CLASS_BY_ID[g.classId]
-  const tint = rankTint(g.rank)
   const target = currentTarget(g.enemy)
   const guarded = g.enemy.guards.length > 0
 
@@ -115,6 +115,7 @@ export function Column() {
 
   return (
     <main className="column">
+      <Backdrop ri={g.rank} still={g.dead} />
       <div className="rank-block">
         <span className="kanji-watermark" aria-hidden="true">
           里
@@ -148,15 +149,12 @@ export function Column() {
                 </div>
               ))}
           </div>
-          <Sigil
-            preset={cls.sigil}
-            seed={g.soldierSeed}
-            cacheKey={`soldier-${g.classId}-${g.soldierSeed}`}
-            color={bracing ? COLORS.gold : COLORS.bone}
-            spin={320}
-            breathe
+          <Walker
+            stats={st}
+            state={
+              bracing ? 'brace' : soldierHurt ? 'hit' : g.dead ? 'still' : 'strike'
+            }
             flash={soldierHurt}
-            className={soldierHurt ? 'hit-jitter' : ''}
           />
           <div className="bar">
             <div className="bar-fill" style={{ width: `${pct(g.soldier.hp, st.hp)}%` }} />
@@ -201,18 +199,13 @@ export function Column() {
                 </div>
               ))}
           </div>
-          <Sigil
-            preset={FAMILY_PRESETS[target.family]}
-            seed={target.seed}
-            cacheKey={`e-${target.seed}-${target.family}`}
-            color={g.enemy.isWarden && !guarded ? COLORS.gold : tint}
-            spin={g.enemy.isWarden && !guarded ? 420 : 200}
-            breathe
-            flash={enemyHurt}
-            className={`${enemyHurt ? 'hit-jitter' : ''} ${g.enemy.untargetable > 0 ? 'faded' : ''} ${
+          <span
+            className={`${g.enemy.untargetable > 0 ? 'faded' : ''} ${
               g.enemy.tellTicks > 0 ? 'telegraph' : ''
             }`}
-          />
+          >
+            <Yokai enemy={target} flash={enemyHurt} />
+          </span>
           <div className="bar">
             <div
               className="bar-fill enemy"

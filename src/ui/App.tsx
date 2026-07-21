@@ -1,5 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { setAudioEnabled, setVolume, startAudio } from '../audio/engine'
+import { createInitialState } from '../sim/state'
+import { hardReset } from '../save/storage'
+import { Backdrop } from './Backdrop'
+import { MainMenu } from './MainMenu'
 import { useGameLoop } from '../loop/useGameLoop'
 import { CLASS_BY_ID } from '../content/classes'
 import {
@@ -10,6 +14,7 @@ import {
   keysHeld,
   ordersUnlocked,
   readyDescents,
+  replaceGame,
   reveal,
   saveNow,
   soundReveille,
@@ -127,6 +132,7 @@ export function App() {
 
   const chosen = !!g.seen.classChosen
   const cls = CLASS_BY_ID[g.classId]
+  const [screen, setScreen] = useState<'menu' | 'game'>('menu')
 
   const progress = {
     totalDeaths: g.totalDeaths,
@@ -134,10 +140,32 @@ export function App() {
     totalKills: g.totalKills,
   }
 
+  // ── the front of the game ──
+  if (screen === 'menu') {
+    return (
+      <>
+        <MainMenu
+          onContinue={() => setScreen('game')}
+          onNew={() => {
+            hardReset()
+            replaceGame(createInitialState())
+            // `chosen` is now false, so the class picker is what renders next
+            setScreen('game')
+          }}
+        />
+        {settingsOpen && <Settings />}
+        {ledgerOpen && <Ledger />}
+        <div className="grain" />
+        <div className="vignette" />
+      </>
+    )
+  }
+
   if (!chosen) {
     return (
       <>
         <div className="drift" />
+        <Backdrop ri={1} />
         <Opening
           seed={g.soldierSeed}
           progress={progress}
@@ -145,6 +173,7 @@ export function App() {
             chooseClass(id)
             reveal('classChosen')
             saveNow()
+            setScreen('game')
           }}
         />
         <div className="grain" />
@@ -168,7 +197,15 @@ export function App() {
             </span>
             <button
               className="icon-btn"
-              aria-label="Settings"
+              aria-label="Back to the menu"
+              title="The road keeps going without you"
+              onClick={() => setScreen('menu')}
+            >
+              ⌂
+            </button>
+            <button
+              className="icon-btn"
+              aria-label="Options"
               onClick={() => setSettings(true)}
             >
               ☰
