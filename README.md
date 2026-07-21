@@ -93,7 +93,7 @@ pie showData
 | Auto-cast arts | **6** |
 | Stories in the Hyakumonogatari | **100** |
 | Playable classes | **7** |
-| Relics & affixes (item foundation) | **34** |
+| Equippable items (6 slots, 7 rarities) | **120** |
 | Tests passing | **138** |
 | Art & audio asset files | **0** |
 

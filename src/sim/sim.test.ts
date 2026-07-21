@@ -12,6 +12,7 @@ import { SPECIES } from '../pixel/species'
 import { yokaiFrame } from '../pixel/yokai'
 import { SLOT_ORDER, STAT_SLOT, RARITIES, RARITY_ORDER, CURSES } from '../content/relics'
 import { slotForRelic, emptyEquip } from '../sim/relics'
+import { ITEM_BASES, ITEM_BASE_BY_ID, baseFor } from '../content/items'
 import { migrate } from '../save/serialize'
 import { worldStage, worldHue, worldSat } from '../content/worldStage'
 import {
@@ -1804,5 +1805,55 @@ describe('seven rarities', () => {
     expect(blessed).not.toBeNull()
     expect(blessed!.affixes.length).toBe(RARITIES.blessed.affixes)
     expect(blessed!.affixes.every((a) => a.value > 0)).toBe(true)
+  })
+})
+
+describe('the 120 items', () => {
+  it('there are exactly 120 named things to wear (102 bases + 18 uniques)', () => {
+    expect(ITEM_BASES.length + UNIQUES.length).toBe(120)
+    expect(ITEM_BASES).toHaveLength(102)
+  })
+
+  it('every base is well-formed and unique, and every id is distinct across the whole catalogue', () => {
+    const ids = new Set<string>()
+    for (const b of ITEM_BASES) {
+      expect(SLOT_ORDER).toContain(b.slot)
+      expect(['issued', 'kept', 'named', 'blessed', 'cursed']).toContain(b.tier)
+      expect(b.name.length).toBeGreaterThan(0)
+      expect(b.kanji.length).toBeGreaterThan(0)
+      expect(b.lore.length).toBeGreaterThan(15)
+      expect(b.name + b.kanji + b.lore).not.toMatch(/Ã|â€|Â/)
+      expect(ids.has(b.id)).toBe(false)
+      ids.add(b.id)
+    }
+    // base ids never collide with unique ids
+    for (const u of UNIQUES) expect(ids.has(u.id)).toBe(false)
+  })
+
+  it('every slot has a base at every common tier — a drop always finds a name', () => {
+    for (const slot of SLOT_ORDER) {
+      for (const tier of ['issued', 'kept', 'named', 'blessed', 'cursed'] as const) {
+        expect(baseFor(slot, tier, 0)).not.toBeNull()
+      }
+    }
+  })
+
+  it('a common drop is named after a catalogue base; a myth keeps its unique name', () => {
+    let named = 0
+    let uniqueNamed = 0
+    for (let seed = 1; seed <= 3000; seed++) {
+      const r = rollRelic(seed, 400)
+      if (r.rarity === 'myth' || r.rarity === 'truename') {
+        if (r.unique) uniqueNamed++
+      } else {
+        // every common drop gets a base identity, not an affix-list name
+        expect(r.base).toBeTruthy()
+        expect(ITEM_BASE_BY_ID[r.base!].slot).toBe(r.slot)
+        expect(ITEM_BASE_BY_ID[r.base!].tier).toBe(r.rarity)
+        named++
+      }
+    }
+    expect(named).toBeGreaterThan(2000)
+    expect(uniqueNamed).toBeGreaterThan(0)
   })
 })

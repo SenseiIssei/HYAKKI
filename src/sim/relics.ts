@@ -12,6 +12,7 @@ import {
   type Rarity,
   type UniqueDef,
 } from '../content/relics'
+import { baseFor, ITEM_BASE_BY_ID } from '../content/items'
 import { Rng, hashSeed } from './rng'
 import type { Relic, RolledAffix } from './types'
 
@@ -116,6 +117,17 @@ export function rollRelic(seed: number, dropRank: number, rarityBonus = 0): Reli
     dropRank,
   }
   relic.slot = slotForRelic(relic)
+
+  // Common tiers get a named identity from the catalogue: the base gives the
+  // name and lore, the affixes above give the numbers. Uniques keep their own
+  // authored name and never take a base.
+  if (!unique && rarity !== 'myth' && rarity !== 'truename') {
+    const base = baseFor(relic.slot, rarity, seed)
+    if (base) {
+      relic.base = base.id
+      relic.name = base.name
+    }
+  }
   return relic
 }
 
@@ -129,9 +141,16 @@ export function relicSeed(rank: number, kills: number, runSeed: number): number 
 }
 
 export function relicLabel(r: Relic): string {
-  if (r.unique) return r.name
+  // uniques and catalogue bases carry their own name; only legacy drops with
+  // neither fall back to a list of their affixes.
+  if (r.unique || r.base) return r.name
   const parts = r.affixes.map((a) => AFFIX_BY_ID[a.id]?.label ?? a.id)
   return parts.length ? parts.join(', ') : RARITIES[r.rarity].label
+}
+
+/** The catalogue base a drop is, if any — for its name and lore in the UI. */
+export function baseOf(r: Relic) {
+  return r.base ? ITEM_BASE_BY_ID[r.base] : undefined
 }
 
 export function meltValue(r: Relic): number {

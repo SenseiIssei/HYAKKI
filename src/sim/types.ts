@@ -72,6 +72,8 @@ export type Relic = {
   affixes: RolledAffix[]
   /** authored Myth / True Name id */
   unique?: string
+  /** the named item base this drop is, for the common tiers (see content/items.ts) */
+  base?: string
   name: string
   dropRank: number
 }

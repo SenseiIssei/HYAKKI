@@ -7,7 +7,7 @@ import {
   SLOT_ORDER,
   type Rarity,
 } from '../content/relics'
-import { meltValue, relicLabel, uniqueOf } from '../sim/relics'
+import { baseOf, meltValue, relicLabel, uniqueOf } from '../sim/relics'
 import type { Relic } from '../sim/types'
 import { fmt, fmtInt, fmtPct } from '../format'
 import {
@@ -56,6 +56,7 @@ function RelicCard({
   selected?: boolean
 }) {
   const u = uniqueOf(relic)
+  const base = baseOf(relic)
   const color = rarityColor(relic.rarity)
   return (
     <button
@@ -92,6 +93,7 @@ function RelicCard({
         })}
         {u?.cost && <span className="relic-cost">{u.cost}</span>}
         {u && <span className="relic-line">{u.line}</span>}
+        {!u && base && <span className="relic-line">{base.kanji} · {base.lore}</span>}
       </span>
     </button>
   )
