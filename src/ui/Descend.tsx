@@ -92,8 +92,8 @@ export function Descend() {
       <div className="drawer" onClick={(e) => e.stopPropagation()}>
         <header className="drawer-head">
           <div>
-            <h2>Descend</h2>
-            <span className="drawer-sub">the Column goes forward · there is also down</span>
+            <h2>The Hells</h2>
+            <span className="drawer-sub">the Parade goes forward · there is also down</span>
           </div>
           <div className="drawer-head-right">
             <span className="keys">

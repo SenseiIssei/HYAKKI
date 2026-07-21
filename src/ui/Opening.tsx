@@ -14,7 +14,7 @@ export function Opening({
   seed,
   progress,
   onChoose,
-  title = 'Ten thousand were sent.',
+  title = 'A hundred demons. Which is to say: too many to count.',
   prompt = 'Choose what you were',
   onCancel,
 }: {
@@ -50,7 +50,10 @@ export function Opening({
                   color={open ? COLORS.bone : COLORS.ash}
                   spin={280}
                 />
-                <span className="class-name">{c.name}</span>
+                <span className="class-name">
+                  {c.kanji && <span className="kanji class-kanji">{c.kanji}</span>}
+                  {c.name}
+                </span>
                 <span className="class-epithet">{c.epithet}</span>
                 {open ? (
                   <span className="class-meta">
@@ -73,7 +76,7 @@ export function Opening({
         </div>
         {onCancel && (
           <button className="small-btn" style={{ marginTop: 22 }} onClick={onCancel}>
-            Keep marching as you are
+            Keep walking as you are
           </button>
         )}
       </div>

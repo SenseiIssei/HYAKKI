@@ -15,6 +15,7 @@ import {
   soundReveille,
   useUI,
 } from '../store/gameStore'
+import { isDesktop, winDrag, winHide, winMaximize, winMinimize } from '../save/desktop'
 import { Bargain } from './Bargain'
 import { Ascend } from './Ascend'
 import { Ledger } from './Ledger'
@@ -22,7 +23,7 @@ import { Descend, DescentReport } from './Descend'
 import { Orders } from './Orders'
 import { Report } from './Report'
 import { fmtInt } from '../format'
-import { Autopsy, ReveilleButton } from './Autopsy'
+import { Riverbed, StackButton } from './Riverbed'
 import { Column, LogStrip } from './Column'
 import { Lower } from './Lower'
 import { Opening } from './Opening'
@@ -156,8 +157,11 @@ export function App() {
     <>
       <div className="drift" />
       <div className="app">
-        <header className="topbar">
-          <span className="wordmark">Myriad</span>
+        <header className="topbar" onMouseDown={(e) => e.target === e.currentTarget && winDrag()}>
+          <span className="wordmark">
+            <span className="wordmark-kanji">百鬼</span>
+            <span className="wordmark-romaji">Hyakki</span>
+          </span>
           <span className="topbar-right">
             <span>
               #{fmtInt(g.soldierNumber)} · {cls.name}
@@ -169,6 +173,20 @@ export function App() {
             >
               ☰
             </button>
+            {isDesktop() && (
+              <span className="win-controls">
+                <button className="win-btn" aria-label="Minimise" onClick={winMinimize}>
+                  ─
+                </button>
+                <button className="win-btn" aria-label="Maximise" onClick={winMaximize}>
+                  □
+                </button>
+                {/* Closing hides to the tray. The Parade does not stop. */}
+                <button className="win-btn close" aria-label="Hide" onClick={winHide}>
+                  ✕
+                </button>
+              </span>
+            )}
           </span>
         </header>
 
@@ -177,28 +195,28 @@ export function App() {
         {g.seen.ash && (
           <div className="actionbar">
             <button className="small-btn" onClick={() => setTree(true)}>
-              The Tree
+              The Cairn
               {g.ash.gte(8) && <span className="dot" />}
             </button>
             <button className="small-btn" onClick={() => setOrdersOpen(true)}>
-              Orders
+              The Vow
               {ordersUnlocked() && !g.orders.enabled && <span className="dot" />}
             </button>
             {(g.reveilles >= 10 || g.interments > 0 || g.names > 0) && (
               <button className="small-btn" onClick={() => setBargain(true)}>
-                The Bargain
+                Enshrinement
                 {(intermentReady() || g.names > 0) && <span className="dot" />}
               </button>
             )}
             {g.interments > 0 && (
               <button className="small-btn" onClick={() => setDescend(true)}>
-                Descend
+                The Hells
                 {(keysHeld() >= 1 || readyDescents().length > 0) && <span className="dot" />}
               </button>
             )}
             {(g.interments >= 1 || g.apotheoses > 0 || g.fragments.length > 0) && (
               <button className="small-btn" onClick={() => setAscend(true)}>
-                Apotheosis
+                Becoming
                 {(ascendReady() || g.ichor > 0) && <span className="dot" />}
               </button>
             )}
@@ -207,7 +225,7 @@ export function App() {
                 Carried {g.inventory.length > 0 && <span className="dot" />}
               </button>
             )}
-            <ReveilleButton />
+            <StackButton />
           </div>
         )}
         <LogStrip />
@@ -217,7 +235,7 @@ export function App() {
       {/* The report comes before anything else — it is the first thing you
           came back for. */}
       {report && <Report report={report} />}
-      {!report && g.dead && <Autopsy />}
+      {!report && g.dead && <Riverbed />}
       {treeOpen && <Tree />}
       {relicsOpen && <Relics />}
       {ordersOpen && <Orders />}
@@ -233,7 +251,7 @@ export function App() {
         <Opening
           seed={g.soldierSeed}
           progress={progress}
-          title="You wake at the Mouth."
+          title="You are back at the pass. The stone is still moved aside."
           prompt="Choose what you are this time"
           onCancel={() => setPicker(false)}
           onChoose={(id) => {

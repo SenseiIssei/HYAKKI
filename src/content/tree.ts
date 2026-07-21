@@ -198,10 +198,10 @@ export const TREE_BY_ID: Record<string, TreeNode> = Object.fromEntries(
   TREE.map((n) => [n.id, n]),
 )
 
-export const TRUNKS: { id: Trunk; label: string; blurb: string }[] = [
-  { id: 'flesh', label: 'FLESH', blurb: 'survival & sustain' },
-  { id: 'iron', label: 'IRON', blurb: 'offence' },
-  { id: 'rite', label: 'RITE', blurb: 'economy & time' },
+export const TRUNKS: { id: Trunk; label: string; kanji: string; blurb: string }[] = [
+  { id: 'flesh', label: 'KARADA', kanji: '体', blurb: 'the body, and keeping it' },
+  { id: 'iron', label: 'HA', kanji: '刃', blurb: 'the edge' },
+  { id: 'rite', label: 'MATSURI', kanji: '祭', blurb: 'observance, and what it returns' },
 ]
 
 /** Every keystone earned, as a flag set the sim can ask cheap questions of. */

@@ -199,7 +199,7 @@ export function reveille(s: GameState, classId = s.classId): Decimal {
 
   s.events.push({
     t: 'log',
-    text: `You wake at the Mouth. Your coat says ${s.soldierNumber}.`,
+    text: `You are back at the pass. Your coat says ${s.soldierNumber}.`,
   })
   return gained
 }

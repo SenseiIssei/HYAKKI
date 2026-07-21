@@ -93,9 +93,10 @@ export function Tree() {
       <div className="drawer" onClick={(e) => e.stopPropagation()}>
         <header className="drawer-head">
           <div>
-            <h2>The Tree</h2>
+            <h2>The Cairn</h2>
             <span className="drawer-sub">
-              what the burning was for · {fmtInt(Object.values(g.treeLevels).reduce((a, b) => a + b, 0))} levels held
+              what the stones were for ·{' '}
+              {fmtInt(Object.values(g.treeLevels).reduce((a, b) => a + b, 0))} stones set
             </span>
           </div>
           <div className="drawer-head-right">
@@ -117,7 +118,9 @@ export function Tree() {
           {TRUNKS.map((t) => (
             <section key={t.id} className="trunk">
               <div className="trunk-head">
-                <span className="trunk-name">{t.label}</span>
+                <span className="trunk-name">
+                  <span className="kanji">{t.kanji}</span> {t.label}
+                </span>
                 <span className="trunk-blurb">{t.blurb}</span>
               </div>
               {visible

@@ -26,17 +26,19 @@ export function Lower() {
     <div className="lower">
       <div className="currency">
         <div className="currency-row">
-          <span className="currency-name">Bone</span>
+          <span className="currency-name">
+            <span className="kanji">魂</span> Tama
+          </span>
           <span className="currency-value">{fmt(g.bone)}</span>
         </div>
         {g.seen['up.reinforce'] && (
           <>
             <div className="currency-row">
-              <span className="currency-name">Felled</span>
+              <span className="currency-name">Put down</span>
               <span className="currency-value">{fmtInt(g.killsThisRun)}</span>
             </div>
             <div className="currency-row">
-              <span className="currency-name">Deepest</span>
+              <span className="currency-name">Furthest</span>
               <span className="currency-value">{fmtInt(g.bestRank)}</span>
             </div>
             <div className="currency-row" style={{ marginTop: 2 }}>

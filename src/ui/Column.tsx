@@ -116,16 +116,21 @@ export function Column() {
   return (
     <main className="column">
       <div className="rank-block">
-        <div className="rank-label">Rank</div>
+        <span className="kanji-watermark" aria-hidden="true">
+          里
+        </span>
+        <div className="rank-label">Ri</div>
         <div className="rank-number">{fmtInt(g.rank)}</div>
         <div className="rank-rule" />
-        <div className={`enemy-name ${target.ghost ? 'returned' : ''}`}>{target.name}</div>
+        <div className={`enemy-name ${target.ghost ? 'returned' : ''}`}>
+          {target.name || <span className="unnamed">（ ）</span>}
+        </div>
         {/* The whole thesis of the game, stated quietly. */}
         {target.ghost && (
           <div className="returned-note">
             {target.ghost.soldierNumber === g.soldierNumber
               ? 'Its coat says the same as yours.'
-              : `It got as far as Rank ${fmtInt(target.ghost.deepestRank)}. You were it.`}
+              : `It got as far as Ri ${fmtInt(target.ghost.deepestRank)}. You were it.`}
           </div>
         )}
       </div>

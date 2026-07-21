@@ -1,6 +1,5 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { App } from './ui/App'
 import './styles.css'
 
 // Dev-only inspection handle. The sim lives outside React, so without this
@@ -11,8 +10,26 @@ if (import.meta.env.DEV) {
   })
 }
 
-createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+/**
+ * On the desktop the save file is primed into place BEFORE the store module is
+ * imported — the store reads storage at module scope, so this has to happen
+ * first or the file is ignored on the very run that matters.
+ */
+async function start() {
+  const { isDesktop, primeDesktopSave } = await import('./save/desktop').then(async (d) => ({
+    isDesktop: d.isDesktop,
+    primeDesktopSave: (await import('./save/storage')).primeDesktopSave,
+  }))
+  if (isDesktop()) {
+    document.documentElement.classList.add('desktop')
+    await primeDesktopSave()
+  }
+  const { App } = await import('./ui/App')
+  createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  )
+}
+
+void start()

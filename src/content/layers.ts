@@ -79,12 +79,12 @@ export type LayerDef = {
 export const LAYERS: LayerDef[] = [
   {
     id: 'ossuary',
-    name: 'THE OSSUARY',
+    name: 'TŌKATSU 等活',
     flavour:
-      'The place where the Myriad’s dead were stacked, before someone realised there would be no end to them.',
+      'The Reviving Hell. Everything here tears everything else apart, and a voice says get up, and it does.',
     family: 'chaff',
     twist: 'bonepiles',
-    twistText: 'Every kill leaves a pile. Standing over them is worth +2% Attack, and it stacks.',
+    twistText: 'The voice works for you too. Everything you put down gets up once, and each one that does is worth +2%.',
     cost: 0,
     wardenId: 'quartermaster',
     accent: '--bone',
@@ -92,11 +92,11 @@ export const LAYERS: LayerDef[] = [
   },
   {
     id: 'barracks',
-    name: 'THE DROWNED BARRACKS',
-    flavour: 'Someone flooded it deliberately. The bunks are still made.',
+    name: 'KOKUJŌ 黒縄',
+    flavour: 'The Black Rope. They mark you with a cord first, so the cut is straight.',
     family: 'organs',
     twist: 'pressure',
-    twistText: 'Pressure. You lose 1.5% of your Health for every room you enter, and it does not come back.',
+    twistText: 'The line. You lose 1.5% of your health for every room you enter, and it does not come back.',
     cost: 3,
     wardenId: 'drownedsergeant',
     accent: '--ichor',
@@ -104,12 +104,12 @@ export const LAYERS: LayerDef[] = [
   },
   {
     id: 'museum',
-    name: 'THE MUSEUM OF WOUNDS',
+    name: 'KYŌKAN 叫喚',
     flavour:
-      'Every injury the god ever took, mounted and labelled. Some of the labels are in your handwriting.',
+      'The Screaming Hell. You will recognise some of it, which is the part nobody warns you about.',
     family: 'returned',
     twist: 'exhibits',
-    twistText: 'Exhibits. Every room is a run of yours, and what it wore, it wears.',
+    twistText: 'The noise. Every room is a walk of yours, and what it wore, it wears.',
     cost: 7,
     wardenId: 'predecessor',
     accent: '--gold',
@@ -117,12 +117,11 @@ export const LAYERS: LayerDef[] = [
   },
   {
     id: 'choir',
-    name: 'THE CHOIR',
-    flavour:
-      'Ten thousand voices. Nine thousand of them are counting. The rest are the number.',
+    name: 'SHUGŌ 衆合',
+    flavour: 'The Crushing Hell. Two mountains, and a road between them that narrows.',
     family: 'chaff',
     twist: 'harmony',
-    twistText: 'Harmony. They strengthen each other, +15% for every one still standing.',
+    twistText: 'The press. They hold each other up, +15% for every one still standing.',
     cost: 14,
     wardenId: 'census',
     accent: '--blood',
@@ -130,11 +129,11 @@ export const LAYERS: LayerDef[] = [
   },
   {
     id: 'nowhere',
-    name: 'NOWHERE',
+    name: 'MUKEN 無間',
     flavour: '',
     family: 'nothing',
     twist: 'erasure',
-    twistText: 'Erasure. Rooms delete themselves as you approach. Your route will not survive.',
+    twistText: 'Without interval. There is no pause in it, and no room stays where the map says.',
     cost: 999, // opens at Apotheosis — Phase 6
     wardenId: 'hollow',
     accent: '--ash',

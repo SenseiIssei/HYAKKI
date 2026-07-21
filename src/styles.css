@@ -1,22 +1,46 @@
-/* MYRIAD — docs/09-ART-DIRECTION.md
-   Seven colours. No gradients between hues. Nothing bounces. */
+/* 百鬼 HYAKKI — docs/hyakki/04-HORROR.md
+   Ink, paper, lacquer and rot. Nothing bounces. Nothing is explained. */
 
 :root {
-  --void: #0b0b0f;
-  --void-lift: #14141a;
-  --void-edge: #1f1f28;
-  --bone: #e8e2d4;
-  --bone-dim: #9a9488;
-  --ash: #5c5a55;
-  --blood: #b4232a;
-  --gold: #c9a227;
-  --ichor: #3fa7a0;
+  /* The old MYRIAD names are kept as the variable names so the whole app
+     re-skins at once; only the values move. */
+  --void: #0a0908; /* sumi — ink black */
+  --void-lift: #14110f;
+  --void-edge: #221c18;
+  --bone: #e4dccb; /* washi — paper */
+  --bone-dim: #8e8577;
+  --ash: #55504a; /* hai */
+  --blood: #c1372b; /* shu — vermilion. In this world it means a warded boundary. */
+  --gold: #b8912f; /* kin — old gold. The Kings. */
+  --ichor: #46707a; /* aoi — dead blue-green. Yūrei and Mu. */
+  --kegare: #4b3a52; /* defilement, and nothing else */
 
   --serif: 'EB Garamond', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --jp: 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
   --mono: ui-monospace, 'Cascadia Mono', 'JetBrains Mono', Consolas, monospace;
   --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   --label: 0.14em;
+}
+
+/* ── kanji ──────────────────────────────────────────────────── */
+
+.kanji {
+  font-family: var(--jp);
+  font-weight: 500;
+}
+
+/* Set large and sparse. Small decorative kanji reads as a menu, not a world. */
+.kanji-watermark {
+  position: absolute;
+  font-family: var(--jp);
+  font-size: 22vh;
+  line-height: 1;
+  color: var(--washi, var(--bone));
+  opacity: 0.045;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
 }
 
 * {
@@ -59,34 +83,41 @@ button {
   z-index: 90;
 }
 
+/* Washi fibre, not film noise: the same turbulence stretched anisotropically so
+   it reads as paper grain. */
 .grain {
-  opacity: 0.038;
+  opacity: 0.05;
   mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.14 0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* Lamplight on paper, not a camera lens: warm at the edges. */
 .vignette {
-  background: radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.62) 100%);
+  background:
+    radial-gradient(ellipse at center, transparent 40%, rgba(20, 10, 4, 0.45) 78%, rgba(0, 0, 0, 0.7) 100%);
 }
 
-/* the slow drift that says: you are moving */
+/* The Parade. Faint marks moving past you, always downward, always slightly too
+   slow — the others walking in it. */
 .drift {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.22;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0 58px,
-    var(--void-edge) 58px 59px
-  );
-  animation: drift 34s linear infinite;
+  opacity: 0.28;
+  background-image:
+    repeating-linear-gradient(to bottom, transparent 0 92px, var(--void-edge) 92px 93px),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 37px,
+      rgba(70, 112, 122, 0.09) 37px 38px
+    );
+  animation: drift 52s linear infinite;
 }
 
 @keyframes drift {
   from {
-    transform: translateY(-59px);
+    transform: translateY(-93px);
   }
   to {
     transform: translateY(0);
@@ -118,11 +149,24 @@ button {
 }
 
 .wordmark {
-  font-family: var(--serif);
-  font-size: 15px;
-  letter-spacing: 0.5em;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
   color: var(--bone);
+}
+
+.wordmark-kanji {
+  font-family: var(--jp);
+  font-size: 19px;
+  letter-spacing: 0.12em;
+}
+
+.wordmark-romaji {
+  font-family: var(--serif);
+  font-size: 11px;
+  letter-spacing: 0.42em;
   text-transform: uppercase;
+  color: var(--bone-dim);
 }
 
 .topbar-right {
@@ -137,6 +181,39 @@ button {
   letter-spacing: 0;
 }
 .icon-btn:hover {
+  color: var(--bone);
+}
+
+/* ── the window is ours ─────────────────────────────────────── */
+
+.desktop .topbar {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.win-controls {
+  display: flex;
+  margin-left: 6px;
+  margin-right: -10px;
+}
+
+.win-btn {
+  width: 40px;
+  height: 44px;
+  color: var(--bone-dim);
+  font-size: 11px;
+  line-height: 1;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.win-btn:hover {
+  background: var(--void-lift);
+  color: var(--bone);
+}
+
+.win-btn.close:hover {
+  background: var(--blood);
   color: var(--bone);
 }
 
@@ -1838,11 +1915,12 @@ button {
   background: rgba(11, 11, 15, 0.94);
 }
 
-/* Death is bright. The only white screen in the game. */
+/* The riverbed. Wet grey, the colour of river stones — a colder shock after the
+   ink than white would be. docs/hyakki/04-HORROR.md */
 .overlay.autopsy {
-  background: var(--bone);
-  color: var(--void);
-  animation: bleach 420ms ease-out;
+  background: #6e6a63;
+  color: #14110f;
+  animation: bleach 520ms ease-out;
 }
 
 @keyframes bleach {
@@ -1851,6 +1929,48 @@ button {
   }
   to {
     opacity: 1;
+  }
+}
+
+/* the tower, and then not the tower */
+.cairn {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  height: 22px;
+  margin: 4px 0 14px;
+}
+
+.cairn-stone {
+  width: 9px;
+  height: 9px;
+  border-radius: 50% 50% 45% 45%;
+  background: #2a2724;
+  animation: stone-fall 620ms cubic-bezier(0.4, 0, 0.9, 0.4) forwards;
+}
+
+@keyframes stone-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(26px) rotate(28deg);
+    opacity: 0;
+  }
+}
+
+.cairn-rule {
+  width: 190px;
+  height: 1px;
+  background: rgba(20, 17, 15, 0.35);
+  margin: 0 auto 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cairn-stone {
+    animation: none;
+    opacity: 0.5;
   }
 }
 

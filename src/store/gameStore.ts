@@ -115,11 +115,11 @@ export function drainEvents(now: number) {
           else sfxTaken()
           break
         case 'rank':
-          pushLog(`Rank ${e.rank}.`)
+          pushLog(`Ri ${e.rank}.`)
           sfxRank()
           break
         case 'stand':
-          pushLog(`A Stand. ${e.warden}.`)
+          pushLog(`A hearing. ${e.warden} will see you.`)
           sfxStand()
           setTension(true)
           break
@@ -128,7 +128,7 @@ export function drainEvents(now: number) {
           setTension(false)
           break
         case 'standLost':
-          pushLog(`The Stand closed at Rank ${e.rank}. You are further back than you were.`)
+          pushLog(`The hearing closed at Ri ${e.rank}. You are further back than you were.`)
           break
         case 'signature':
           pushLog(`${e.label}.`)
@@ -138,7 +138,7 @@ export function drainEvents(now: number) {
           pushLog('You get up. Nobody asked you to.')
           break
         case 'relic':
-          pushLog(`Something was carried in here. ${relicLabel(e.relic)}.`)
+          pushLog(`Something old. ${relicLabel(e.relic)}. It has been waiting.`)
           sfxRelic()
           break
         case 'echoLost':
@@ -520,7 +520,7 @@ export function doRecant() {
   recant(G)
   refreshStats()
   floaters = []
-  pushLog('You recant. Everything burned is returned to you, cold.')
+  pushLog('You take the cairn apart. Every stone is returned to you, cold.')
   useUI.getState().bump()
   saveNow()
 }
@@ -536,7 +536,7 @@ export function soundReveille(classId?: string) {
   refreshStats()
   G.soldier.hp = ST.hp
   floaters = []
-  pushLog(`Reveille. +${fmt(gained)} Ash.`)
+  pushLog(`You stack the stones. ${fmt(gained)} 石 remain when they fall.`)
   useUI.getState().setAutopsy(false)
   useUI.getState().bump()
   saveNow()

@@ -2,6 +2,7 @@ import LZString from 'lz-string'
 import { spawnFor } from '../sim/enemies'
 import { createInitialState } from '../sim/state'
 import type { GameState } from '../sim/types'
+import { desktopLoad, desktopWrite, isDesktop } from './desktop'
 import { deserialize, serialize, toDecimal, type SaveBlob } from './serialize'
 
 const KEY = 'myriad.save'
@@ -117,12 +118,26 @@ function hydrate(b: SaveBlob): GameState {
 export function save(g: GameState): void {
   try {
     const packed = LZString.compressToBase64(serialize(g))
+    // On the desktop this is a real file, with its own rotation on the Rust
+    // side. localStorage is still written as a belt-and-braces second copy.
+    if (isDesktop()) desktopWrite(packed)
     localStorage.setItem(KEY, packed)
     rotateBackup(packed)
   } catch (err) {
-    // A full quota must never take the game down mid-run.
-    console.error('[myriad] save failed', err)
+    // A full quota must never take the game down mid-walk.
+    console.error('[hyakki] save failed', err)
   }
+}
+
+/**
+ * Called once at startup on the desktop, before the store reads anything. The
+ * file wins over localStorage — it is the one that survives a browser cache
+ * being cleared, and it is the one the player can see and back up.
+ */
+export async function primeDesktopSave(): Promise<void> {
+  if (!isDesktop()) return
+  const blob = await desktopLoad()
+  if (blob) localStorage.setItem(KEY, blob)
 }
 
 let lastBackupAt = 0
