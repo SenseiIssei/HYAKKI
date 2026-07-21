@@ -3,7 +3,7 @@ import { create } from 'zustand'
 import { BALANCE as B } from '../content/balance'
 import { BONE_UPGRADE_BY_ID } from '../content/upgrades'
 import { TREE_BY_ID } from '../content/tree'
-import { INVENTORY_CAP, slotsFor, type Rarity } from '../content/relics'
+import { INVENTORY_CAP, SLOT_ORDER, slotsFor, type Rarity } from '../content/relics'
 import { compareRelic } from '../sim/evaluate'
 import { meltValue, rarityRank, relicLabel } from '../sim/relics'
 import { affordableLevels, costOfNext } from '../sim/formulas'
@@ -46,7 +46,7 @@ import {
 import { createInitialState, resetRun } from '../sim/state'
 import { computeStats } from '../sim/stats'
 import type { OfflineReport } from '../sim/offline'
-import type { GameState, SimEvent, StatBlock } from '../sim/types'
+import type { GameState, Relic, SimEvent, StatBlock } from '../sim/types'
 import { fmt } from '../format'
 import {
   setAudioEnabled,
@@ -866,26 +866,26 @@ export function chooseClass(classId: string) {
 
 // ── relics ──
 
+/** How many of the six typed slots are unlocked (2..6, by depth + Names). */
 export function slotCount(): number {
   return slotsFor(G.bestRankEver, G.slotBonus)
 }
 
-/** Keeps `equipped` the right length as slot milestones unlock. */
-function syncSlots() {
-  const want = slotCount()
-  while (G.equipped.length < want) G.equipped.push(null)
-  while (G.equipped.length > want) {
-    const dropped = G.equipped.pop()
-    if (dropped) G.inventory.push(dropped)
-  }
+/** Is the slot this item belongs to open yet? */
+export function slotUnlockedFor(relic: Relic): boolean {
+  return SLOT_ORDER.indexOf(relic.slot) < slotCount()
 }
 
-export function equipRelic(uid: string, slot?: number) {
-  syncSlots()
+/**
+ * Equip an item into ITS slot — RPG-typed: a helm only fits the head, and the
+ * head slot has to be unlocked. Whatever was in that slot goes back to the bag.
+ */
+export function equipRelic(uid: string) {
   const idx = G.inventory.findIndex((r) => r.uid === uid)
   if (idx < 0) return
   const relic = G.inventory[idx]
-  const target = slot ?? compareRelic(G, relic).slot
+  const target = SLOT_ORDER.indexOf(relic.slot)
+  if (target < 0 || target >= slotCount()) return // slot locked or unknown
   const displaced = G.equipped[target] ?? null
   G.equipped[target] = relic
   G.inventory.splice(idx, 1)

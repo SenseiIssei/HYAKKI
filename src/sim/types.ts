@@ -67,6 +67,8 @@ export type Relic = {
   uid: string
   seed: number
   rarity: import('../content/relics').Rarity
+  /** which of the six slots this is worn in */
+  slot: import('../content/relics').EquipSlot
   affixes: RolledAffix[]
   /** authored Myth / True Name id */
   unique?: string

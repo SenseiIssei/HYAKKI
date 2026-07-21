@@ -1,5 +1,12 @@
 import { useMemo, useState } from 'react'
-import { AFFIX_BY_ID, RARITIES, RARITY_ORDER, type Rarity } from '../content/relics'
+import {
+  AFFIX_BY_ID,
+  RARITIES,
+  RARITY_ORDER,
+  SLOT_META,
+  SLOT_ORDER,
+  type Rarity,
+} from '../content/relics'
 import { meltValue, relicLabel, uniqueOf } from '../sim/relics'
 import type { Relic } from '../sim/types'
 import { fmt, fmtInt, fmtPct } from '../format'
@@ -45,12 +52,10 @@ function affixLine(a: { id: string; value: number }) {
 
 function RelicCard({
   relic,
-  equippedSlot,
   onSelect,
   selected,
 }: {
   relic: Relic
-  equippedSlot?: number
   onSelect?: () => void
   selected?: boolean
 }) {
@@ -77,8 +82,8 @@ function RelicCard({
         </span>
         <span className="relic-rarity">
           {RARITIES[relic.rarity].label}
-          {equippedSlot !== undefined ? ` · slot ${equippedSlot + 1}` : ''}
-          {` · found at Rank ${fmtInt(relic.dropRank)}`}
+          {` · ${SLOT_META[relic.slot].kanji} ${SLOT_META[relic.slot].label}`}
+          {` · found at Ri ${fmtInt(relic.dropRank)}`}
         </span>
         {relic.affixes.map((a) => (
           <span key={a.id} className="relic-affix">
@@ -107,7 +112,8 @@ function Comparison({ relic }: { relic: Relic }) {
   return (
     <div className="cmp">
       <div className="cmp-head">
-        versus equipped{cmp.intoEmptySlot ? ' (empty slot)' : ` (slot ${cmp.slot + 1})`}
+        {SLOT_META[relic.slot].label} slot
+        {cmp.intoEmptySlot ? ' (empty)' : ' · versus what you wear'}
       </div>
       <div className={`cmp-row ${cls(dps)}`}>
         <span>{arrow(dps)} effective damage</span>
@@ -128,9 +134,15 @@ function Comparison({ relic }: { relic: Relic }) {
       </div>
       <div className="cmp-note">measured over 60 seconds of simulated combat at Rank {fmtInt(g.rank)}</div>
       <div className="cmp-actions">
-        <button className="small-btn" onClick={() => equipRelic(relic.uid, cmp.slot)}>
-          Equip
-        </button>
+        {SLOT_ORDER.indexOf(relic.slot) < slotCount() ? (
+          <button className="small-btn" onClick={() => equipRelic(relic.uid)}>
+            Equip · {SLOT_META[relic.slot].label}
+          </button>
+        ) : (
+          <button className="small-btn" disabled title="That slot opens deeper in">
+            {SLOT_META[relic.slot].label} locked
+          </button>
+        )}
         <button className="small-btn" onClick={() => meltRelic(relic.uid)}>
           Melt · ◈ {fmt(meltValue(relic))}
         </button>
@@ -186,22 +198,32 @@ export function Relics() {
             <div className="trunk-head">
               <span className="trunk-name">WORN</span>
               <span className="trunk-blurb">
-                {slots} slots
+                {slots} of 6 slots open
                 {slots < 6 ? ' · more open as you go deeper' : ''}
               </span>
             </div>
-            {Array.from({ length: slots }).map((_, i) => {
-              const r = g.equipped[i]
-              return r ? (
-                <div key={i} className="slot-filled">
-                  <RelicCard relic={r} equippedSlot={i} />
-                  <button className="small-btn" onClick={() => unequipRelic(i)}>
-                    Take off
-                  </button>
-                </div>
-              ) : (
-                <div key={i} className="slot-empty">
-                  empty
+            {SLOT_ORDER.map((slot, i) => {
+              const meta = SLOT_META[slot]
+              const unlocked = i < slots
+              const r = g.equipped[i] ?? null
+              return (
+                <div key={slot} className={`equip-slot ${unlocked ? '' : 'locked'}`}>
+                  <span className="equip-slot-tag">
+                    <span className="kanji">{meta.kanji}</span>
+                    {meta.label}
+                  </span>
+                  {!unlocked ? (
+                    <span className="slot-empty">opens deeper in</span>
+                  ) : r ? (
+                    <div className="slot-filled">
+                      <RelicCard relic={r} />
+                      <button className="small-btn" onClick={() => unequipRelic(i)}>
+                        Take off
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="slot-empty">{meta.blurb} — empty</span>
+                  )}
                 </div>
               )
             })}

@@ -295,3 +295,35 @@
 @media (prefers-reduced-motion: reduce) {
   .yokai-elite { animation: none; filter: saturate(1.6); }
 }
+
+/* ── equipment: the six typed slots ── */
+.equip-slot {
+  border: 1px solid var(--void-edge);
+  background: var(--void-lift);
+  padding: 8px 10px;
+  margin-bottom: 6px;
+}
+.equip-slot.locked { opacity: 0.5; }
+.equip-slot-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  margin-bottom: 4px;
+}
+.equip-slot-tag .kanji {
+  font-family: var(--jp);
+  font-size: 18px;
+  color: var(--blood);
+  letter-spacing: 0;
+}
+.equip-slot .slot-empty {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ash);
+}

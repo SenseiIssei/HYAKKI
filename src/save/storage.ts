@@ -1,5 +1,6 @@
 import LZString from 'lz-string'
 import { spawnFor } from '../sim/enemies'
+import { emptyEquip } from '../sim/relics'
 import { createInitialState } from '../sim/state'
 import type { GameState } from '../sim/types'
 import { desktopLoad, desktopWrite, isDesktop } from './desktop'
@@ -99,7 +100,7 @@ function hydrate(b: SaveBlob): GameState {
     observations: Array.isArray(b.observations) ? (b.observations as string[]) : [],
     authored: (b.authored as GameState['authored']) ?? null,
 
-    equipped: Array.isArray(b.equipped) ? (b.equipped as GameState['equipped']) : [null, null],
+    equipped: Array.isArray(b.equipped) ? (b.equipped as GameState['equipped']) : emptyEquip(),
     inventory: Array.isArray(b.inventory) ? (b.inventory as GameState['inventory']) : [],
     slotBonus: n('slotBonus'),
     ghosts: Array.isArray(b.ghosts) ? (b.ghosts as GameState['ghosts']) : [],

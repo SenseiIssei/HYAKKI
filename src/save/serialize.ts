@@ -1,6 +1,8 @@
 import Decimal from 'break_infinity.js'
 import { SAVE_VERSION } from '../sim/state'
-import type { GameState } from '../sim/types'
+import { SLOT_ORDER } from '../content/relics'
+import { slotForRelic } from '../sim/relics'
+import type { GameState, Relic, RolledAffix } from '../sim/types'
 
 /**
  * Explicit serialisation. A generic Decimal-sniffing walker is tempting and
@@ -206,6 +208,28 @@ const MIGRATIONS: Record<number, Migration> = {
     snuffed: [],
     hundredth: false,
   }),
+  // v9 predates typed equipment slots. Give every relic a slot, then re-hang
+  // the worn ones into the six fixed slots — a collision (two old relics that
+  // now map to the same slot) keeps the first and drops the rest into the bag,
+  // so nothing is ever lost.
+  9: (b) => {
+    const withSlot = (r: unknown): unknown => {
+      if (!r || typeof r !== 'object') return r
+      const rr = r as { slot?: string; unique?: string; affixes?: RolledAffix[]; seed?: number }
+      if (rr.slot) return rr
+      return { ...rr, slot: slotForRelic({ unique: rr.unique, affixes: rr.affixes ?? [], seed: rr.seed ?? 0 }) }
+    }
+    const inv = (Array.isArray(b.inventory) ? b.inventory : []).map(withSlot) as Relic[]
+    const worn = (Array.isArray(b.equipped) ? b.equipped : []).filter(Boolean).map(withSlot) as Relic[]
+    const eq: (Relic | null)[] = SLOT_ORDER.map(() => null)
+    const overflow: Relic[] = []
+    for (const r of worn) {
+      const i = SLOT_ORDER.indexOf(r.slot)
+      if (i >= 0 && eq[i] === null) eq[i] = r
+      else overflow.push(r)
+    }
+    return { ...b, v: 10, equipped: eq, inventory: [...inv, ...overflow] }
+  },
 }
 
 export function migrate(blob: SaveBlob): SaveBlob {

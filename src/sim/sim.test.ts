@@ -10,6 +10,9 @@ import { KEGARE_BANDS, bandFor, kegareFromKill, purificationCost } from '../cont
 import { OFUDA, OFUDA_BY_ID, wardFailChance } from '../content/ofuda'
 import { SPECIES } from '../pixel/species'
 import { yokaiFrame } from '../pixel/yokai'
+import { SLOT_ORDER, STAT_SLOT } from '../content/relics'
+import { slotForRelic, emptyEquip } from '../sim/relics'
+import { migrate } from '../save/serialize'
 import { worldStage, worldHue, worldSat } from '../content/worldStage'
 import {
   ABILITY_BY_ID,
@@ -1680,5 +1683,69 @@ describe('world-stage', () => {
       expect(Math.abs(worldHue(w))).toBeLessThanOrEqual(70)
       expect(worldSat(w)).toBeGreaterThanOrEqual(1)
     }
+  })
+})
+
+describe('equipment slots', () => {
+  it('every unique is authored into a real slot', () => {
+    for (const u of UNIQUES) {
+      expect(SLOT_ORDER).toContain(u.slot)
+    }
+  })
+
+  it('a rolled relic gets a slot, uniques by authorship and rolls by primary affix', () => {
+    for (let seed = 1; seed < 200; seed++) {
+      const r = rollRelic(seed, 300)
+      expect(SLOT_ORDER).toContain(r.slot)
+      if (r.unique) expect(r.slot).toBe(UNIQUE_BY_ID[r.unique].slot)
+      else if (r.affixes[0]) {
+        const stat = AFFIX_BY_ID[r.affixes[0].id].stat
+        expect(r.slot).toBe(STAT_SLOT[stat])
+      }
+    }
+  })
+
+  it('slotForRelic is deterministic — an old save always migrates the same way', () => {
+    const r = rollRelic(42, 250)
+    expect(slotForRelic(r)).toBe(slotForRelic(r))
+    expect(slotForRelic(r)).toBe(r.slot)
+  })
+
+  it('the empty loadout is one null per slot', () => {
+    expect(emptyEquip()).toHaveLength(SLOT_ORDER.length)
+    expect(emptyEquip().every((x) => x === null)).toBe(true)
+  })
+
+  it('an old save migrates: every relic gets a slot, worn ones re-hang, nothing is lost', () => {
+    // a v9-shaped blob: relics with no slot, a generic two-item equipped array
+    const blob = {
+      v: 9,
+      equipped: [
+        { uid: 'a', seed: 1, rarity: 'named', affixes: [{ id: 'whetted', value: 0.2 }] }, // → weapon
+        { uid: 'b', seed: 2, rarity: 'kept', affixes: [{ id: 'heavy', value: 0.2 }] }, // → body
+      ],
+      inventory: [
+        { uid: 'c', seed: 3, rarity: 'issued', affixes: [{ id: 'quick', value: 0.1 }] }, // → legs
+        { uid: 'd', seed: 4, rarity: 'myth', unique: 'longcoat', affixes: [] }, // → body
+      ],
+    }
+    const m = migrate(blob) as {
+      v: number
+      equipped: (null | { uid: string; slot: string })[]
+      inventory: { uid: string; slot: string }[]
+    }
+    expect(m.v).toBeGreaterThanOrEqual(10)
+    // six typed slots
+    expect(m.equipped).toHaveLength(SLOT_ORDER.length)
+    // the worn weapon and body landed in their slots
+    expect(m.equipped[SLOT_ORDER.indexOf('weapon')]?.uid).toBe('a')
+    expect(m.equipped[SLOT_ORDER.indexOf('body')]?.uid).toBe('b')
+    // every relic — worn or held — now has a real slot
+    const all = [...m.equipped.filter(Boolean), ...m.inventory] as { uid: string; slot: string }[]
+    for (const r of all) expect(SLOT_ORDER).toContain(r.slot)
+    // nothing vanished: a, b were worn; c, d were held (d also maps to body, but
+    // body is taken, so it stays in the bag rather than being lost)
+    const uids = new Set(all.map((r) => r.uid))
+    expect(uids).toEqual(new Set(['a', 'b', 'c', 'd']))
   })
 })

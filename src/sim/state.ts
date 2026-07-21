@@ -5,10 +5,11 @@ import { spawnFor } from './enemies'
 import { enemiesPerRank } from './formulas'
 import { hashSeed } from './rng'
 import { maxEchoes } from './ghosts'
+import { emptyEquip } from './relics'
 import { computeStats } from './stats'
 import type { GameState } from './types'
 
-export const SAVE_VERSION = 9
+export const SAVE_VERSION = 10
 
 /** Everything that a Reveille wipes. Kept in one place so nothing is missed. */
 export function resetRun(s: GameState): void {
@@ -116,7 +117,7 @@ export function createInitialState(classId = DEFAULT_CLASS, seed?: number): Game
     ofudaCharges: {},
     ofudaOwned: [],
 
-    equipped: [null, null],
+    equipped: emptyEquip(),
     inventory: [],
     slotBonus: 0,
     ghosts: [],

@@ -3,13 +3,40 @@ import {
   AFFIX_BY_ID,
   RARITIES,
   RARITY_ORDER,
+  SLOT_ORDER,
+  STAT_SLOT,
   UNIQUES,
   UNIQUE_BY_ID,
+  type EquipSlot,
   type Rarity,
   type UniqueDef,
 } from '../content/relics'
 import { Rng, hashSeed } from './rng'
 import type { Relic, RolledAffix } from './types'
+
+/**
+ * Where a relic is worn. A unique wears where it was authored to; a rolled
+ * relic wears where its primary (first-rolled) affix belongs, so a Whetted
+ * blade is a Weapon and a Heavy coat is Body. Deterministic, so the same relic
+ * always finds the same slot — including old saves being migrated.
+ */
+export function slotForRelic(r: {
+  unique?: string
+  affixes: RolledAffix[]
+  seed: number
+}): EquipSlot {
+  if (r.unique) {
+    const u = UNIQUE_BY_ID[r.unique]
+    if (u) return u.slot
+  }
+  const primary = r.affixes[0]
+  if (primary) {
+    const def = AFFIX_BY_ID[primary.id]
+    if (def && STAT_SLOT[def.stat]) return STAT_SLOT[def.stat]
+  }
+  // last resort: spread by seed so nothing lands nowhere
+  return SLOT_ORDER[(r.seed >>> 0) % SLOT_ORDER.length]
+}
 
 /** Systems that exist yet. Nothing gated on a future phase can drop. */
 const AVAILABLE = new Set<string>()
@@ -70,15 +97,23 @@ export function rollRelic(seed: number, dropRank: number, rarityBonus = 0): Reli
     affixes.push({ id: a.id, value: a.min + (a.max - a.min) * Math.min(1, roll) })
   }
 
-  return {
+  const relic: Relic = {
     uid: `${seed.toString(36)}-${dropRank}`,
     seed,
     rarity,
+    slot: 'weapon', // replaced below once affixes/unique are known
     affixes,
     unique,
     name,
     dropRank,
   }
+  relic.slot = slotForRelic(relic)
+  return relic
+}
+
+/** A fresh, empty loadout — one null per typed slot, in SLOT_ORDER. */
+export function emptyEquip(): (Relic | null)[] {
+  return SLOT_ORDER.map(() => null)
 }
 
 export function relicSeed(rank: number, kills: number, runSeed: number): number {

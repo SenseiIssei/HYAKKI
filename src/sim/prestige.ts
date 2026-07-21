@@ -4,7 +4,7 @@ import { keystoneFlags } from '../content/tree'
 import { vowAshMult, vowExtraNames, vowNameMult } from '../content/vows'
 import { ashOnReveille } from './formulas'
 import { recordGhost } from './ghosts'
-import { equippedFlags } from './relics'
+import { emptyEquip, equippedFlags } from './relics'
 import { resetRun } from './state'
 import { computeStats } from './stats'
 import type { GameState } from './types'
@@ -122,7 +122,7 @@ export function apotheosis(s: GameState): number {
   s.layerNames = 0
   s.interments = 0
   s.slotBonus = 0
-  s.equipped = [null, null]
+  s.equipped = emptyEquip()
   s.vows = []
   s.treeLevels = {}
   s.ash = new Decimal(0)

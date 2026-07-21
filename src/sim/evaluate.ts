@@ -1,6 +1,7 @@
 import Decimal from 'break_infinity.js'
 import { BALANCE as B } from '../content/balance'
 import { keystoneFlags } from '../content/tree'
+import { SLOT_ORDER } from '../content/relics'
 import { spawnEnemy } from './enemies'
 import { equippedFlags } from './relics'
 import { computeStats } from './stats'
@@ -113,33 +114,30 @@ export type Comparison = {
 const ratio = (next: Decimal, cur: Decimal) =>
   cur.lte(0) ? (next.gt(0) ? 1 : 0) : next.div(cur).toNumber() - 1
 
-/** Compare equipping `relic` into its best slot against the current loadout. */
+/**
+ * Compare equipping `relic` against the current loadout. Slots are typed now,
+ * so it can only go in one place — its own — and the comparison is against
+ * whatever is already there.
+ */
 export function compareRelic(s: GameState, relic: Relic): Comparison {
   const current = evaluate(s, s.equipped)
-
-  let best: Comparison | null = null
-  for (let slot = 0; slot < s.equipped.length; slot++) {
-    const next = [...s.equipped]
-    next[slot] = relic
-    const e = evaluate(s, next)
-    const cmp: Comparison = {
-      dpsDelta: ratio(e.dps, current.dps),
-      survivalDelta:
-        !Number.isFinite(e.survival) && !Number.isFinite(current.survival)
-          ? 0
-          : !Number.isFinite(e.survival)
-            ? 1
-            : !Number.isFinite(current.survival)
-              ? -1
-              : (e.survival - current.survival) / Math.max(0.001, current.survival),
-      survivalNow: current.survival,
-      survivalNext: e.survival,
-      intoEmptySlot: s.equipped[slot] === null,
-      slot,
-    }
-    // Prefer the slot that helps most, counting survival at half weight.
-    const score = (c: Comparison) => c.dpsDelta + c.survivalDelta * 0.5
-    if (!best || score(cmp) > score(best)) best = cmp
+  const slot = SLOT_ORDER.indexOf(relic.slot)
+  const next = [...s.equipped]
+  next[slot] = relic
+  const e = evaluate(s, next)
+  return {
+    dpsDelta: ratio(e.dps, current.dps),
+    survivalDelta:
+      !Number.isFinite(e.survival) && !Number.isFinite(current.survival)
+        ? 0
+        : !Number.isFinite(e.survival)
+          ? 1
+          : !Number.isFinite(current.survival)
+            ? -1
+            : (e.survival - current.survival) / Math.max(0.001, current.survival),
+    survivalNow: current.survival,
+    survivalNext: e.survival,
+    intoEmptySlot: (s.equipped[slot] ?? null) === null,
+    slot,
   }
-  return best!
 }

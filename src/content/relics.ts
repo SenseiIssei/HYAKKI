@@ -4,6 +4,43 @@ import type { StatKey } from './upgrades'
 
 export type Rarity = 'issued' | 'kept' | 'named' | 'myth' | 'truename'
 
+/**
+ * The six places a thing can be worn. Typed slots, RPG-style: an item goes in
+ * its slot and nowhere else. The ORDER is the unlock order — the first
+ * `slotsFor()` of these open with depth (see below), so the array position of a
+ * slot is also its rank on the progression ladder.
+ */
+export type EquipSlot = 'weapon' | 'body' | 'head' | 'hands' | 'legs' | 'charm'
+
+export const SLOT_ORDER: EquipSlot[] = ['weapon', 'body', 'head', 'hands', 'legs', 'charm']
+
+export const SLOT_META: Record<EquipSlot, { label: string; kanji: string; blurb: string }> = {
+  weapon: { label: 'Weapon', kanji: '刃', blurb: 'the blade' },
+  body: { label: 'Body', kanji: '胴', blurb: 'the coat, the plate' },
+  head: { label: 'Head', kanji: '兜', blurb: 'helm, mask, or bare' },
+  hands: { label: 'Hands', kanji: '手', blurb: 'bracers, and what they do' },
+  legs: { label: 'Legs', kanji: '脛', blurb: 'the walk' },
+  charm: { label: 'Charm', kanji: '札', blurb: 'a carried thing' },
+}
+
+/** Which slot an affix's stat belongs to — how a rolled relic finds its place. */
+export const STAT_SLOT: Record<string, EquipSlot> = {
+  atk: 'weapon',
+  pen: 'weapon',
+  hp: 'body',
+  arm: 'body',
+  reg: 'head',
+  res: 'head',
+  cc: 'hands',
+  cm: 'hands',
+  spd: 'legs',
+  eva: 'legs',
+  ls: 'charm',
+  bf: 'charm',
+  af: 'charm',
+  omen: 'charm',
+}
+
 export const RARITIES: Record<
   Rarity,
   { label: string; affixes: number; weight: number; colorVar: string; meltValue: number }
@@ -60,6 +97,8 @@ export type UniqueDef = {
   name: string
   line: string
   rarity: 'myth' | 'truename'
+  /** where it is worn */
+  slot: EquipSlot
   /** multiplicative, applied after everything else */
   mods?: Partial<Record<StatKey, number>>
   flags?: string[]
@@ -72,99 +111,99 @@ export type UniqueDef = {
 export const UNIQUES: UniqueDef[] = [
   // ── Myths ──
   {
-    id: 'ninthnail', name: 'The Ninth Nail', rarity: 'myth',
+    id: 'ninthnail', name: 'The Ninth Nail', rarity: 'myth', slot: 'weapon',
     line: 'There were eight. There is a ninth. Nobody built it.',
     mods: { atk: 1.4 }, flags: ['ninth'],
   },
   {
-    id: 'lantern', name: 'Lantern of the Unreturned', rarity: 'myth',
+    id: 'lantern', name: 'Lantern of the Unreturned', rarity: 'myth', slot: 'charm',
     line: 'It lights nothing. It only makes the dark specific.',
     mods: { atk: 1.25 }, flags: ['lantern'],
   },
   {
-    id: 'wardenseye', name: "The Warden's Left Eye", rarity: 'myth',
+    id: 'wardenseye', name: "The Warden's Left Eye", rarity: 'myth', slot: 'head',
     line: 'It blinks when you are not looking. You know this because you have looked.',
     mods: { cm: 1.3 },
   },
   {
-    id: 'letter', name: 'A Letter Never Sent', rarity: 'myth',
+    id: 'letter', name: 'A Letter Never Sent', rarity: 'myth', slot: 'charm',
     line: 'The address is a rank and a number. Both of them are yours.',
     mods: { af: 1.2 }, flags: ['letter'],
   },
   {
-    id: 'rationtin', name: 'Ration Tin, Empty', rarity: 'myth',
+    id: 'rationtin', name: 'Ration Tin, Empty', rarity: 'myth', slot: 'charm',
     line: 'Licked clean. Not recently.',
     mods: { bf: 1.5, hp: 0.8 },
   },
   {
-    id: 'longcoat', name: 'The Long Coat', rarity: 'myth',
+    id: 'longcoat', name: 'The Long Coat', rarity: 'myth', slot: 'body',
     line: 'Issued to ten thousand. Fits exactly one.',
     mods: { hp: 1.35 }, flags: ['longcoat'],
   },
   {
-    id: 'crackedbell', name: 'Bell, Cracked', rarity: 'myth',
+    id: 'crackedbell', name: 'Bell, Cracked', rarity: 'myth', slot: 'charm',
     line: 'It rings on the downstroke only. Reveille has always sounded wrong.',
     mods: { res: 1.3 }, flags: ['halfsig'],
   },
   {
-    id: 'consent', name: "The Surgeon's Consent", rarity: 'myth',
+    id: 'consent', name: "The Surgeon's Consent", rarity: 'myth', slot: 'hands',
     line: 'Signed. Not by the patient.',
     mods: { ls: 1.4, reg: 0.5 },
   },
   {
-    id: 'map', name: 'A Map of the Hollow', rarity: 'myth',
+    id: 'map', name: 'A Map of the Hollow', rarity: 'myth', slot: 'legs',
     line: 'It is accurate. It updates. You have never seen it update.',
     mods: { atk: 1.15, hp: 1.15, arm: 1.15, reg: 1.15 },
   },
   {
-    id: 'secondcoat', name: 'The Second Coat', rarity: 'myth',
+    id: 'secondcoat', name: 'The Second Coat', rarity: 'myth', slot: 'body',
     line: 'Same number, stitched twice. The second stitching is fresher.',
     mods: { atk: 1.2, hp: 1.2 },
   },
   {
-    id: 'tooth', name: 'Tooth of the Thing at 400', rarity: 'myth',
+    id: 'tooth', name: 'Tooth of the Thing at 400', rarity: 'myth', slot: 'weapon',
     line: 'Pulled, not shed.',
     flags: ['deeptooth'],
   },
   {
-    id: 'firstash', name: 'Ash of the First Reveille', rarity: 'myth',
+    id: 'firstash', name: 'Ash of the First Reveille', rarity: 'myth', slot: 'charm',
     line: 'Cold. Still cold. Colder than the room.',
     flags: ['firstash'],
   },
 
   // ── True Names — always with a cost ──
   {
-    id: 'ownskull', name: 'Your Own Skull', rarity: 'truename',
+    id: 'ownskull', name: 'Your Own Skull', rarity: 'truename', slot: 'head',
     line: 'You recognise it. You do not recognise how you recognise it.',
     cost: 'Max Health is set to 1.',
     mods: { atk: 2.5, cc: 2.5, cm: 2.5 }, flags: ['skull'],
   },
   {
-    id: 'blankcoat', name: 'The Blank Coat', rarity: 'truename',
+    id: 'blankcoat', name: 'The Blank Coat', rarity: 'truename', slot: 'body',
     line: 'No number. The stitching holes are there. The thread is not.',
     cost: 'You lose your class Pipeline and Signature.',
     flags: ['blank'],
   },
   {
-    id: 'thecount', name: 'The Count', rarity: 'truename',
+    id: 'thecount', name: 'The Count', rarity: 'truename', slot: 'charm',
     line: 'Someone has been keeping it. Someone is still keeping it.',
     cost: 'You cannot Reveille until Rank 200.',
     flags: ['count'],
   },
   {
-    id: 'woundsblade', name: "The Wound's Own Blade", rarity: 'truename',
+    id: 'woundsblade', name: "The Wound's Own Blade", rarity: 'truename', slot: 'weapon',
     line: 'It was in the god. It is not from the god.',
     cost: 'You take 12% of your Max Health every second, always.',
     mods: { atk: 4 }, flags: ['woundblade'],
   },
   {
-    id: 'tenthousandth', name: 'The Ten Thousandth Coat', rarity: 'truename',
+    id: 'tenthousandth', name: 'The Ten Thousandth Coat', rarity: 'truename', slot: 'body',
     line: 'The last one. It has been the last one for some time.',
     cost: 'Your number is fixed at ten thousand and stops increasing.',
     flags: ['tenthousandth'],
   },
   {
-    id: 'nothingheld', name: 'Nothing, Held', rarity: 'truename',
+    id: 'nothingheld', name: 'Nothing, Held', rarity: 'truename', slot: 'hands',
     line: 'Weightless. Your hand closes further than it should.',
     cost: '−60% damage to everything that is not Nothing.',
     requires: 'nothing', flags: ['nothingheld'],
