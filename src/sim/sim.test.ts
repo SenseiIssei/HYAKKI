@@ -13,6 +13,7 @@ import { yokaiFrame } from '../pixel/yokai'
 import { SLOT_ORDER, STAT_SLOT, RARITIES, RARITY_ORDER, CURSES } from '../content/relics'
 import { slotForRelic, emptyEquip } from '../sim/relics'
 import { ITEM_BASES, ITEM_BASE_BY_ID, baseFor } from '../content/items'
+import { lookFromEquipment, equipGlow, RARITY_GEAR } from '../render/figure'
 import { migrate } from '../save/serialize'
 import { worldStage, worldHue, worldSat } from '../content/worldStage'
 import {
@@ -1855,5 +1856,44 @@ describe('the 120 items', () => {
     }
     expect(named).toBeGreaterThan(2000)
     expect(uniqueNamed).toBeGreaterThan(0)
+  })
+})
+
+describe('visual gear', () => {
+  it('equipped items drive the walker look; empty slots fall back to stats', () => {
+    const s = createInitialState('hoplite', 5)
+    s.bestRankEver = 3000
+    const st = computeStats(s)
+    const bare = lookFromEquipment(st, emptyEquip(), {})
+    // wearing a Myth weapon shows the top blade regardless of stats
+    const eq = emptyEquip()
+    eq[SLOT_ORDER.indexOf('weapon')] = { ...rollRelic(1, 100), slot: 'weapon', rarity: 'myth' }
+    const armed = lookFromEquipment(st, eq, {})
+    expect(armed.weapon).toBe(RARITY_GEAR.myth)
+    // the head slot was empty in both — it still matches the stat fallback
+    expect(armed.head).toBe(bare.head)
+  })
+
+  it('better rarity shows better gear, monotonically', () => {
+    const s = createInitialState('hoplite', 1)
+    const st = computeStats(s)
+    const tierFor = (rarity: (typeof RARITY_ORDER)[number]) => {
+      const eq = emptyEquip()
+      eq[SLOT_ORDER.indexOf('body')] = { ...rollRelic(1, 100), slot: 'body', rarity }
+      return lookFromEquipment(st, eq, {}).armour
+    }
+    expect(tierFor('issued')).toBeLessThanOrEqual(tierFor('named'))
+    expect(tierFor('named')).toBeLessThanOrEqual(tierFor('myth'))
+  })
+
+  it('only the rare tiers glow, and the best-worn rarity wins', () => {
+    expect(equipGlow(emptyEquip())).toBeUndefined()
+    const common = emptyEquip()
+    common[0] = { ...rollRelic(1, 100), slot: 'weapon', rarity: 'issued' }
+    expect(equipGlow(common)).toBeUndefined() // commons don't glow
+    const mixed = emptyEquip()
+    mixed[0] = { ...rollRelic(1, 100), slot: 'weapon', rarity: 'named' }
+    mixed[1] = { ...rollRelic(2, 100), slot: 'body', rarity: 'myth' }
+    expect(equipGlow(mixed)).toBe('#cf4436') // myth beats named
   })
 })

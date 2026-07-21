@@ -1,5 +1,6 @@
 import Decimal from 'break_infinity.js'
-import type { StatBlock } from '../sim/types'
+import { SLOT_ORDER, type EquipSlot, type Rarity } from '../content/relics'
+import type { Relic, StatBlock } from '../sim/types'
 
 /**
  * The walker, drawn.
@@ -57,6 +58,75 @@ export function lookFrom(st: StatBlock, opts: { kegare?: number } = {}): Look {
     aura: Math.min(1, Math.max(0, (log(st.atk) - 4) / 8)),
     kegare: Math.min(1, Math.max(0, opts.kegare ?? 0)),
   }
+}
+
+/** A rarity's gear tier on the walker — better rarity, better-looking piece. */
+export const RARITY_GEAR: Record<Rarity, GearTier> = {
+  issued: 1,
+  kept: 2,
+  named: 3,
+  blessed: 4,
+  cursed: 4,
+  myth: 5,
+  truename: 5,
+}
+
+/**
+ * What the man looks like WEARING his gear. The three visible slots — weapon,
+ * body, head — are driven by what is actually equipped, so swapping a blade or
+ * a helm changes the sprite. An empty slot falls back to the stat-derived look,
+ * so a well-built but unarmoured soldier still reads as advanced rather than
+ * suddenly naked.
+ */
+export function lookFromEquipment(
+  st: StatBlock,
+  equipped: (Relic | null)[],
+  opts: { kegare?: number } = {},
+): Look {
+  const base = lookFrom(st, opts)
+  const at = (slot: EquipSlot) => equipped[SLOT_ORDER.indexOf(slot)] ?? null
+  const w = at('weapon')
+  const b = at('body')
+  const h = at('head')
+  return {
+    ...base,
+    weapon: w ? RARITY_GEAR[w.rarity] : base.weapon,
+    armour: b ? RARITY_GEAR[b.rarity] : base.armour,
+    head: h ? RARITY_GEAR[h.rarity] : base.head,
+  }
+}
+
+/** The colour a loadout glows, from the best rarity worn — or none. */
+export function equipGlow(equipped: (Relic | null)[]): string | undefined {
+  let best = -1
+  let color: string | undefined
+  for (const r of equipped) {
+    if (!r) continue
+    const rank = RARITY_RANK[r.rarity]
+    if (rank > best) {
+      best = rank
+      color = GLOW_BY_RARITY[r.rarity]
+    }
+  }
+  return color
+}
+
+const RARITY_RANK: Record<Rarity, number> = {
+  issued: 0,
+  kept: 1,
+  named: 2,
+  blessed: 3,
+  cursed: 4,
+  myth: 5,
+  truename: 6,
+}
+
+/** Only the rare tiers glow; the common ones wear plainly. */
+const GLOW_BY_RARITY: Partial<Record<Rarity, string>> = {
+  blessed: '#c39a34',
+  cursed: '#8a6ba0',
+  myth: '#cf4436',
+  truename: '#e4dccb',
 }
 
 // ── geometry ───────────────────────────────────────────────────────────

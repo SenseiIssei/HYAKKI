@@ -138,6 +138,7 @@ export function PixelWalker({
   flash,
   scale = 5,
   kegare = 0,
+  glow,
 }: {
   stats?: StatBlock
   /** how defiled the walker is, 0..1 — tints him without touching the sprites */
@@ -148,6 +149,8 @@ export function PixelWalker({
    * statline, so deriving a look from stats drew six near-identical men.
    */
   look?: Look
+  /** a colour the best-worn rarity casts around him */
+  glow?: string
   pose?: 'walk' | 'strike' | 'brace' | 'hit'
   flash?: boolean
   scale?: number
@@ -171,6 +174,10 @@ export function PixelWalker({
   )
   // faster gait -> faster cycle, which is the whole point of the stat
   const fps = Math.round(WALK_FRAMES / Math.max(0.3, look.gait))
+  // the rarity glow is a coloured drop-shadow, stacked onto the kegare tint
+  const rot = rotFilter(kegare)
+  const glowFx = glow ? `drop-shadow(0 0 ${scale}px ${glow}) drop-shadow(0 0 2px ${glow})` : ''
+  const filter = [rot, glowFx].filter(Boolean).join(' ') || undefined
   return (
     <Canvas
       frames={frames}
@@ -181,7 +188,7 @@ export function PixelWalker({
       paused={pose === 'brace'}
       className={`walker-px pose-${pose}`}
       flash={flash}
-      filter={rotFilter(kegare)}
+      filter={filter}
     />
   )
 }

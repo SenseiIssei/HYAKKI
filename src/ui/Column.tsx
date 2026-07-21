@@ -22,6 +22,7 @@ import {
 import { AbilityVfx } from './AbilityVfx'
 import { AbilityBar } from './AbilityBar'
 import { worldStage, wsLabel } from '../content/worldStage'
+import { lookFromEquipment, equipGlow } from '../render/figure'
 import { fmt, fmtInt } from '../format'
 
 function pct(cur: Decimal, max: Decimal): number {
@@ -227,10 +228,11 @@ export function Column() {
           </div>
           <span className={`fighter ${lunge ? 'lunge-right' : ''}`}>
             <PixelWalker
-              stats={st}
+              look={lookFromEquipment(st, g.equipped, { kegare: g.kegare })}
               pose={bracing ? 'brace' : soldierHurt ? 'hit' : lunge ? 'strike' : 'walk'}
               flash={soldierHurt}
               kegare={g.kegare}
+              glow={equipGlow(g.equipped)}
             />
           </span>
           <div className="bar">
