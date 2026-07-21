@@ -2,7 +2,31 @@
    Every animation here is CSS, not requestAnimationFrame: rAF is suspended in a
    hidden window and the figures must not freeze while the sim keeps running. */
 
-/* ── the walker ─────────────────────────────────────────────── */
+/* ── pixel actors ───────────────────────────────────────────── */
+
+.pixel {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.45));
+}
+
+.walker-px { transform: scaleX(1); }
+
+/* the enemy faces the other way */
+.yokai-px { transform: scaleX(-1); }
+
+.pixel-flash { filter: brightness(2.4) saturate(0.2) drop-shadow(0 4px 0 rgba(0, 0, 0, 0.45)); }
+
+.pose-strike { animation: lunge 620ms ease-in-out infinite; }
+@keyframes lunge {
+  0%, 70%, 100% { transform: translateX(0); }
+  80%           { transform: translateX(7px); }
+}
+
+.pose-brace { animation: none; }
+
+/* ── the walker (legacy SVG, kept for the class cards) ──────── */
 
 .walker {
   width: clamp(120px, 24vw, 190px);

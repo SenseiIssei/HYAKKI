@@ -9,6 +9,8 @@
  * full volume. Hits are rate-limited and sit under the drone.
  */
 
+import { bonsho, initMusic, setIntensity, setMusicEnabled } from './music'
+
 type Ctx = AudioContext & { _unlocked?: boolean }
 
 let ctx: Ctx | null = null
@@ -42,7 +44,17 @@ export function startAudio() {
   meter = new Float32Array(new ArrayBuffer(analyser.fftSize * 4))
 
   buildDrone()
+  initMusic(ctx, master)
+  setMusicEnabled(enabled && musicOn)
 }
+
+let musicOn = true
+export function setMusicWanted(on: boolean) {
+  musicOn = on
+  setMusicEnabled(enabled && on)
+}
+/** 0..1 — how deep and how defiled; the drum walks closer. */
+export const setMusicIntensity = setIntensity
 
 let analyser: AnalyserNode | null = null
 let meter: Float32Array<ArrayBuffer> | null = null
@@ -60,6 +72,7 @@ export function setAudioEnabled(on: boolean) {
   enabled = on
   if (master && ctx) master.gain.setTargetAtTime(on ? volume : 0, now(), 0.2)
   if (on) startAudio()
+  setMusicEnabled(on && musicOn)
 }
 
 export function setVolume(v: number) {
@@ -192,8 +205,24 @@ export function sfxBell(base = 440, gain = 0.13, decay = 2.6) {
   }
 }
 
+/**
+ * A hearing begins. The drone CUTS first — nothing in the mix is more
+ * frightening than its sudden absence — and the temple bell lands in the gap.
+ * docs/hyakki/04-HORROR.md § rule 3
+ */
 export function sfxStand() {
-  sfxBell(330, 0.16, 3.2)
+  if (!ctx || !master || !enabled) return
+  const t = now()
+  if (droneGain) {
+    droneGain.gain.cancelScheduledValues(t)
+    droneGain.gain.setValueAtTime(droneGain.gain.value, t)
+    droneGain.gain.linearRampToValueAtTime(0.0001, t + 0.12)
+    droneGain.gain.setValueAtTime(0.0001, t + 0.8)
+    droneGain.gain.linearRampToValueAtTime(0.09, t + 2.2)
+  }
+  window.setTimeout(() => {
+    if (ctx && master && enabled) bonsho(master, ctx, 0.26)
+  }, 780)
 }
 
 export function sfxSignature() {
@@ -213,9 +242,38 @@ export function sfxSignature() {
 }
 
 export function sfxDeath() {
-  if (!ctx || !enabled) return
-  sfxBell(146, 0.18, 4)
+  if (!ctx || !master || !enabled) return
+  bonsho(master, ctx, 0.3)
   setTension(false)
+}
+
+/** Stone on stone, at the riverbed. */
+export function sfxStone() {
+  if (!ctx || !enabled) return
+  const src = noise()
+  if (!src) return
+  const t = now()
+  const f = ctx.createBiquadFilter()
+  f.type = 'bandpass'
+  f.frequency.value = 2400 + Math.random() * 900
+  f.Q.value = 6
+  src.connect(f)
+  env(f, 0.1, 0.001, 0.07)
+  src.start()
+  src.stop(t + 0.2)
+}
+
+/** The oni's club coming down. */
+export function sfxHeavy() {
+  if (!ctx || !enabled) return
+  const t = now()
+  const o = ctx.createOscillator()
+  o.type = 'sine'
+  o.frequency.setValueAtTime(90, t)
+  o.frequency.exponentialRampToValueAtTime(36, t + 0.3)
+  env(o, 0.16, 0.002, 0.32)
+  o.start()
+  o.stop(t + 0.5)
 }
 
 export function sfxReveille() {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Backdrop } from './Backdrop'
-import { Walker } from './Walker'
+import { PixelWalker } from './PixelActor'
 import { fmtInt, fmtTime } from '../format'
 import { BALANCE as B } from '../content/balance'
 import { game, stats, useUI } from '../store/gameStore'
@@ -50,7 +50,7 @@ export function MainMenu({
         </div>
 
         <div className="menu-walker">
-          <Walker stats={st} state="walk" />
+          <PixelWalker stats={st} pose="walk" scale={4} />
         </div>
 
         {confirming ? (

@@ -20,7 +20,7 @@ import {
   soundReveille,
   useUI,
 } from '../store/gameStore'
-import { isDesktop, winDrag, winHide, winMaximize, winMinimize } from '../save/desktop'
+import { isDesktop, winDrag, winHide, winMaximize, winMinimize, winQuit } from '../save/desktop'
 import { Bargain } from './Bargain'
 import { Ascend } from './Ascend'
 import { Ledger } from './Ledger'
@@ -218,8 +218,14 @@ export function App() {
                 <button className="win-btn" aria-label="Maximise" onClick={winMaximize}>
                   □
                 </button>
-                {/* Closing hides to the tray. The Parade does not stop. */}
-                <button className="win-btn close" aria-label="Hide" onClick={winHide}>
+                {/* Closing hides to the tray; the Parade does not stop.
+                    Shift-click actually quits. */}
+                <button
+                  className="win-btn close"
+                  aria-label="Close"
+                  title="Hides to the tray — shift-click to quit"
+                  onClick={(e) => (e.shiftKey ? winQuit() : winHide())}
+                >
                   ✕
                 </button>
               </span>

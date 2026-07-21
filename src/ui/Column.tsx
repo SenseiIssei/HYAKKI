@@ -5,8 +5,7 @@ import { CLASS_BY_ID } from '../content/classes'
 import { WARDEN_BY_ID } from '../content/wardens'
 import { currentTarget } from '../sim/enemies'
 import { Backdrop } from './Backdrop'
-import { Walker } from './Walker'
-import { Yokai } from './Yokai'
+import { PixelWalker, PixelYokai } from './PixelActor'
 import { game, getFloaters, getLog, stats, useUI } from '../store/gameStore'
 import { fmt, fmtInt } from '../format'
 
@@ -149,11 +148,9 @@ export function Column() {
                 </div>
               ))}
           </div>
-          <Walker
+          <PixelWalker
             stats={st}
-            state={
-              bracing ? 'brace' : soldierHurt ? 'hit' : g.dead ? 'still' : 'strike'
-            }
+            pose={bracing ? 'brace' : soldierHurt ? 'hit' : 'strike'}
             flash={soldierHurt}
           />
           <div className="bar">
@@ -204,7 +201,7 @@ export function Column() {
               g.enemy.tellTicks > 0 ? 'telegraph' : ''
             }`}
           >
-            <Yokai enemy={target} flash={enemyHurt} />
+            <PixelYokai enemy={target} flash={enemyHurt} />
           </span>
           <div className="bar">
             <div

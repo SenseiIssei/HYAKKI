@@ -63,21 +63,20 @@ export function revealSave(): void {
   void getInvoke()?.('reveal_save')
 }
 
-// ── window controls, for the custom title bar ──
+// ── window controls ──
+//
+// These go through invoke, NOT `window.__TAURI__.window`. With
+// `withGlobalTauri: false` the invoke bridge is injected but the JS window API
+// is not, so the title-bar buttons rendered and did nothing at all.
 
-type AppWindow = {
-  minimize(): Promise<void>
-  toggleMaximize(): Promise<void>
-  hide(): Promise<void>
-  startDragging(): Promise<void>
+const win = (cmd: string) => {
+  const i = getInvoke()
+  if (!i) return
+  void i(cmd).catch((err) => console.error(`[hyakki] ${cmd} failed`, err))
 }
 
-function appWindow(): AppWindow | null {
-  const w = window as unknown as { __TAURI__?: { window?: { appWindow?: AppWindow } } }
-  return w.__TAURI__?.window?.appWindow ?? null
-}
-
-export const winMinimize = () => void appWindow()?.minimize()
-export const winMaximize = () => void appWindow()?.toggleMaximize()
-export const winHide = () => void appWindow()?.hide()
-export const winDrag = () => void appWindow()?.startDragging()
+export const winMinimize = () => win('win_minimize')
+export const winMaximize = () => win('win_toggle_maximize')
+export const winHide = () => win('win_hide')
+export const winQuit = () => win('win_quit')
+export const winDrag = () => win('win_start_drag')

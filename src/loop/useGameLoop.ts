@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { BALANCE as B } from '../content/balance'
 import { step } from '../sim/combat'
+import { setMusicIntensity } from '../audio/engine'
 import { addKeyTime } from '../sim/descent'
 import { catchUp, shouldReveille } from '../sim/offline'
 import { projectedAsh, reveille } from '../sim/prestige'
@@ -88,6 +89,8 @@ export function useGameLoop() {
         }
       }
 
+      // the drum walks closer the deeper you are
+      setMusicIntensity(Math.min(1, Math.log10(Math.max(1, game().rank)) / 3.4))
       checkFragments()
       const changed = drainEvents(now)
       if (now - lastRender >= RENDER_MS && changed) {

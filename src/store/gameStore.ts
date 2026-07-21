@@ -42,6 +42,7 @@ import type { GameState, SimEvent, StatBlock } from '../sim/types'
 import { fmt } from '../format'
 import {
   setAudioEnabled,
+  setMusicWanted,
   setTension,
   setVolume,
   sfxBell,
@@ -191,6 +192,8 @@ type UIState = {
   setAudioOn: (v: boolean) => void
   audioVolume: number
   setAudioVolume: (v: number) => void
+  musicOn: boolean
+  setMusicOn: (v: boolean) => void
   report: OfflineReport | null
   setReport: (r: OfflineReport | null) => void
   /** low-end / high-legibility mode: combat as a text log, no sigils */
@@ -231,6 +234,12 @@ export const useUI = create<UIState>((set) => ({
     localStorage.setItem('myriad.audio', v ? '1' : '0')
     setAudioEnabled(v)
     set({ audioOn: v })
+  },
+  musicOn: localStorage.getItem('hyakki.music') !== '0',
+  setMusicOn: (v) => {
+    localStorage.setItem('hyakki.music', v ? '1' : '0')
+    setMusicWanted(v)
+    set({ musicOn: v })
   },
   audioVolume: Number(localStorage.getItem('myriad.volume') ?? 35),
   setAudioVolume: (v) => {

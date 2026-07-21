@@ -16,6 +16,8 @@ export function Settings() {
   const setAudioOn = useUI((s) => s.setAudioOn)
   const audioVolume = useUI((s) => s.audioVolume)
   const setAudioVolume = useUI((s) => s.setAudioVolume)
+  const musicOn = useUI((s) => s.musicOn)
+  const setMusicOn = useUI((s) => s.setMusicOn)
   const [blob, setBlob] = useState('')
   const [level, setLevel] = useState(0)
 
@@ -75,9 +77,20 @@ export function Settings() {
             </span>
           </div>
         )}
+        {audioOn && (
+          <label className="orders-toggle">
+            <input
+              type="checkbox"
+              checked={musicOn}
+              onChange={(e) => setMusicOn(e.target.checked)}
+            />
+            <span>Koto, taiko, breath</span>
+          </label>
+        )}
         <div className="hint">
-          Everything you hear is generated as it plays. There are no sound files, for the
-          same reason there are no pictures.
+          Everything you hear is generated as it plays — the music is written on the in
+          scale as it goes, so it never repeats. There are no sound files, for the same
+          reason there are no pictures.
         </div>
 
         <h2>Display</h2>

@@ -76,6 +76,48 @@ fn save_path(app: AppHandle) -> String {
     save_file(&app).to_string_lossy().to_string()
 }
 
+/// Window controls go through Rust, not the JS window API.
+///
+/// `withGlobalTauri: false` still injects `__TAURI_INVOKE__` — which is why
+/// saving worked — but it does NOT inject `window.__TAURI__.window`, so the
+/// title-bar buttons rendered and silently did nothing. invoke is the reliable
+/// channel, so the buttons use it.
+#[tauri::command]
+fn win_minimize(window: tauri::Window) {
+    let _ = window.minimize();
+}
+
+#[tauri::command]
+fn win_toggle_maximize(window: tauri::Window) {
+    match window.is_maximized() {
+        Ok(true) => {
+            let _ = window.unmaximize();
+        }
+        _ => {
+            let _ = window.maximize();
+        }
+    }
+}
+
+#[tauri::command]
+fn win_hide(window: tauri::Window) {
+    let _ = window.hide();
+}
+
+#[tauri::command]
+fn win_quit(app: AppHandle) {
+    if let Some(w) = app.get_window("main") {
+        let _ = w.emit("hyakki://quitting", ());
+    }
+    std::thread::sleep(std::time::Duration::from_millis(200));
+    std::process::exit(0);
+}
+
+#[tauri::command]
+fn win_start_drag(window: tauri::Window) {
+    let _ = window.start_dragging();
+}
+
 #[tauri::command]
 fn reveal_save(app: AppHandle) {
     let dir = save_dir(&app);
@@ -135,7 +177,12 @@ fn main() {
             load_save,
             write_save,
             save_path,
-            reveal_save
+            reveal_save,
+            win_minimize,
+            win_toggle_maximize,
+            win_hide,
+            win_quit,
+            win_start_drag
         ])
         .run(tauri::generate_context!())
         .expect("hyakki failed to start");
