@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { COLORS } from '../render/presets'
 import { Rng } from '../sim/rng'
+import { worldHue, worldSat } from '../content/worldStage'
 
 /**
  * The road through Yomi, moving.
@@ -226,10 +227,18 @@ function Band({
  * rather than by rewriting every region's palette, so a new region inherits the
  * behaviour for free and the authored colours stay authored.
  */
-function rotFilter(kegare: number): string | undefined {
+function rotFilter(kegare: number, ri: number): string | undefined {
   const k = Math.min(1, Math.max(0, kegare))
-  if (k < 0.02) return undefined
-  return `saturate(${1 + k * 1.5}) hue-rotate(${-k * 18}deg) contrast(${1 + k * 0.22}) brightness(${1 - k * 0.16})`
+  // Procedural World variation: every World tilts the palette its own way, so
+  // the authored Regions give the broad strokes and the World seed makes each
+  // one its own place. Deterministic, so a World always looks the same.
+  const world = Math.floor(Math.max(0, ri) / 10)
+  const wHue = worldHue(world)
+  const wSat = worldSat(world)
+  if (k < 0.02 && world === 0) return undefined
+  const hue = -k * 18 + wHue
+  const sat = (1 + k * 1.5) * wSat
+  return `saturate(${sat.toFixed(2)}) hue-rotate(${hue.toFixed(0)}deg) contrast(${(1 + k * 0.22).toFixed(2)}) brightness(${(1 - k * 0.16).toFixed(2)})`
 }
 
 export function Backdrop({
@@ -267,7 +276,7 @@ export function Backdrop({
     <div
       className={`backdrop ${still ? 'still' : ''}`}
       aria-hidden="true"
-      style={{ filter: rotFilter(kegare) }}
+      style={{ filter: rotFilter(kegare, ri) }}
     >
       <div
         className="bd-sky"

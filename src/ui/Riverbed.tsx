@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { BALANCE as B } from '../content/balance'
 import { fmt, fmtInt, fmtTime } from '../format'
 import { ashProjection, game, reveilleReady, soundReveille, useUI } from '../store/gameStore'
+import { worldStage } from '../content/worldStage'
 
 /**
  * SAI NO KAWARA 賽の河原 — the riverbed.
@@ -37,8 +38,8 @@ export function Riverbed() {
   return (
     <div className="overlay autopsy">
       <div className="autopsy-inner">
-        <div className="rank-label">Ri</div>
-        <div className="rank-number">{fmtInt(g.bestRank)}</div>
+        <div className="rank-label">World {worldStage(g.bestRank).world}</div>
+        <div className="rank-number">{worldStage(g.bestRank).label}</div>
 
         <p className="autopsy-line">
           Your tower was {stones === 1 ? 'one stone' : `${fmtInt(stones)} stones`}.

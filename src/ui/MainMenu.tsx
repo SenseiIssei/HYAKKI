@@ -4,6 +4,7 @@ import { PixelWalker } from './PixelActor'
 import { fmtInt, fmtTime } from '../format'
 import { BALANCE as B } from '../content/balance'
 import { game, stats, useUI } from '../store/gameStore'
+import { wsLabel } from '../content/worldStage'
 import { isDesktop, winHide } from '../save/desktop'
 
 /**
@@ -59,8 +60,8 @@ export function MainMenu({
           <div className="menu-confirm">
             <p className="menu-warn">
               There is already someone on the road — {fmtInt(g.soldierNumber)}, who has walked{' '}
-              {fmtTime((g.totalTicks / B.TICKS_PER_SEC) * 1000)} and got as far as Ri{' '}
-              {fmtInt(g.bestRankEver)}.
+              {fmtTime((g.totalTicks / B.TICKS_PER_SEC) * 1000)} and got as far as{' '}
+              {wsLabel(g.bestRankEver)}.
             </p>
             <p className="menu-warn">Starting again unmakes all of it. There is no undo.</p>
             <div className="menu-row">
@@ -78,7 +79,7 @@ export function MainMenu({
               <button className="menu-btn primary" onClick={onContinue}>
                 Keep walking
                 <span className="menu-sub">
-                  #{fmtInt(g.soldierNumber)} · Ri {fmtInt(g.rank)}
+                  #{fmtInt(g.soldierNumber)} · {wsLabel(g.rank)}
                 </span>
               </button>
             )}

@@ -21,6 +21,7 @@ import {
 } from '../store/gameStore'
 import { AbilityVfx } from './AbilityVfx'
 import { AbilityBar } from './AbilityBar'
+import { worldStage, wsLabel } from '../content/worldStage'
 import { fmt, fmtInt } from '../format'
 
 function pct(cur: Decimal, max: Decimal): number {
@@ -192,8 +193,8 @@ export function Column() {
         <span className="kanji-watermark" aria-hidden="true">
           里
         </span>
-        <div className="rank-label">Ri</div>
-        <div className="rank-number">{fmtInt(g.rank)}</div>
+        <div className="rank-label">World {worldStage(g.rank).world}</div>
+        <div className="rank-number">{worldStage(g.rank).label}</div>
         <div className="rank-rule" />
         <div className={`enemy-name ${target.ghost ? 'returned' : ''}`}>
           {species && <span className="kanji enemy-kanji">{species.kanji}</span>}
@@ -208,7 +209,7 @@ export function Column() {
           <div className="returned-note">
             {target.ghost.soldierNumber === g.soldierNumber
               ? 'Its coat says the same as yours.'
-              : `It got as far as Ri ${fmtInt(target.ghost.deepestRank)}. You were it.`}
+              : `It got as far as ${wsLabel(target.ghost.deepestRank)}. You were it.`}
           </div>
         )}
       </div>

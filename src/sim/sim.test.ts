@@ -10,6 +10,7 @@ import { KEGARE_BANDS, bandFor, kegareFromKill, purificationCost } from '../cont
 import { OFUDA, OFUDA_BY_ID, wardFailChance } from '../content/ofuda'
 import { SPECIES } from '../pixel/species'
 import { yokaiFrame } from '../pixel/yokai'
+import { worldStage, worldHue, worldSat } from '../content/worldStage'
 import {
   ABILITY_BY_ID,
   abilityCooldownSec,
@@ -1643,5 +1644,41 @@ describe('abilities', () => {
     s.abilityCd = { iai: 15, raijin: 40 }
     resetRun(s)
     expect(s.abilityCd).toEqual({})
+  })
+})
+
+describe('world-stage', () => {
+  it('reads Ri as World-Stage, every ten Ri a World', () => {
+    expect(worldStage(0).label).toBe('0-0')
+    expect(worldStage(1).label).toBe('0-1')
+    expect(worldStage(9).label).toBe('0-9')
+    expect(worldStage(10).label).toBe('1-0')
+    expect(worldStage(137).label).toBe('13-7')
+    expect(worldStage(137).world).toBe(13)
+    expect(worldStage(137).stage).toBe(7)
+  })
+
+  it('is defined for any depth, however deep — it never stops', () => {
+    for (const ri of [0, 1, 99, 1000, 99999]) {
+      const ws = worldStage(ri)
+      expect(ws.label).toMatch(/^\d+-\d$/)
+      expect(ws.stage).toBeGreaterThanOrEqual(0)
+      expect(ws.stage).toBeLessThan(10)
+    }
+  })
+
+  it('each World tilts the palette its own deterministic way', () => {
+    // same World, same look
+    expect(worldHue(7)).toBe(worldHue(7))
+    // neighbours differ — the whole point of "procedural levels"
+    expect(worldHue(7)).not.toBe(worldHue(8))
+    // World 0 is the authored baseline, untinted
+    expect(worldHue(0)).toBe(0)
+    expect(worldSat(0)).toBe(1)
+    // hues stay in a sane range
+    for (let w = 1; w < 200; w++) {
+      expect(Math.abs(worldHue(w))).toBeLessThanOrEqual(70)
+      expect(worldSat(w)).toBeGreaterThanOrEqual(1)
+    }
   })
 })
