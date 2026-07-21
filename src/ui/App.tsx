@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { setAudioEnabled, setVolume, startAudio } from '../audio/engine'
 import { useGameLoop } from '../loop/useGameLoop'
 import { CLASS_BY_ID } from '../content/classes'
 import {
@@ -16,6 +17,7 @@ import {
 } from '../store/gameStore'
 import { Bargain } from './Bargain'
 import { Ascend } from './Ascend'
+import { Ledger } from './Ledger'
 import { Descend, DescentReport } from './Descend'
 import { Orders } from './Orders'
 import { Report } from './Report'
@@ -56,6 +58,7 @@ export function App() {
   const setDescend = useUI((s) => s.setDescend)
   const ascendOpen = useUI((s) => s.ascendOpen)
   const setAscend = useUI((s) => s.setAscend)
+  const ledgerOpen = useUI((s) => s.ledgerOpen)
   const report = useUI((s) => s.report)
   const fontScale = useUI((s) => s.fontScale)
 
@@ -78,6 +81,7 @@ export function App() {
         ui.setBargain(false)
         ui.setDescend(false)
         ui.setAscend(false)
+        ui.setLedger(false)
         return
       }
       const map: Record<string, () => void> = {
@@ -93,6 +97,26 @@ export function App() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  // Browsers will not start audio without a gesture, so the first one anywhere
+  // in the page unlocks it — if the player has asked for sound at all.
+  useEffect(() => {
+    const unlock = () => {
+      if (useUI.getState().audioOn) {
+        startAudio()
+        setAudioEnabled(true)
+        setVolume(useUI.getState().audioVolume / 100)
+      }
+      window.removeEventListener('pointerdown', unlock)
+      window.removeEventListener('keydown', unlock)
+    }
+    window.addEventListener('pointerdown', unlock)
+    window.addEventListener('keydown', unlock)
+    return () => {
+      window.removeEventListener('pointerdown', unlock)
+      window.removeEventListener('keydown', unlock)
+    }
   }, [])
 
   // Font scale is applied at the document root so every rem-based size follows.
@@ -200,6 +224,7 @@ export function App() {
       {bargainOpen && <Bargain />}
       {descendOpen && <Descend />}
       {ascendOpen && <Ascend />}
+      {ledgerOpen && <Ledger />}
       {/* A finished Descent announces itself rather than waiting to be noticed. */}
       {!report && !descendOpen && readyDescents()[0] && (
         <DescentReport id={readyDescents()[0].id} />

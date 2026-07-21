@@ -137,7 +137,7 @@ export function Descend() {
               <span className="trunk-name">LAYERS</span>
             </div>
             {LAYERS.map((l) => {
-              const open = l.id === 'nowhere' ? false : g.layerNames >= l.cost
+              const open = l.id === 'nowhere' ? g.apotheoses > 0 : g.layerNames >= l.cost
               const need = Math.max(0, l.cost - g.layerNames)
               return (
                 <button

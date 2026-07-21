@@ -372,7 +372,31 @@ export function resolveDescent(
   let diedAt: number | null = null
 
   for (const id of route) {
-    const outcome = resolveRoom(g, ctx, map.rooms[id], loot)
+    let room = map.rooms[id]
+
+    /**
+     * NOWHERE: rooms delete themselves as you approach, and the route you
+     * plotted stops being the route you are walking. You are not in control.
+     * That is the point — so the re-route is real, not cosmetic.
+     */
+    if (ctx.layer.twist === 'erasure' && room.type !== 'warden' && ctx.rng.chance(0.45)) {
+      const sameFloor = map.rooms.filter((r) => r.floor === room.floor && r.id !== room.id)
+      const replacement = sameFloor.length ? ctx.rng.pick(sameFloor) : null
+      if (replacement) {
+        room = replacement
+      } else {
+        rooms.push({
+          roomId: id,
+          type: room.type,
+          text: 'The room is not there. It was, on the way in.',
+          hpAfter: Decimal.max(g.soldier.hp, 0).toString(),
+          died: false,
+        })
+        continue
+      }
+    }
+
+    const outcome = resolveRoom(g, ctx, room, loot)
     rooms.push(outcome)
     if (outcome.died) {
       diedAt = id

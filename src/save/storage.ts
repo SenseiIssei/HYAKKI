@@ -91,6 +91,7 @@ function hydrate(b: SaveBlob): GameState {
     rules: (b.rules as Record<string, number>) ?? {},
     myriadFelled: !!b.myriadFelled,
     fragments: Array.isArray(b.fragments) ? (b.fragments as number[]) : [],
+    observations: Array.isArray(b.observations) ? (b.observations as string[]) : [],
     authored: (b.authored as GameState['authored']) ?? null,
 
     equipped: Array.isArray(b.equipped) ? (b.equipped as GameState['equipped']) : [null, null],

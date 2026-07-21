@@ -186,9 +186,13 @@ export function reveille(s: GameState, classId = s.classId): Decimal {
   recordGhost(s)
 
   s.reveilles += 1
-  // THE TEN THOUSANDTH COAT stops the count.
-  if (!equippedFlags(s.equipped).has('tenthousandth')) s.soldierNumber += 1
-  else s.soldierNumber = 10000
+  // THE TEN THOUSANDTH COAT stops the count — and so does having been the
+  // thing at the end of it. There is no number after ten thousand.
+  if (s.myriadFelled || equippedFlags(s.equipped).has('tenthousandth')) {
+    s.soldierNumber = 10000
+  } else {
+    s.soldierNumber += 1
+  }
   s.classId = classId
   resetRun(s)
   s.bone = carriedBone

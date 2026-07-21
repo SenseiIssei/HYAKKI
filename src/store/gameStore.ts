@@ -20,6 +20,7 @@ import {
 import type { DescentMap } from '../sim/types'
 import { ICHOR_BY_ID, ichorCost } from '../content/ichor'
 import { newFragments } from '../content/fragments'
+import { newObservations } from '../content/achievements'
 import { fightMyriad, myriadReady } from '../sim/myriad'
 import {
   apotheosis,
@@ -39,6 +40,19 @@ import { computeStats } from '../sim/stats'
 import type { OfflineReport } from '../sim/offline'
 import type { GameState, SimEvent, StatBlock } from '../sim/types'
 import { fmt } from '../format'
+import {
+  setAudioEnabled,
+  setTension,
+  setVolume,
+  sfxBell,
+  sfxDeath,
+  sfxHit,
+  sfxRank,
+  sfxRelic,
+  sfxSignature,
+  sfxStand,
+  sfxTaken,
+} from '../audio/engine'
 import { load, save } from '../save/storage'
 
 /**
@@ -97,27 +111,35 @@ export function drainEvents(now: number) {
             x: (floaterId * 37) % 60 - 30,
             born: now,
           })
+          if (e.target === 'enemy') sfxHit(e.crit)
+          else sfxTaken()
           break
         case 'rank':
           pushLog(`Rank ${e.rank}.`)
+          sfxRank()
           break
         case 'stand':
           pushLog(`A Stand. ${e.warden}.`)
+          sfxStand()
+          setTension(true)
           break
         case 'standWon':
           pushLog(e.line)
+          setTension(false)
           break
         case 'standLost':
           pushLog(`The Stand closed at Rank ${e.rank}. You are further back than you were.`)
           break
         case 'signature':
           pushLog(`${e.label}.`)
+          sfxSignature()
           break
         case 'revive':
           pushLog('You get up. Nobody asked you to.')
           break
         case 'relic':
           pushLog(`Something was carried in here. ${relicLabel(e.relic)}.`)
+          sfxRelic()
           break
         case 'echoLost':
           pushLog('One of you stops.')
@@ -127,6 +149,7 @@ export function drainEvents(now: number) {
           break
         case 'death':
           pushLog(e.cause)
+          sfxDeath()
           break
         case 'log':
           pushLog(e.text)
@@ -162,6 +185,12 @@ type UIState = {
   setDescend: (v: boolean) => void
   ascendOpen: boolean
   setAscend: (v: boolean) => void
+  ledgerOpen: boolean
+  setLedger: (v: boolean) => void
+  audioOn: boolean
+  setAudioOn: (v: boolean) => void
+  audioVolume: number
+  setAudioVolume: (v: number) => void
   report: OfflineReport | null
   setReport: (r: OfflineReport | null) => void
   /** low-end / high-legibility mode: combat as a text log, no sigils */
@@ -194,6 +223,21 @@ export const useUI = create<UIState>((set) => ({
   setDescend: (v) => set({ descendOpen: v }),
   ascendOpen: false,
   setAscend: (v) => set({ ascendOpen: v }),
+  ledgerOpen: false,
+  setLedger: (v) => set({ ledgerOpen: v }),
+  // Sound is off until asked for. An idle game runs for hours.
+  audioOn: localStorage.getItem('myriad.audio') === '1',
+  setAudioOn: (v) => {
+    localStorage.setItem('myriad.audio', v ? '1' : '0')
+    setAudioEnabled(v)
+    set({ audioOn: v })
+  },
+  audioVolume: Number(localStorage.getItem('myriad.volume') ?? 35),
+  setAudioVolume: (v) => {
+    localStorage.setItem('myriad.volume', String(v))
+    setVolume(v / 100)
+    set({ audioVolume: v })
+  },
   report: null,
   setReport: (r) => set({ report: r }),
   numbersOnly: localStorage.getItem('myriad.numbersOnly') === '1',
@@ -379,13 +423,24 @@ export function challengeMyriad() {
 
 /** Fragments unlock silently; the log mentions one landed, nothing more. */
 export function checkFragments() {
+  let changed = false
+
   const found = newFragments(G)
-  if (!found.length) return
   for (const f of found) {
     G.fragments.push(f.n)
     pushLog(`A fragment. #${f.n}.`)
+    sfxBell(700, 0.07, 1.6)
+    changed = true
   }
-  useUI.getState().bump()
+
+  // The game notices things about you. It does not congratulate you.
+  for (const o of newObservations(G)) {
+    G.observations.push(o.id)
+    pushLog(o.text)
+    changed = true
+  }
+
+  if (changed) useUI.getState().bump()
 }
 
 // ── descents ──
@@ -439,7 +494,10 @@ export function collectDescent(id: string) {
     G.names += r.names
     G.seen[`layer.${d.layerId}`] = true
   }
-  if (r.cleared) G.descentsCleared += 1
+  if (r.cleared) {
+    G.descentsCleared += 1
+    if (d.depth >= 30) G.seen.deepDescent = true
+  }
 
   // finished Descents do not linger in the save
   G.descents = G.descents.filter((x) => !x.collected)
@@ -486,6 +544,7 @@ export function soundReveille(classId?: string) {
 
 export function chooseClass(classId: string) {
   G.classId = classId
+  G.seen[`played.${classId}`] = true
   refreshStats()
   G.soldier.hp = ST.hp
   useUI.getState().bump()
@@ -538,6 +597,7 @@ export function meltRelic(uid: string) {
   const idx = G.inventory.findIndex((r) => r.uid === uid)
   if (idx < 0) return
   const [relic] = G.inventory.splice(idx, 1)
+  if (relic.rarity === 'truename') G.seen.meltedTrueName = true
   G.ash = G.ash.add(meltValue(relic))
   useUI.getState().bump()
   saveNow()

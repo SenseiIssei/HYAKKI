@@ -40,6 +40,8 @@ export type Enemy = {
   wardenId?: string
   /** THE RETURNED: the past self this one was made from */
   ghost?: Ghost
+  /** WHAT YOU LEFT BEHIND: the Ascension this one was made from */
+  authored?: AuthoredWarden
   /** Lampbearer stacks. Decays continuously; carries between enemies. */
   burn: number
   /** Interposed enemies (THE QUARTERMASTER's ISSUE). Front of array is target. */
@@ -278,6 +280,8 @@ export type GameState = {
   myriadFelled: boolean
   /** fragment numbers read */
   fragments: number[]
+  /** observation ids the game has made about you */
+  observations: string[]
   /**
    * Your best Ascension, kept as a Warden for the Ascensions after it.
    * The Hollow reissues its dead; you are the Hollow now.

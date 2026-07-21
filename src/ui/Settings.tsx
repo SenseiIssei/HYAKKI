@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { audioLevel } from '../audio/engine'
 import { createInitialState } from '../sim/state'
 import { exportSave, hardReset, importSave } from '../save/storage'
 import { game, replaceGame, saveNow, useUI } from '../store/gameStore'
@@ -11,17 +12,72 @@ export function Settings() {
   const setNumbersOnly = useUI((s) => s.setNumbersOnly)
   const fontScale = useUI((s) => s.fontScale)
   const setFontScale = useUI((s) => s.setFontScale)
+  const audioOn = useUI((s) => s.audioOn)
+  const setAudioOn = useUI((s) => s.setAudioOn)
+  const audioVolume = useUI((s) => s.audioVolume)
+  const setAudioVolume = useUI((s) => s.setAudioVolume)
   const [blob, setBlob] = useState('')
+  const [level, setLevel] = useState(0)
+
+  // A meter, so "is the sound on?" is answerable by looking.
+  useEffect(() => {
+    if (!audioOn) return
+    const id = window.setInterval(() => setLevel(audioLevel()), 100)
+    return () => window.clearInterval(id)
+  }, [audioOn])
   const [msg, setMsg] = useState('')
   const g = game()
 
   return (
     <div className="overlay dark" onClick={() => close(false)}>
       <div className="panel" onClick={(e) => e.stopPropagation()}>
-        <h2>The Ledger</h2>
+        <div className="panel-row">
+          <button
+            className="small-btn"
+            onClick={() => {
+              close(false)
+              useUI.getState().setLedger(true)
+            }}
+          >
+            Open the Ledger
+          </button>
+          <span className="hint" style={{ alignSelf: 'center' }}>
+            #{fmtInt(g.soldierNumber)} · {fmtTime((g.totalTicks / B.TICKS_PER_SEC) * 1000)} marched
+          </span>
+        </div>
+
+        <h2>Sound</h2>
+        <label className="orders-toggle">
+          <input
+            type="checkbox"
+            checked={audioOn}
+            onChange={(e) => setAudioOn(e.target.checked)}
+          />
+          <span>Drone, bell, breath</span>
+        </label>
+        {audioOn && (
+          <div className="orders-rule">
+            <span className="orders-when">volume</span>
+            <span className="orders-value">{audioVolume}%</span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={audioVolume}
+              onChange={(e) => setAudioVolume(Number(e.target.value))}
+              aria-label="Volume"
+            />
+            <span className="bar" style={{ height: 3 }}>
+              <span
+                className="bar-fill resolve"
+                style={{ width: `${Math.min(100, level * 400)}%` }}
+              />
+            </span>
+          </div>
+        )}
         <div className="hint">
-          soldier #{fmtInt(g.soldierNumber)} · {fmtInt(g.totalKills)} felled ·{' '}
-          {fmtInt(g.totalDeaths)} deaths · {fmtTime((g.totalTicks / B.TICKS_PER_SEC) * 1000)} marched
+          Everything you hear is generated as it plays. There are no sound files, for the
+          same reason there are no pictures.
         </div>
 
         <h2>Display</h2>
@@ -47,8 +103,8 @@ export function Settings() {
           ))}
         </div>
         <div className="hint">
-          Motion follows your system setting. Keys: 1 Tree · 2 Carried · 3 Orders · 4 here ·
-          Esc closes.
+          Motion follows your system setting. Keys: 1 Tree · 2 Carried · 3 Orders ·
+          4 Bargain · 5 Descend · 6 Apotheosis · 7 here · Esc closes.
         </div>
 
         <h2>Save</h2>

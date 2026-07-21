@@ -150,3 +150,5 @@ export function layerUnlocked(l: LayerDef, namesSpentOnLayers: number, apotheose
   if (l.id === 'nowhere') return apotheoses > 0
   return namesSpentOnLayers >= l.cost
 }
+
+export const NOWHERE_ERASE_CHANCE = 0.45

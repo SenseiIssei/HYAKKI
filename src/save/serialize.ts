@@ -74,6 +74,7 @@ export function serialize(g: GameState): string {
     rules: g.rules,
     myriadFelled: g.myriadFelled,
     fragments: g.fragments,
+    observations: g.observations,
     authored: g.authored,
 
     equipped: g.equipped,
@@ -185,6 +186,8 @@ const MIGRATIONS: Record<number, Migration> = {
     fragments: [],
     authored: null,
   }),
+  // v7 predates the observations the game makes about you.
+  7: (b) => ({ ...b, v: 8, observations: [] }),
 }
 
 export function migrate(blob: SaveBlob): SaveBlob {

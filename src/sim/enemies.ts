@@ -5,7 +5,7 @@ import { AFFIX_BY_ID } from '../content/relics'
 import { enemyArm, enemyAtk, enemyHp, isStandRank, wardenHp } from './formulas'
 import { pickGhostFrom } from './ghosts'
 import { Rng } from './rng'
-import type { GameState, Ghost } from './types'
+import type { AuthoredWarden, GameState, Ghost } from './types'
 import { attackCooldown } from './stats'
 import type { Enemy } from './types'
 
@@ -108,6 +108,29 @@ export function spawnEnemy(
 }
 
 /** The Warden holding the Stand at this Rank. */
+/**
+ * WHAT YOU LEFT BEHIND. Your best Ascension, standing in the Column, waiting
+ * for whoever you are next. The Hollow reissues its dead; you are the Hollow
+ * now. docs/14-NARRATIVE.md § Warden authoring
+ */
+export function spawnAuthored(rank: number, a: AuthoredWarden, carryBurn = 0): Enemy {
+  const spd = B.ENEMY_SPD_BASE * FAMILY_MODS.warden.spd
+  const maxHp = wardenHp(rank, 0).mul(1.25)
+  return {
+    ...blank('warden', a.seed, spd),
+    name: `SOLDIER #${a.soldierNumber.toLocaleString('en-US')}`,
+    isWarden: true,
+    wardenId: undefined,
+    authored: a,
+    hp: maxHp,
+    maxHp,
+    atk: enemyAtk(rank, 'warden').mul(1.1),
+    arm: enemyArm(rank, 'warden'),
+    burn: carryBurn,
+    sigTicks: 100,
+  }
+}
+
 export function spawnWarden(
   rank: number,
   standsCleared: number,
@@ -148,7 +171,13 @@ export function spawnGuard(rank: number, n: number, runSeed: number): Enemy {
 export function spawnFor(
   s: Pick<
     GameState,
-    'soldierSeed' | 'reveilles' | 'standsThisRun' | 'ghosts' | 'interments' | 'apotheoses'
+    | 'soldierSeed'
+    | 'reveilles'
+    | 'standsThisRun'
+    | 'ghosts'
+    | 'interments'
+    | 'apotheoses'
+    | 'authored'
   >,
   rank: number,
   index: number,
@@ -163,6 +192,7 @@ export function spawnFor(
     s.ghosts,
     s.interments,
     s.apotheoses > 0,
+    s.authored,
   )
 }
 
@@ -179,8 +209,14 @@ export function spawnForRank(
   ghosts: Ghost[] = [],
   interments = 0,
   ascended = false,
+  authored: AuthoredWarden | null = null,
 ): Enemy {
-  return isStandRank(rank)
-    ? spawnWarden(rank, standsCleared, carryBurn, interments)
-    : spawnEnemy(rank, index, runSeed, carryBurn, ghosts, ascended)
+  if (!isStandRank(rank)) {
+    return spawnEnemy(rank, index, runSeed, carryBurn, ghosts, ascended)
+  }
+  // Every fifth Stand past halfway to where it got, it is waiting there instead.
+  if (authored && rank >= Math.round(authored.deepestRank * 0.5) && rank % 50 === 0) {
+    return spawnAuthored(rank, authored, carryBurn)
+  }
+  return spawnWarden(rank, standsCleared, carryBurn, interments)
 }

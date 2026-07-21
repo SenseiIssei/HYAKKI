@@ -10,7 +10,8 @@ import { maxEchoes } from './ghosts'
 import { rollRelic } from './relics'
 import { VOWS, vowAshMult } from '../content/vows'
 import { LAYER_BY_ID } from '../content/layers'
-import { spawnEnemy } from './enemies'
+import { OBSERVATIONS, newObservations } from '../content/achievements'
+import { spawnEnemy, spawnForRank } from './enemies'
 import {
   addKeyTime,
   autoRoute,
@@ -1154,6 +1155,15 @@ describe('the myriad', () => {
     expect(new Decimal(r.hp).eq(0)).toBe(true)
   })
 
+  it('once it has fallen, the number never changes again', () => {
+    const s = veteran(40)
+    s.myriadFelled = true
+    s.soldierNumber = 10000
+    s.bestRank = 60
+    for (let i = 0; i < 5; i++) reveille(s)
+    expect(s.soldierNumber).toBe(10000)
+  })
+
   it('reports the gap in orders of magnitude, because there is no near-miss', () => {
     // Tree nodes multiply, so 400 EDGE is ~13 orders short and 800 is ~6 past.
     // A percentage would read 0% or 100% forever and tell the player nothing.
@@ -1204,6 +1214,99 @@ describe('fragments', () => {
     const fresh = createInitialState('hoplite', 12)
     const act3 = FRAGMENTS.filter((f) => f.act === 3)
     for (const f of act3) expect(f.when(fresh)).toBe(false)
+  })
+})
+
+describe('what you left behind', () => {
+  const authored = {
+    soldierNumber: 4102, classId: 'hoplite', deepestRank: 400,
+    seed: 777, vows: [], ascension: 1,
+  }
+
+  it('waits in the Column, wearing the number you had', () => {
+    const e = spawnForRank(200, 0, 5, 0, 0, [], 0, false, authored)
+    expect(e.authored).toBeDefined()
+    expect(e.name).toBe('SOLDIER #4,102')
+    expect(e.isWarden).toBe(true)
+  })
+
+  it('is not there before you got that deep', () => {
+    const shallow = spawnForRank(50, 0, 5, 0, 0, [], 0, false, authored)
+    expect(shallow.authored).toBeUndefined()
+  })
+
+  it('does not replace every Stand', () => {
+    const ordinary = spawnForRank(210, 0, 5, 0, 0, [], 0, false, authored)
+    expect(ordinary.authored).toBeUndefined()
+    expect(ordinary.isWarden).toBe(true)
+  })
+})
+
+describe('nowhere', () => {
+  it('deletes the route you plotted', () => {
+    const s = createInitialState('hoplite', 55)
+    s.bestRankEver = 400
+    s.apotheoses = 1
+    s.treeLevels = { edge: 60, meat: 60 }
+    s.soldier.hp = computeStats(s).hp
+
+    const map = generateMap('nowhere', 5, 31)
+    const route = autoRoute(map)
+
+    // Compare room IDs, not types — a replacement can coincidentally be the
+    // same type, which makes a type comparison silently pass or fail.
+    let everDiverged = false
+    for (let seed = 0; seed < 12 && !everDiverged; seed++) {
+      const r = resolveDescent(s, map, route, seed)
+      everDiverged = r.rooms.some((o, i) => route[i] !== undefined && o.roomId !== route[i])
+    }
+    expect(everDiverged).toBe(true)
+  })
+
+  it('does not erase anywhere else', () => {
+    const s = createInitialState('hoplite', 55)
+    s.bestRankEver = 400
+    s.treeLevels = { edge: 60, meat: 60 }
+    s.soldier.hp = computeStats(s).hp
+
+    const map = generateMap('ossuary', 5, 31)
+    const route = autoRoute(map)
+    for (let seed = 0; seed < 8; seed++) {
+      const r = resolveDescent(s, map, route, seed)
+      r.rooms.forEach((o, i) => expect(o.roomId).toBe(route[i]))
+    }
+  })
+
+  it('leaves the Warden where it is — the way out is still the way out', () => {
+    const map = generateMap('nowhere', 5, 31)
+    const route = autoRoute(map)
+    expect(map.rooms[route[route.length - 1]].type).toBe('warden')
+  })
+})
+
+describe('observations', () => {
+  it('are statements, never instructions', () => {
+    for (const o of OBSERVATIONS) {
+      expect(o.text).not.toMatch(/^(Kill|Reach|Defeat|Collect|Complete|Earn)\b/)
+      expect(o.text).not.toContain('!')
+      expect(o.text.length).toBeGreaterThan(25)
+    }
+  })
+
+  it('have unique ids and fire only once', () => {
+    const ids = OBSERVATIONS.map((o) => o.id)
+    expect(new Set(ids).size).toBe(ids.length)
+
+    const s = createInitialState('hoplite', 3)
+    s.totalDeaths = 1
+    const found = newObservations(s)
+    expect(found.length).toBeGreaterThan(0)
+    for (const o of found) s.observations.push(o.id)
+    expect(newObservations(s).length).toBe(0)
+  })
+
+  it('say nothing about a soldier who has done nothing', () => {
+    expect(newObservations(createInitialState('hoplite', 3)).length).toBe(0)
   })
 })
 

@@ -400,6 +400,9 @@ function onEnemyKilled(s: GameState, st: StatBlock, f: Flags, overkill: Decimal,
   s.totalKills += 1
   s.events.push({ t: 'kill', bone, name: e.name })
 
+  // you put down something wearing your own coat number
+  if (e.ghost && e.ghost.soldierNumber === s.soldierNumber) s.seen.metSelf = true
+
   if (f.has('clot50')) heal(s, st, f, st.hp.mul(0.02))
   if (f.has('marrow50') && st.ls > 0 && overkill.gt(0)) heal(s, st, f, overkill.mul(st.ls))
   if (f.has('haste75')) {

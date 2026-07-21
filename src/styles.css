@@ -1754,6 +1754,53 @@ button {
   max-width: 62ch;
 }
 
+/* ── the ledger ─────────────────────────────────────────────── */
+
+.ledger {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 22px;
+  padding: 18px 20px;
+  align-content: start;
+}
+
+.ledger-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-content: start;
+}
+
+.observations {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.observation {
+  font-family: var(--serif);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--bone-dim);
+  border-left: 1px solid var(--void-edge);
+  padding-left: 12px;
+  max-width: 52ch;
+}
+
+.hidden-count {
+  font-style: italic;
+  opacity: 0.6;
+}
+
+@media (max-width: 980px) {
+  .ledger,
+  .ledger-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── log strip ──────────────────────────────────────────────── */
 
 .logstrip {

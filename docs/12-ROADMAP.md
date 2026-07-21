@@ -143,12 +143,44 @@ it does mean **the game currently has an endgame ceiling at ~Rank 6,800**.
 
 ## Phase 7 — POLISH & AFTER
 
-- [ ] Audio: drone bed, bell, three hit textures, one Signature swell. Sparse. Mixable to zero.
-- [ ] Achievements — written as *observations*, not tasks (*"You have died one thousand times. The Hollow has kept count."*)
-- [ ] Statistics screen: lifetime everything, graphed
-- [ ] Tauri desktop build + installer, tray mode
-- [ ] Optional cloud save via the DevPanel VPS
-- [ ] Deploy to `senseiissei.dev/myriad` (manual scp + docker compose, per the existing DevPanel process)
+- [x] Audio: drone bed, bell, hit textures, Signature swell. Sparse. Mixable to zero.
+- [x] Achievements — written as *observations*, not tasks
+- [x] Statistics screen (**The Ledger**), with the observations alongside
+- [x] Warden authoring actually spawns (was captured-but-unused after Phase 6)
+- [x] Layer V — NOWHERE, with its self-deleting map
+- [ ] Tauri desktop build + installer, tray mode — **not done**, see below
+- [ ] Optional cloud save via the DevPanel VPS — **not done**
+- [ ] Deploy to `senseiissei.dev/myriad` — **not done; needs a decision**
+
+### Audio, in full
+
+Everything is synthesised at runtime with the Web Audio API. There are **no audio files**,
+for the same reason there are no image files.
+
+| Sound | How |
+|---|---|
+| Drone bed | 3 detuned sine oscillators (55/55+7c/82.5Hz) → lowpass at 320Hz, with a 0.045Hz LFO on the cutoff so it never sits still |
+| Hit | Bandpass-filtered noise burst, 900Hz; crits at 1800Hz with a tighter Q |
+| Taken | Sine sweeping 180 → 60Hz |
+| Bell | 4 inharmonic partials (1, 2.76, 5.4, 8.9) with per-partial decay — Stand, death, Reveille, relic and fragment all use it at different pitches |
+| Signature | Noise through a bandpass sweeping 300 → 2600Hz |
+
+**Sound is off until asked for**, and hits are rate-limited to one per 70ms — at high
+attack speed an unlimited hit sound is the fastest way to make someone mute a game forever.
+A Stand deepens the drone; the death bell lifts the tension again.
+
+Measured on the master bus (RMS): drone **0.013**, bell **0.061**, muted **0.0008**.
+
+### What is deliberately not done
+
+**Tauri.** You chose a web app in the first place, and the wall-clock loop already survives
+being backgrounded, so the desktop shell buys very little. It is a self-contained follow-up
+whenever you want it — the build is already fully static and portable.
+
+**Deploy.** Publishing is outward-facing, so it is not something to do unasked. The build is
+ready (`npm run build`, `base: './'`, ~100 KB gzipped, works from any subpath and fully
+offline). Deploying means the usual manual route: scp `dist/` to the VPS and rebuild the
+docker compose stack behind the host nginx.
 
 ---
 

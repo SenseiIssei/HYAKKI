@@ -7,7 +7,7 @@ import { maxEchoes } from './ghosts'
 import { computeStats } from './stats'
 import type { GameState } from './types'
 
-export const SAVE_VERSION = 7
+export const SAVE_VERSION = 8
 
 /** Everything that a Reveille wipes. Kept in one place so nothing is missed. */
 export function resetRun(s: GameState): void {
@@ -64,7 +64,15 @@ export function createInitialState(classId = DEFAULT_CLASS, seed?: number): Game
     enemyIndex: 0,
     enemiesThisRank: enemiesPerRank(1),
     enemy: spawnFor(
-      { soldierSeed, reveilles: 0, standsThisRun: 0, ghosts: [], interments: 0, apotheoses: 0 },
+      {
+        soldierSeed,
+        reveilles: 0,
+        standsThisRun: 0,
+        ghosts: [],
+        interments: 0,
+        apotheoses: 0,
+        authored: null,
+      },
       1,
       0,
     ),
@@ -127,6 +135,7 @@ export function createInitialState(classId = DEFAULT_CLASS, seed?: number): Game
     rules: {},
     myriadFelled: false,
     fragments: [],
+    observations: [],
     authored: null,
 
     totalTicks: 0,
