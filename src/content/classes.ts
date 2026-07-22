@@ -44,6 +44,7 @@ export type SignatureId =
   | 'secondbody'
   | 'thechoir'
   | 'exhume'
+  | 'devour'
 
 export type PipelineCtx = {
   rank: number
@@ -169,6 +170,26 @@ export const CLASSES: ClassDef[] = [
     curseText: 'Genuinely bad at fighting. You will stop early.',
     wants: 'Tama, ishi, and a long night',
     sigil: { symmetry: 1, rings: 2, strokeWeight: 3, density: 0.45, coreFill: 'solid', jitter: 0.5, openness: 0.2 },
+  },
+  {
+    id: 'gaki',
+    name: 'GAKI',
+    kanji: '餓鬼',
+    epithet: 'the hunger that outlived the body',
+    line: 'It ate everything it had in life. Then it kept eating. It is still eating.',
+    unlock: { kind: 'kills', n: 4000, text: 'Devour four thousand.' },
+    // Damage rises with how much you drain back — it hits harder the more it eats.
+    pipeline: (s) => 1 + s.ls * 4,
+    curse: { arm: -0.5 },
+    grant: { ls: 0.15 },
+    signature: {
+      id: 'devour',
+      label: 'GAKIDŌ 餓鬼道',
+      text: 'One vast bite that lands whole — and feeds you back a share of it.',
+    },
+    curseText: '−50% armour. It defends nothing; it only takes.',
+    wants: 'Lifesteal, attack, and a steady supply',
+    sigil: { symmetry: 2, rings: 3, strokeWeight: 2, density: 0.7, coreFill: 'hollow', jitter: 0.4, openness: 0.15 },
   },
 ]
 

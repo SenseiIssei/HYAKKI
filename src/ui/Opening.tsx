@@ -25,6 +25,8 @@ export const CLASS_LOOKS: Record<string, Look> = {
   chorus: { weapon: 2, armour: 2, head: 2, gait: 0.75, aura: 0.45, kegare: 0.35 },
   // ONBŌ, who burns the dead: a long blade and a working man's cloak
   gravedigger: { weapon: 5, armour: 3, head: 1, gait: 0.95, aura: 0.2, kegare: 0.55 },
+  // GAKI, the hunger: gaunt and maskless, no armour, deep in defilement
+  gaki: { weapon: 3, armour: 0, head: 5, gait: 0.6, aura: 0.4, kegare: 0.7 },
 }
 
 const FALLBACK_LOOK: Look = {

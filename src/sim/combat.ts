@@ -300,6 +300,15 @@ function fireSignature(s: GameState, st: StatBlock, f: Flags, rf: Flags, rng: Rn
     case 'exhume':
       s.bone = s.bone.add(boneFromKill(s.rank, 'chaff', st.bf).mul(30 * strength))
       break
+    case 'devour': {
+      // one vast bite that lands whole, and feeds a share of it back as health
+      const target = currentTarget(s.enemy)
+      const dmg = st.atk.mul(6 * strength)
+      target.hp = target.hp.sub(dmg)
+      s.events.push({ t: 'hit', target: 'enemy', amount: dmg, crit: true })
+      heal(s, st, f, dmg.mul(0.12))
+      break
+    }
   }
   s.events.push({ t: 'signature', label: cls.signature.label })
 }
