@@ -1009,6 +1009,93 @@ export const SPECIES: Species[] = [
     lore: 'A cat that lived long enough to split its tail in two, stand on its back legs, and remember every cruelty done under its roof.',
     build: bakeneko,
   },
+
+  // ═══ wave 2 — the thousand gates, snow country, sea of trees ═══
+  {
+    id: 'nozuchi', name: 'NOZUCHI', kanji: '野槌', family: 'organs', from: 116, weight: 12, fps: 5,
+    lore: 'A serpent shaped like a wooden mallet, no eyes, no neck, only a mouth. It rolls downhill at you and it does not miss.',
+    build: nozuchi,
+  },
+  {
+    id: 'nurikabe', name: 'NURIKABE', kanji: '塗壁', family: 'organs', from: 120, weight: 11, fps: 3,
+    lore: 'An invisible wall across the night road that grows as you sidestep it. Here it has stopped hiding, and put a slow face on.',
+    build: nurikabe,
+  },
+  {
+    id: 'tsukumogami', name: 'TSUKUMOGAMI', kanji: '付喪神', family: 'chaff', from: 160, weight: 15, fps: 8,
+    lore: 'Tools that reached a hundred years and woke up resentful of every hand that used them. Now they walk in a small angry parade.',
+    build: tsukumogami,
+  },
+  {
+    id: 'hitodama', name: 'HITODAMA', kanji: '人魂', family: 'nothing', from: 160, weight: 11, fps: 6,
+    lore: 'The pale fires that leave a body a little before it dies, or a little after. These have not decided which, and are hungry.',
+    build: hitodama,
+  },
+  {
+    id: 'jatai', name: 'JATAI', kanji: '蛇帯', family: 'returned', from: 165, weight: 12, fps: 6,
+    lore: 'A woman’s sash, worn against her at the end. At night it uncoils, finds the sleeping throat it remembers, and tightens.',
+    build: jatai,
+  },
+  {
+    id: 'basan', name: 'BASAN', kanji: '波山', family: 'chaff', from: 170, weight: 13, fps: 9,
+    lore: 'A great cockerel that haunts the bamboo and breathes a cold blue fire that gives no heat and burns nothing but the nerve.',
+    build: basan,
+  },
+  {
+    id: 'kamaitachi', name: 'KAMAITACHI', kanji: '鎌鼬', family: 'chaff', from: 230, weight: 15, fps: 14,
+    lore: 'Three weasels ride the whirlwind: one knocks you down, one cuts you open, one salves it shut — so it never even hurts.',
+    build: kamaitachi,
+  },
+  {
+    id: 'tsuraraonna', name: 'TSURARA-ONNA', kanji: '氷柱女', family: 'returned', from: 232, weight: 12, fps: 5,
+    lore: 'She forms from a single icicle over a doorway a lonely man admired too long. She is beautiful, and she is very, very cold.',
+    build: tsuraraonna,
+  },
+  {
+    id: 'yamawaro', name: 'YAMAWARO', kanji: '山童', family: 'chaff', from: 234, weight: 14, fps: 10,
+    lore: 'A one-eyed child of the mountain that becomes the rice-paddy god in spring. Hardy, tireless, and it never comes down alone.',
+    build: yamawaro,
+  },
+  {
+    id: 'yukinba', name: 'YUKINBA', kanji: '雪婆', family: 'organs', from: 236, weight: 11, fps: 4,
+    lore: 'The snow’s own grandmother, out in the whiteout on a rimed staff, gathering the ones who sat down to rest just for a moment.',
+    build: yukinba,
+  },
+  {
+    id: 'oshiroibaba', name: 'OSHIROI-BABĀ', kanji: '白粉婆', family: 'returned', from: 240, weight: 12, fps: 5,
+    lore: 'A hag caked in white face-powder, cracked mirror in hand. She served a goddess of paint, and outlived every face she made up.',
+    build: oshiroibaba,
+  },
+  {
+    id: 'yukiwarashi', name: 'YUKI-WARASHI', kanji: '雪童子', family: 'nothing', from: 245, weight: 10, fps: 4,
+    lore: 'The shape of a child pressed into the blizzard, cut from it, and now walking. Where it stands, the warmth simply leaves you.',
+    build: yukiwarashi,
+  },
+  {
+    id: 'aonyobo', name: 'AO-NYŌBŌ', kanji: '青女房', family: 'returned', from: 466, weight: 12, fps: 5,
+    lore: 'A lady of a court that fell four hundred years ago, still at her mirror, still painting her teeth black, still waiting for him.',
+    build: aonyobo,
+  },
+  {
+    id: 'yamabiko', name: 'YAMABIKO', kanji: '山彦', family: 'returned', from: 465, weight: 12, fps: 6,
+    lore: 'The echo that comes back a beat too late and a shade too knowing. Down here the echo has a body, and it answers what you do.',
+    build: yamabiko,
+  },
+  {
+    id: 'nobiagari', name: 'NOBIAGARI', kanji: '伸び上がり', family: 'chaff', from: 462, weight: 13, fps: 7,
+    lore: 'A small dark thing on the path. Look at it and it is taller. Keep looking and it is taller still. Look away is the only counsel.',
+    build: nobiagari,
+  },
+  {
+    id: 'kubikireuma', name: 'KUBIKIRE-UMA', kanji: '首切れ馬', family: 'organs', from: 470, weight: 11, fps: 10,
+    lore: 'A headless horse that gallops the roads on certain nights of certain months. It has somewhere to be, and you are in the way.',
+    build: kubikireuma,
+  },
+  {
+    id: 'jubokko', name: 'JUBOKKO', kanji: '樹木子', family: 'organs', from: 460, weight: 12, fps: 5,
+    lore: 'A tree grown on a battlefield that drank so much blood it needs more. Its branches take you gently, the way roots take water.',
+    build: jubokko,
+  },
 ]
 
 export const SPECIES_BY_ID: Record<string, Species> = Object.fromEntries(
@@ -1398,5 +1485,375 @@ function honekarakasa(_seed: number, phase: number): Sprite {
   blit(s, sprite(['V.V.V', '.V.V.']), cx + 1, y + 6)
   blit(s, sprite(['YKY']), cx + 2, y + 3)
   blit(s, sprite(['V', 'V', 'V']), cx + 3, y + 8, { shear: Math.round(Math.sin(t) * 2) })
+  return outline(s, 'K')
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// WAVE 2 — the thousand gates, the snow country, the sea of trees
+// ═══════════════════════════════════════════════════════════════════════
+
+/** NURIKABE 塗壁 — the wall that blocks the road, with a dim slow face. */
+function nurikabe(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 4
+  const y = 8
+  for (let yy = 0; yy < 30; yy++)
+    for (let xx = 0; xx < 36; xx++) {
+      const brick = (yy % 4 === 0) || ((xx + (Math.floor(yy / 4) % 2) * 4) % 8 === 0)
+      s.px[(y + yy) * W + (cx + xx)] = brick ? 'i' : 'I'
+    }
+  // two dim eyes and a flat mouth, blinking slowly
+  const open = Math.sin(t) > -0.3
+  blit(s, sprite([open ? 'nn' : '..']), cx + 10, y + 11)
+  blit(s, sprite([open ? 'nn' : '..']), cx + 22, y + 11)
+  blit(s, sprite(['nnnnnn']), cx + 14, y + 20)
+  return outline(s, 'K')
+}
+
+/** NOZUCHI 野槌 — a mallet-headed serpent; a heavy overhead. */
+function nozuchi(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 14
+  const rear = Math.round(Math.abs(Math.sin(t)) * -4)
+  // fat mallet head, no eyes to speak of
+  const head = sprite([
+    'mmmmmm',
+    'mMMMMm',
+    'mMMMMm',
+    'mMMMMm',
+    'mmmmmm',
+  ])
+  blit(s, head, cx, 10 + rear)
+  // a thick tapering body coiling down
+  for (let d = 0; d < 14; d++) {
+    const wob = Math.round(Math.sin(t + d * 0.6) * 3)
+    const wdt = 6 - Math.floor(d / 3)
+    for (let x = 0; x < wdt; x++) s.px[(16 + rear + d) * W + (cx + 1 + wob + x)] = d % 2 ? 'm' : 'M'
+  }
+  return outline(s, 'K')
+}
+
+/** TSUKUMOGAMI 付喪神 — a parade of hundred-year tools, walking together. */
+function tsukumogami(seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  // a comb
+  blit(s, sprite(['LLLLL', 'l.l.l', 'l.l.l']), 4, 14 + Math.round(Math.sin(t) * 2))
+  // a teacup with an eye
+  blit(s, sprite(['P...P', 'PpppP', 'PYKpP', 'Pppp.', '.PPP.']), 16, 20 + Math.round(Math.cos(t) * 2))
+  // a folding fan
+  blit(s, sprite(['..V..', '.VVV.', 'VVVVV', 'DDDDD', '..D..']), 28, 12 + Math.round(Math.sin(t + 1) * 2))
+  void seed
+  return outline(s, 'K')
+}
+
+/** JATAI 蛇帯 — a sash that has become a snake, coiling to strangle. */
+function jatai(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 20
+  for (let d = 0; d < 30; d++) {
+    const a = t + d * 0.4
+    const r = 3 + d * 0.35
+    const x = Math.round(cx + Math.cos(a) * r)
+    const y = Math.round(8 + d * 1.1)
+    if (x >= 0 && x < W && y < H) {
+      s.px[y * W + x] = d % 2 ? 'L' : 'l'
+      if (x + 1 < W) s.px[y * W + x + 1] = 'l'
+    }
+  }
+  // the snake head at the loose end
+  blit(s, sprite(['LLL', 'YKL', 'LLL']), cx - 2, 6)
+  return outline(s, 'K')
+}
+
+/** BASAN 波山 — a cockerel that breathes a cold ghost-fire. */
+function basan(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 12
+  const y = 16
+  const body = sprite([
+    '.RR.....',
+    'RRRWW...',
+    '.RWWWWW.',
+    'WWWWWWWW',
+    'WWWWWWW.',
+    '.WWWWWW.',
+    '..W..W..',
+  ])
+  blit(s, body, cx, y)
+  // comb-eye
+  s.px[(y + 2) * W + cx + 1] = 'Y'
+  // a puff of pale fire from the beak, flickering
+  const puff = phase > 0.5
+  if (puff) blit(s, sprite(['FF', 'FoF', 'FF']), cx - 3, y + 1 + Math.round(Math.sin(t) * 2))
+  return outline(s, 'K')
+}
+
+/** HITODAMA 人魂 — soul-flames that gutter, gather, and pull. */
+function hitodama(seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  for (let i = 0; i < 5; i++) {
+    const a = t + i * 1.25
+    const cx = 22 + Math.round(Math.cos(a) * (7 + i))
+    const cy = 22 + Math.round(Math.sin(a) * (6 + i))
+    const flame = sprite(['.U.', 'UUU', 'UpU', '.p.'])
+    blit(s, flame, cx - 1, cy - 1)
+    void seed
+  }
+  return outline(s, 'K')
+}
+
+/** YAMAWARO 山童 — a one-eyed mountain child, hardy, comes in a pack. */
+function yamawaro(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 15
+  const y = 16 + Math.round(Math.abs(Math.sin(t)) * -2)
+  const body = sprite([
+    '..CCCC..',
+    '.CccccC.',
+    'CcYKKccC',
+    'CccccccC',
+    'CcRRRRcC',
+    '.CccccC.',
+    'Cc....cC',
+    'C......C',
+  ])
+  blit(s, body, cx, y)
+  // stubby legs
+  blit(s, sprite(['CC', 'cc']), cx + 1, y + 8, { shear: Math.round(Math.sin(t) * 1) })
+  blit(s, sprite(['CC', 'cc']), cx + 5, y + 8, { shear: Math.round(-Math.sin(t) * 1) })
+  return outline(s, 'K')
+}
+
+/** YUKINBA 雪婆 — the snow-hag; a slow, freezing bulk on a staff. */
+function yukinba(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 12
+  const y = 12 + Math.round(Math.sin(t) * 1)
+  const hag = sprite([
+    '.xxxx.',
+    'xxWWxx',
+    'xWnnWx',
+    'xWWWWx',
+    'xxWWxx',
+    'WWWWWW',
+    'xWWWWx',
+    'xWWWWx',
+    'xxWWxx',
+    '.x..x.',
+  ])
+  blit(s, hag, cx, y)
+  // a tall staff, rime on it
+  for (let d = 0; d < 22; d++) s.px[(y + d) * W + (cx + 9)] = d % 3 === 0 ? 'x' : 'w'
+  return outline(s, 'K')
+}
+
+/** TSURARA-ONNA 氷柱女 — the icicle-woman; a downward drift-spike. */
+function tsuraraonna(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 16 + Math.round(Math.sin(t) * 2)
+  const y = 8
+  const head = sprite(['.xxxx.', 'xxUUxx', 'xUnnUx', 'xUUUUx', '.xUUx.'])
+  blit(s, head, cx, y)
+  // a long tapering icicle body
+  for (let d = 0; d < 26; d++) {
+    const wdt = Math.max(1, 5 - Math.floor(d / 5))
+    for (let x = 0; x < wdt; x++) s.px[(y + 5 + d) * W + (cx + 2 - Math.floor(wdt / 2) + x)] = d % 2 ? 'U' : 'x'
+  }
+  return outline(s, 'K')
+}
+
+/** OSHIROI-BABĀ 白粉婆 — a face caked white, mirror in hand; a blinding. */
+function oshiroibaba(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 12
+  const y = 12
+  const face = sprite([
+    '.WWWWWW.',
+    'WWWWWWWW',
+    'WWKWWKWW',
+    'WWWWWWWW',
+    'WWWnnWWW',
+    'WWKKKKWW',
+    '.WWWWWW.',
+    '.WwwwwW.',
+  ])
+  blit(s, face, cx, y)
+  // a round mirror flashing on the beat
+  const flash = Math.sin(t * 2) > 0.3
+  blit(s, sprite(['III', flash ? 'IWI' : 'IiI', 'III']), cx + 9, y + 6)
+  return outline(s, 'K')
+}
+
+/** KAMAITACHI 鎌鼬 — the sickle-weasel wind; three cuts in one blink. */
+function kamaitachi(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 10
+  const y = 20
+  const weasel = sprite([
+    '.tt.......',
+    'ttYttt....',
+    '.ttttttt..',
+    '..tttttttt',
+    '...tt..tt.',
+  ])
+  blit(s, weasel, cx, y, { shear: Math.round(Math.sin(t * 3) * 2) })
+  // three sickle-cuts slashing the air
+  for (let i = 0; i < 3; i++) {
+    const cxi = cx + 12 + i * 4
+    for (let d = 0; d < 6; d++) s.px[(y - 2 + d) * W + (cxi - d)] = 'I'
+  }
+  return outline(s, 'K')
+}
+
+/** YUKI-WARASHI 雪童子 — a child-shaped absence in the white-out. */
+function yukiwarashi(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 16 + Math.round(Math.sin(t) * 2)
+  const y = 14
+  // a small void child, rimmed in cold light
+  const shape = [
+    '.ZZZZ.',
+    'ZZZZZZ',
+    'ZZZZZZ',
+    '.ZZZZ.',
+    'ZZZZZZ',
+    'ZZZZZZ',
+    '.Z..Z.',
+  ]
+  shape.forEach((row, yy) => {
+    for (let x = 0; x < row.length; x++) if (row[x] === 'Z') s.px[(y + yy) * W + (cx + x)] = 'Z'
+  })
+  return outline(s, 'x')
+}
+
+/** JUBOKKO 樹木子 — a blood-drinking tree; roots grab and drain. */
+function jubokko(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 16
+  // trunk
+  for (let d = 0; d < 24; d++)
+    for (let x = 0; x < 6; x++) s.px[(14 + d) * W + (cx + x)] = x < 2 || x > 3 ? 'm' : 'H'
+  // grasping branches
+  for (let i = 0; i < 4; i++) {
+    const a = t + i * 1.6
+    const bx = cx + 3 + Math.round(Math.cos(a) * 10)
+    const by = 12 + i * 3 + Math.round(Math.sin(a) * 2)
+    if (by >= 0 && by < H && bx >= 0 && bx < W) {
+      s.px[by * W + bx] = 'H'
+      s.px[by * W + Math.max(0, bx - 1)] = 'C'
+    }
+  }
+  // blood dripping from the bark
+  for (let i = 0; i < 3; i++) s.px[((18 + i * 4 + Math.round(t * 2)) % 38) * W + (cx + 2)] = 'R'
+  return outline(s, 'K')
+}
+
+/** YAMABIKO 山彦 — an echo given a body; it answers you with a copy. */
+function yamabiko(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 12
+  const y = 16
+  const body = sprite([
+    '.uuuu.',
+    'uuuuuu',
+    'uYuuYu',
+    'uuUUuu',
+    'uuuuuu',
+    '.uUUu.',
+    'uu..uu',
+  ])
+  blit(s, body, cx, y)
+  // a faint echo of itself, offset, pulsing in and out
+  const off = 6 + Math.round(Math.abs(Math.sin(t)) * 4)
+  const echo = sprite(['.ee.', 'eeee', 'eeee', '.ee.'])
+  blit(s, echo, cx + off, y + 1)
+  return outline(s, 'K')
+}
+
+/** NOBIAGARI 伸び上がり — a thing that grows taller the longer you look. */
+function nobiagari(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const grow = Math.round((Math.sin(phase * Math.PI * 2 - Math.PI / 2) * 0.5 + 0.5) * 16)
+  const cx = 18
+  const top = 30 - grow
+  // a thin dark column that rises
+  for (let y = top; y < 34; y++) {
+    s.px[y * W + cx] = 'n'
+    s.px[y * W + cx + 1] = 'H'
+    s.px[y * W + cx + 2] = 'H'
+    s.px[y * W + cx + 3] = 'n'
+  }
+  // a small head that lifts with it
+  blit(s, sprite(['nHHn', 'HYYH', 'HHHH']), cx, top - 3)
+  return outline(s, 'K')
+}
+
+/** KUBIKIRE-UMA 首切れ馬 — a headless horse; a trampling charge. */
+function kubikireuma(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 4
+  const y = 16
+  const body = sprite([
+    '...HHHHHHHH..',
+    '..HHHHHHHHHH.',
+    '.HHHHHHHHHHHH',
+    'HHHHHHHHHHHH.',
+    '.HH..HH..HH..',
+  ])
+  blit(s, body, cx, y)
+  // the severed neck stump, bleeding
+  blit(s, sprite(['RR', 'Rn', 'RR']), cx + 10, y + 1)
+  // galloping legs
+  const g = Math.round(Math.sin(t * 3) * 2)
+  blit(s, sprite(['H', 'H', 'n']), cx + 2, y + 5, { shear: g })
+  blit(s, sprite(['H', 'H', 'n']), cx + 9, y + 5, { shear: -g })
+  return outline(s, 'K')
+}
+
+/** AO-NYŌBŌ 青女房 — a blue court-lady still waiting, centuries on. */
+function aonyobo(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 12
+  const y = 8
+  const head = sprite([
+    'HHHHHHHH',
+    'HHHHHHHH',
+    'HAAAAAAH',
+    'HAKAAKAH',
+    'HAAAAAAH',
+    'HARRRRAH',
+    '.AAAAAA.',
+  ])
+  const robe = sprite([
+    '.AAAAAA.',
+    'AAaaaaAA',
+    'AaAAAAaA',
+    'AaAAAAaA',
+    'AAaaaaAA',
+    'AaAAAAaA',
+    '.AAAAAA.',
+  ])
+  // long sleeves swaying
+  blit(s, sprite(['A', 'a', 'A', 'a']), cx - 1, y + 8, { shear: Math.round(Math.sin(t) * 2) })
+  blit(s, sprite(['A', 'a', 'A', 'a']), cx + 8, y + 8, { flip: true, shear: Math.round(-Math.sin(t) * 2) })
+  blit(s, robe, cx, y + 8)
+  blit(s, head, cx, y)
+  dissolveLegs(s, y + 15)
   return outline(s, 'K')
 }
