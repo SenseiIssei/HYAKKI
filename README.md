@@ -31,9 +31,9 @@ It is built on a hard rule: **zero art and zero audio assets.** Every sprite is 
 
 <div align="center">
 <br/>
-<img src=".github/assets/bestiary.svg" alt="All twenty-four yōkai rendered from the game's own sprite engine" width="94%" />
+<img src=".github/assets/bestiary.svg" alt="All seventy-four yōkai rendered from the game's own sprite engine" width="96%" />
 <br/>
-<sub><i>All <b>twenty-four</b> yōkai — every one a real creature from the folklore, every one <b>animated</b>, each rendered straight from the game's own sprite engine into this image. No two share a silhouette; not one stands still.</i></sub>
+<sub><i>All <b>seventy-four</b> yōkai — every one a real creature from the folklore, every one <b>animated</b>, each rendered straight from the game's own sprite engine into this image. No two share a silhouette; not one stands still.</i></sub>
 </div>
 
 ---
@@ -83,17 +83,18 @@ It is built on a hard rule: **zero art and zero audio assets.** Every sprite is 
 ```mermaid
 %%{init: {'theme':'base','themeVariables':{'pie1':'#c1372b','pie2':'#b8912f','pie3':'#46707a','pie4':'#5a4663','pie5':'#4a6b3f','pieStrokeColor':'#0a0908','pieOuterStrokeColor':'#251e19','pieTitleTextColor':'#e4dccb','pieSectionTextColor':'#0a0908','pieLegendTextColor':'#9a9081'}}}%%
 pie showData
-    title Twenty-four yōkai, four families
-    "Chaff — the small and many" : 7
-    "Organs — the horned and heavy" : 7
-    "Returned — the dead by how they died" : 7
-    "Nothing — the Mu, a hole in the world" : 3
+    title Seventy-four yōkai, four families
+    "Chaff — the small and many" : 21
+    "Organs — the horned and heavy" : 22
+    "Returned — the dead by how they died" : 19
+    "Nothing — the Mu, a hole in the world" : 12
     "The Ten Kings" : 10
 ```
 
 | | |
 |---|---:|
-| Yōkai species (+ 10 Kings) | **24** |
+| Yōkai species (+ 10 Kings) | **74** |
+| Biomes, each with its own mode of music | **12** |
 | Auto-cast arts | **6** |
 | Stories in the Hyakumonogatari | **100** |
 | Playable classes | **7** |
