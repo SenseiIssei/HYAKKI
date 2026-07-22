@@ -1184,6 +1184,25 @@ export const SPECIES_BY_ID: Record<string, Species> = Object.fromEntries(
   SPECIES.map((s) => [s.id, s]),
 )
 
+/**
+ * The marquee dead — kings, heralds, and the vast faces of the deep. Not
+ * Wardens (those are the Ten Kings, apart), but species imposing enough to earn
+ * a presence: an aura, their name looming behind them, a heavier blow. Purely a
+ * matter of presentation — the sim neither knows nor cares which these are.
+ */
+export const BOSS_SPECIES = new Set([
+  'umibozu',
+  'datsueba',
+  'okubi',
+  'yamajiji',
+  'kanaoboni',
+  'shutendoji',
+  'enmanotsukai',
+  'koku',
+  'yato',
+])
+export const isBoss = (id?: string): boolean => !!id && BOSS_SPECIES.has(id)
+
 /** Which species this particular thing is. Deterministic from its seed. */
 export function speciesFor(
   family: Species['family'],

@@ -4,7 +4,7 @@ import { BALANCE as B } from '../content/balance'
 import { CLASS_BY_ID } from '../content/classes'
 import { WARDEN_BY_ID } from '../content/wardens'
 import { currentTarget } from '../sim/enemies'
-import { SPECIES_BY_ID } from '../pixel/species'
+import { SPECIES_BY_ID, isBoss } from '../pixel/species'
 import { Backdrop, regionFor } from './Backdrop'
 import { setAmbience } from '../audio/engine'
 import { PixelCorpse, PixelWalker, PixelYokai } from './PixelActor'
@@ -132,6 +132,7 @@ export function Column() {
   }, [region.id])
 
   const species = target.speciesId ? SPECIES_BY_ID[target.speciesId] : null
+  const boss = isBoss(target.speciesId) && g.enemy.untargetable === 0
   const floaters = getFloaters()
   const deaths = getDeaths()
   const casts = getCasts()
@@ -315,8 +316,8 @@ export function Column() {
 
         <div
           className={`combatant ${recoil === 'enemy' ? 'recoil-right' : ''} ${
-            enemyAttack ? `enemy-attack fam-${target.family}` : ''
-          }`}
+            enemyAttack ? `enemy-attack fam-${target.family} ${boss ? 'boss-attack' : ''}` : ''
+          } ${boss ? 'is-boss' : ''}`}
         >
           <SparkBurst sparks={sparks} side="enemy" />
           <div className="floaters">
@@ -327,6 +328,13 @@ export function Column() {
               g.enemy.tellTicks > 0 ? 'telegraph' : ''
             }`}
           >
+            {/* a king's name looms behind it, and a presence pulses around it */}
+            {boss && species && (
+              <span className="boss-loom" aria-hidden="true">
+                {species.kanji}
+              </span>
+            )}
+            {boss && <span className="boss-aura" aria-hidden="true" />}
             <PixelYokai enemy={target} flash={enemyHurt} />
             {/* the fallen, dissolving where they stood */}
             {deaths.map((d) => (
