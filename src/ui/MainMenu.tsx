@@ -94,6 +94,7 @@ export function MainMenu({
             {hasWalked && (g.interments > 0 || g.apotheoses > 0) && (
               <button
                 className="menu-btn"
+                data-kind="delve"
                 onClick={() => {
                   onContinue()
                   setDescend(true)
@@ -106,6 +107,7 @@ export function MainMenu({
             {hasWalked && (
               <button
                 className="menu-btn"
+                data-kind="gear"
                 onClick={() => {
                   onContinue()
                   setRelics(true)
@@ -118,7 +120,7 @@ export function MainMenu({
               </button>
             )}
             {g.fragments.length > 0 && (
-              <button className="menu-btn" onClick={() => setStories(true)}>
+              <button className="menu-btn" data-kind="lore" onClick={() => setStories(true)}>
                 {t('menu.candles')}
                 <span className="menu-sub">
                   {g.snuffed.length > 0
@@ -128,7 +130,7 @@ export function MainMenu({
               </button>
             )}
             {g.ofudaOwned.length > 0 && (
-              <button className="menu-btn" onClick={() => setWards(true)}>
+              <button className="menu-btn" data-kind="vow" onClick={() => setWards(true)}>
                 {t('menu.wards')}
                 <span className="menu-sub">
                   {g.ofuda.length > 0 ? `carrying ${fmtInt(g.ofuda.length)}` : t('menu.wards_sub')}
@@ -136,7 +138,7 @@ export function MainMenu({
               </button>
             )}
             {hasWalked && (
-              <button className="menu-btn" onClick={() => setLedger(true)}>
+              <button className="menu-btn" data-kind="lore" onClick={() => setLedger(true)}>
                 {t('menu.register')}
                 <span className="menu-sub">{t('menu.register_sub')}</span>
               </button>

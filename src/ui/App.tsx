@@ -5,6 +5,7 @@ import { hardReset } from '../save/storage'
 import { Backdrop } from './Backdrop'
 import { MainMenu } from './MainMenu'
 import { WindowBar } from './WindowBar'
+import { ActionButton } from './ActionButton'
 import { EquipPrompt } from './EquipPrompt'
 import { useGameLoop } from '../loop/useGameLoop'
 import { CLASS_BY_ID } from '../content/classes'
@@ -245,36 +246,55 @@ export function App() {
         <Lower />
         {g.seen.ash && (
           <div className="actionbar">
-            <button className="small-btn" onClick={() => setTree(true)}>
-              The Cairn
-              {g.ash.gte(8) && <span className="dot" />}
-            </button>
-            <button className="small-btn" onClick={() => setOrdersOpen(true)}>
-              The Vow
-              {ordersUnlocked() && !g.orders.enabled && <span className="dot" />}
-            </button>
+            <ActionButton
+              kind="grow"
+              title="The Cairn"
+              sub="Spend ash to grow stronger"
+              dot={g.ash.gte(8)}
+              onClick={() => setTree(true)}
+            />
+            <ActionButton
+              kind="vow"
+              title="The Vow"
+              sub="Set a standing order"
+              dot={ordersUnlocked() && !g.orders.enabled}
+              onClick={() => setOrdersOpen(true)}
+            />
             {(g.reveilles >= 10 || g.interments > 0 || g.names > 0) && (
-              <button className="small-btn" onClick={() => setBargain(true)}>
-                Enshrinement
-                {(intermentReady() || g.names > 0) && <span className="dot" />}
-              </button>
+              <ActionButton
+                kind="prestige"
+                title="Enshrinement"
+                sub="Retire this soldier for power"
+                dot={intermentReady() || g.names > 0}
+                onClick={() => setBargain(true)}
+              />
             )}
             {(g.interments > 0 || g.apotheoses > 0) && (
-              <button className="small-btn" onClick={() => setDescend(true)}>
-                Enter Dungeon
-                {(keysHeld() >= 1 || readyDescents().length > 0) && <span className="dot" />}
-              </button>
+              <ActionButton
+                kind="delve"
+                title="Enter Dungeon"
+                sub="Delve with your gear for loot"
+                dot={keysHeld() >= 1 || readyDescents().length > 0}
+                onClick={() => setDescend(true)}
+              />
             )}
             {(g.interments >= 1 || g.apotheoses > 0 || g.fragments.length > 0) && (
-              <button className="small-btn" onClick={() => setAscend(true)}>
-                Becoming
-                {(ascendReady() || g.ichor > 0) && <span className="dot" />}
-              </button>
+              <ActionButton
+                kind="become"
+                title="Becoming"
+                sub="Spend souls on lasting power"
+                dot={ascendReady() || g.ichor > 0}
+                onClick={() => setAscend(true)}
+              />
             )}
             {(g.inventory.length > 0 || g.equipped.some(Boolean)) && (
-              <button className="small-btn" onClick={() => setRelics(true)}>
-                Carried {g.inventory.length > 0 && <span className="dot" />}
-              </button>
+              <ActionButton
+                kind="gear"
+                title="Carried"
+                sub="Your gear & inventory"
+                dot={g.inventory.length > 0}
+                onClick={() => setRelics(true)}
+              />
             )}
             <StackButton />
           </div>

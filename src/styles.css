@@ -2233,10 +2233,11 @@ button {
 
 .small-btn {
   border: 1px solid var(--void-edge);
-  padding: 8px 14px;
-  font-size: 10px;
-  letter-spacing: var(--label);
-  text-transform: uppercase;
+  padding: 9px 15px;
+  /* was 10px uppercase — too small to scan at a glance; 12.5px reads cleanly */
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  text-transform: none;
   color: var(--bone-dim);
 }
 
@@ -2251,9 +2252,9 @@ button {
 }
 
 .hint {
-  font-size: 10.5px;
-  color: var(--ash);
-  line-height: 1.6;
+  font-size: 12.5px;
+  color: var(--bone-dim);
+  line-height: 1.65;
 }
 
 /* ── mobile ─────────────────────────────────────────────────── */
@@ -2731,4 +2732,70 @@ button {
 @keyframes die-warden {
   0% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: brightness(1.4); }
   100% { opacity: 0; transform: translate(-50%, -48%) scale(1.05); filter: brightness(0.15) saturate(0.4); }
+}
+
+/* ═══════════ SELF-SPEAKING, COLOUR-CODED ACTIONS ═══════════ */
+/* One accent per KIND of action, so the eye groups them at a glance and the
+   bottom bar reads as a menu of choices instead of a row of cryptic words. */
+[data-kind='grow'] { --accent: var(--gold); }
+[data-kind='vow'] { --accent: var(--ichor); }
+[data-kind='prestige'] { --accent: var(--blood); }
+[data-kind='delve'] { --accent: #8a6ba0; } /* a lit defilement violet */
+[data-kind='become'] { --accent: #d8b24a; } /* brighter gold — the deepest path */
+[data-kind='gear'] { --accent: #9fb0a4; } /* pale jade — things you carry */
+[data-kind='lore'] { --accent: var(--ichor); }
+
+/* the bottom action bar: let the two-line buttons breathe and wrap */
+.actionbar {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.act-btn {
+  flex: 1 1 auto;
+  min-width: 132px;
+  max-width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 9px 13px;
+  text-align: left;
+  border: 1px solid var(--void-edge);
+  border-left: 3px solid color-mix(in srgb, var(--accent) 60%, var(--void-edge));
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  transition: background 150ms ease, border-color 150ms ease, transform 120ms ease;
+}
+.act-btn:hover {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-color: var(--accent);
+  border-left-color: var(--accent);
+  transform: translateY(-1px);
+}
+.act-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--bone);
+  display: flex;
+  align-items: center;
+}
+.act-btn:hover .act-title { color: color-mix(in srgb, var(--accent) 45%, var(--bone)); }
+.act-sub {
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--bone-dim);
+}
+.act-btn .dot { background: var(--accent); }
+
+/* the front-menu buttons pick up the same accent language */
+.menu-btn[data-kind] { border-left: 3px solid color-mix(in srgb, var(--accent) 55%, var(--void-edge)); }
+.menu-btn[data-kind]:hover { border-left-color: var(--accent); }
+
+@media (max-width: 760px) {
+  .act-btn { min-width: 44%; max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .act-btn:hover { transform: none; }
 }
