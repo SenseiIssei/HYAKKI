@@ -1897,3 +1897,57 @@ describe('visual gear', () => {
     expect(equipGlow(mixed)).toBe('#cf4436') // myth beats named
   })
 })
+
+describe('dungeon loot', () => {
+  function deepDungeonRun(depth: number, seed: number) {
+    // A player kept deliberately over-levelled for the dungeon's rank, so they
+    // actually survive the rooms — the dungeon scales to bestRankEver, so a low
+    // best with a fat tree crushes it and the loot flows.
+    const s = createInitialState('hoplite', seed)
+    s.bestRankEver = 25
+    s.treeLevels = { edge: 45, reinforce: 45, meat: 45, scar: 30, clot: 20 }
+    s.interments = 1
+    s.soldier.hp = computeStats(s).hp
+    const layerId = LAYER_BY_ID[Object.keys(LAYER_BY_ID)[0]].id
+    const map = generateMap(layerId, depth, (depth * 7919 + seed) >>> 0)
+    const route = autoRoute(map)
+    return resolveDescent(s, map, route, seed * 31 + depth)
+  }
+
+  it('deeper dungeons drop rarer things, on average', () => {
+    const rarityScore = (rs: { rarity: string }[]) =>
+      rs.reduce((a, r) => a + ['issued','kept','named','blessed','cursed','myth','truename'].indexOf(r.rarity), 0)
+    let shallow = 0
+    let deep = 0
+    for (let i = 0; i < 40; i++) {
+      shallow += rarityScore(deepDungeonRun(1, i + 1).relics)
+      deep += rarityScore(deepDungeonRun(10, i + 1).relics)
+    }
+    // more depth → higher total rarity across the same number of runs
+    expect(deep).toBeGreaterThan(shallow)
+  })
+
+  it('a dungeon run yields loot to carry back — even from the way down', () => {
+    let withLoot = 0
+    for (let i = 0; i < 30; i++) {
+      const r = deepDungeonRun(2, i + 100)
+      if (r.relics.length > 0) withLoot++
+    }
+    // most runs turn up at least one thing
+    expect(withLoot).toBeGreaterThan(15)
+  })
+
+  it('clearing to the Warden yields a guaranteed boss drop', () => {
+    // drive the sim over depth-1 runs until one clears; the floor pays out
+    let sawClearedWithLoot = false
+    for (let i = 0; i < 60 && !sawClearedWithLoot; i++) {
+      const r = deepDungeonRun(1, i + 7)
+      if (r.cleared) {
+        // a cleared run always brings something back (the Warden's drop at least)
+        expect(r.relics.length).toBeGreaterThan(0)
+        sawClearedWithLoot = true
+      }
+    }
+    expect(sawClearedWithLoot).toBe(true)
+  })
+})

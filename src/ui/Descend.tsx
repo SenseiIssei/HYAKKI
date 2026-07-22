@@ -31,6 +31,7 @@ import {
   useUI,
 } from '../store/gameStore'
 import { relicLabel } from '../sim/relics'
+import { RARITIES, RARITY_ORDER, SLOT_META } from '../content/relics'
 
 /** docs/08-DESCENTS.md */
 export function Descend() {
@@ -317,20 +318,33 @@ export function DescentReport({ id }: { id: string }) {
           ))}
         </div>
         {r.relics.length > 0 && (
-          <div className="report-stats">
-            {r.relics.map((relic, i) => (
-              <div key={i} className="report-row">
-                <span>carried back</span>
-                <span>{relicLabel(relic)}</span>
-              </div>
-            ))}
+          <div className="loot-reveal">
+            <div className="loot-head">
+              {r.relics.length} recovered {r.cleared ? '' : '· carried out of the dark'}
+            </div>
+            {[...r.relics]
+              .sort((a, b) => RARITY_ORDER.indexOf(b.rarity) - RARITY_ORDER.indexOf(a.rarity))
+              .map((relic, i) => {
+                const c = RARITIES[relic.rarity].color
+                return (
+                  <div key={i} className="loot-item" style={{ borderColor: c }}>
+                    <span className="loot-kanji" style={{ color: c }}>
+                      {SLOT_META[relic.slot].kanji}
+                    </span>
+                    <span className="loot-name" style={{ color: c }}>
+                      {relicLabel(relic)}
+                    </span>
+                    <span className="loot-tier">{RARITIES[relic.rarity].label}</span>
+                  </div>
+                )
+              })}
           </div>
         )}
         <div className="ash-award">
           <div className="ash-number">◈ {fmt(new Decimal(r.ash))}</div>
         </div>
         <button className="big-btn" onClick={() => collectDescent(d.id)}>
-          Take it
+          Take it {r.relics.length > 0 ? `· ${r.relics.length} to the bag` : ''}
         </button>
       </div>
     </div>

@@ -24,6 +24,7 @@ export function MainMenu({
   const setLedger = useUI((s) => s.setLedger)
   const setWards = useUI((s) => s.setWards)
   const setStories = useUI((s) => s.setStories)
+  const setDescend = useUI((s) => s.setDescend)
   const [confirming, setConfirming] = useState(false)
 
   const played = g.totalTicks > 0
@@ -90,6 +91,18 @@ export function MainMenu({
               {hasWalked ? 'Begin again' : 'Walk in'}
               {!hasWalked && <span className="menu-sub">choose what you were</span>}
             </button>
+            {hasWalked && (g.interments > 0 || g.apotheoses > 0) && (
+              <button
+                className="menu-btn"
+                onClick={() => {
+                  onContinue()
+                  setDescend(true)
+                }}
+              >
+                Enter Dungeon
+                <span className="menu-sub">delve with your gear · loot the dark</span>
+              </button>
+            )}
             {g.ofudaOwned.length > 0 && (
               <button className="menu-btn" onClick={() => setWards(true)}>
                 The Wards

@@ -333,3 +333,49 @@
   color: var(--blood);
   font-style: italic;
 }
+
+/* ── dungeon loot reveal ── */
+.loot-reveal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 14px 0;
+  width: 100%;
+  max-width: 380px;
+}
+.loot-head {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+  text-align: center;
+  margin-bottom: 2px;
+}
+.loot-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  border: 1px solid var(--void-edge);
+  border-left-width: 3px;
+  background: var(--void-lift);
+  padding: 7px 11px;
+  animation: loot-in 360ms ease-out both;
+}
+.loot-item:nth-child(2) { animation-delay: 60ms; }
+.loot-item:nth-child(3) { animation-delay: 120ms; }
+.loot-item:nth-child(4) { animation-delay: 180ms; }
+.loot-item:nth-child(5) { animation-delay: 240ms; }
+@keyframes loot-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.loot-kanji { font-family: var(--jp); font-size: 18px; }
+.loot-name { font-family: var(--serif); font-size: 15px; flex: 1; }
+.loot-tier {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ash);
+}

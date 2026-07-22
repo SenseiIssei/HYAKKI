@@ -195,11 +195,22 @@ function forkForDescent(s: GameState, rank: number): GameState {
 type Ctx = {
   layer: LayerDef
   rank: number
+  /** how deep the delve was set — deeper dungeons drop rarer things */
+  depth: number
   rng: Rng
   /** THE OSSUARY */
   bonePiles: number
   /** THE CHOIR */
   allies: number
+}
+
+/**
+ * The rarity bias a drop rolls with. A room's own generosity, lifted by how
+ * deep the dungeon was set — so a depth-10 delve is meaningfully better loot
+ * than a depth-1 one, which is the whole reason to push deeper.
+ */
+function lootBonus(ctx: Ctx, base: number): number {
+  return base + ctx.depth * 0.12
 }
 
 /**
@@ -280,12 +291,12 @@ function resolveRoom(
       // Warden of the same name in the Column.
       fightRoom(g, ctx, 1, 3, 1.3)
       if (!g.dead) {
-        loot.push(rollRelic(relicSeed(ctx.rank, loot.length, ctx.rng.state), ctx.rank, 0.6))
+        loot.push(rollRelic(relicSeed(ctx.rank, loot.length, ctx.rng.state), ctx.rank, lootBonus(ctx, 0.6)))
         text = 'Something big. It was carrying something.'
       } else text = 'Something big.'
       break
     case 'cache':
-      loot.push(rollRelic(relicSeed(ctx.rank, loot.length + 77, ctx.rng.state), ctx.rank, 0.3))
+      loot.push(rollRelic(relicSeed(ctx.rank, loot.length + 77, ctx.rng.state), ctx.rank, lootBonus(ctx, 0.3)))
       text = 'Left here on purpose. Not for you.'
       break
     case 'shrine': {
@@ -308,7 +319,7 @@ function resolveRoom(
       const need = enemyAtk(ctx.rank, 'chaff').mul(12)
       const passed = st.arm.gt(need) || st.atk.gt(need.mul(3)) || st.hp.gt(need.mul(20))
       if (passed) {
-        loot.push(rollRelic(relicSeed(ctx.rank, loot.length + 991, ctx.rng.state), ctx.rank, 1.2))
+        loot.push(rollRelic(relicSeed(ctx.rank, loot.length + 991, ctx.rng.state), ctx.rank, lootBonus(ctx, 1.2)))
         text = 'Only the heavy pass. You were heavy enough.'
       } else {
         g.soldier.hp = g.soldier.hp.sub(st.hp.mul(0.3))
@@ -339,6 +350,13 @@ function resolveRoom(
       // the same shape as a Stand: eight times the health, 1.6x the bite
       fightRoom(g, ctx, 1, B.STAND_HP_MULT, B.STAND_ATK_MULT)
       const def = WARDEN_BY_ID[ctx.layer.wardenId]
+      if (!g.dead) {
+        // the floor of the dungeon pays best — a guaranteed high-rarity drop,
+        // and the deeper the delve the better the odds
+        loot.push(
+          rollRelic(relicSeed(ctx.rank, loot.length + 500, ctx.rng.state), ctx.rank, lootBonus(ctx, 1.6)),
+        )
+      }
       text = g.dead
         ? `${def?.name ?? 'It'} is still standing.`
         : (def?.defeatLine ?? 'It stops.')
@@ -365,7 +383,7 @@ export function resolveDescent(
   const layer = LAYER_BY_ID[map.layerId]
   const rank = descentRank(s, layer, map.depth)
   const g = forkForDescent(s, rank)
-  const ctx: Ctx = { layer, rank, rng: new Rng(seed >>> 0), bonePiles: 0, allies: 0 }
+  const ctx: Ctx = { layer, rank, depth: map.depth, rng: new Rng(seed >>> 0), bonePiles: 0, allies: 0 }
 
   const loot: Relic[] = []
   const rooms: RoomOutcome[] = []

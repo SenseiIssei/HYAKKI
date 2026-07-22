@@ -256,9 +256,9 @@ export function App() {
                 {(intermentReady() || g.names > 0) && <span className="dot" />}
               </button>
             )}
-            {g.interments > 0 && (
+            {(g.interments > 0 || g.apotheoses > 0) && (
               <button className="small-btn" onClick={() => setDescend(true)}>
-                The Hells
+                Enter Dungeon
                 {(keysHeld() >= 1 || readyDescents().length > 0) && <span className="dot" />}
               </button>
             )}
