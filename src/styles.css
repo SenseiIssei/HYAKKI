@@ -2956,3 +2956,21 @@ button {
   padding: 1px 6px;
   z-index: 3;
 }
+
+/* bestiary: mark the kings among the recorded */
+.mon-king { border-color: color-mix(in srgb, var(--gold) 55%, var(--void-edge)); background: color-mix(in srgb, var(--gold) 6%, transparent); }
+.mon-king .mon-name { color: var(--gold); }
+.mon-king-tag {
+  position: absolute;
+  top: -8px;
+  right: 6px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--void);
+  background: color-mix(in srgb, var(--gold) 88%, var(--bone));
+  padding: 1px 6px;
+  z-index: 3;
+}
+
+.mon { position: relative; }

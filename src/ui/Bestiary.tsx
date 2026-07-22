@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { draw } from '../pixel/engine'
 import { YOKAI_PAL } from '../pixel/yokai'
-import { SPECIES, type Species } from '../pixel/species'
+import { SPECIES, isBoss, type Species } from '../pixel/species'
 import { bestiaryCompletedFamilies, BESTIARY_ATK_PER_FAMILY } from '../sim/stats'
 import { game, getDiscovery, useUI } from '../store/gameStore'
 import { fmtInt } from '../format'
@@ -67,12 +67,16 @@ function MonSprite({ sp, met }: { sp: Species; met: boolean }) {
 
 function Mon({ sp, count, justMet }: { sp: Species; count: number; justMet?: boolean }) {
   const met = count > 0
+  const king = isBoss(sp.id)
   return (
     <div
-      className={`mon ${met ? '' : 'mon-locked'} ${justMet ? 'mon-new' : ''}`}
+      className={`mon ${met ? '' : 'mon-locked'} ${justMet ? 'mon-new' : ''} ${
+        king && met ? 'mon-king' : ''
+      }`}
       data-family={sp.family}
     >
       {justMet && <span className="mon-new-tag">just met</span>}
+      {king && met && !justMet && <span className="mon-king-tag">a king</span>}
       <div className="mon-art">
         <MonSprite sp={sp} met={met} />
       </div>
