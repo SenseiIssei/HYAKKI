@@ -24,7 +24,18 @@ export type Region = {
   mid: string
   near: string
   /** what stands along the road */
-  motif: 'bamboo' | 'torii' | 'lanterns' | 'stones' | 'pillars' | 'none'
+  motif:
+    | 'bamboo'
+    | 'torii'
+    | 'lanterns'
+    | 'stones'
+    | 'pillars'
+    | 'trees'
+    | 'reeds'
+    | 'posts'
+    | 'deadtrees'
+    | 'stacks'
+    | 'none'
   /** ambient particles: petals, ash, embers, snow, none */
   motes: 'petals' | 'ash' | 'embers' | 'snow' | 'none'
 }
@@ -38,7 +49,7 @@ export const REGIONS: Region[] = [
   {
     id: 'paddies', from: 30, name: 'The Drowned Paddies',
     sky: ['#0c130f', '#0a0908'], far: '#122019', mid: '#152a20', near: '#0a120d',
-    motif: 'stones', motes: 'none',
+    motif: 'reeds', motes: 'none',
   },
   {
     id: 'village', from: 60, name: 'The Emptied Village',
@@ -58,7 +69,7 @@ export const REGIONS: Region[] = [
   {
     id: 'snow', from: 230, name: 'The Snow Country',
     sky: ['#161a1e', '#0b0d10'], far: '#232c34', mid: '#2e3a44', near: '#141a1f',
-    motif: 'none', motes: 'snow',
+    motif: 'deadtrees', motes: 'snow',
   },
   {
     id: 'sanzu', from: 320, name: 'The River',
@@ -68,7 +79,7 @@ export const REGIONS: Region[] = [
   {
     id: 'aokigahara', from: 460, name: 'The Sea of Trees',
     sky: ['#0b110c', '#070a07'], far: '#111c12', mid: '#152615', near: '#0a110a',
-    motif: 'pillars', motes: 'none',
+    motif: 'trees', motes: 'none',
   },
   {
     id: 'jigoku', from: 700, name: 'The Burning Ground',
@@ -78,12 +89,12 @@ export const REGIONS: Region[] = [
   {
     id: 'bridges', from: 900, name: 'The Hundred-Bridge Marsh',
     sky: ['#0b1013', '#080a0b'], far: '#101a1f', mid: '#152329', near: '#0a1013',
-    motif: 'stones', motes: 'none',
+    motif: 'posts', motes: 'none',
   },
   {
     id: 'iron', from: 1400, name: 'The Iron Wastes',
     sky: ['#14100c', '#0a0806'], far: '#231a12', mid: '#2f2116', near: '#130d09',
-    motif: 'pillars', motes: 'embers',
+    motif: 'stacks', motes: 'embers',
   },
   {
     id: 'muken', from: 2000, name: 'Without Interval',
@@ -186,6 +197,95 @@ function pillars(seed: number, n: number): string {
   return d
 }
 
+/** dense conifers — the sea of trees, close and windless */
+function trees(seed: number, n: number): string {
+  const r = new Rng(seed)
+  let d = ''
+  for (let i = 0; i < n; i++) {
+    const x = (i / n) * 400 + r.range(-14, 14)
+    const th = r.range(70, 150)
+    const top = 200 - th
+    const w = r.range(16, 30)
+    // a trunk
+    d += `M ${x - 2} 200 L ${x - 2} ${top + th * 0.4} L ${x + 2} ${top + th * 0.4} L ${x + 2} 200 Z `
+    // three stacked boughs, widening downward
+    for (let s = 0; s < 3; s++) {
+      const ty = top + (s * th) / 3.2
+      const tw = (w * (s + 1.4)) / 3
+      d += `M ${x} ${ty} L ${x + tw} ${ty + th / 3} L ${x - tw} ${ty + th / 3} Z `
+    }
+  }
+  return d
+}
+
+/** marsh reeds / rice stalks — thin, leaning, with a heavy head */
+function reeds(seed: number, n: number): string {
+  const r = new Rng(seed)
+  let d = ''
+  const cnt = n * 5
+  for (let i = 0; i < cnt; i++) {
+    const x = (i / cnt) * 400 + r.range(-4, 4)
+    const top = r.range(70, 150)
+    const lean = r.range(-6, 6)
+    d += `M ${x} 200 L ${x + lean} ${top} L ${x + lean + 1.4} ${top} L ${x + 1.4} 200 Z `
+    // a drooping seed head
+    d += `M ${x + lean - 2} ${top} L ${x + lean + 3.4} ${top} L ${x + lean + 1} ${top - 8} Z `
+  }
+  return d
+}
+
+/** bridge posts / pilings over black water, tied with a rail */
+function posts(seed: number, n: number): string {
+  const r = new Rng(seed)
+  let d = ''
+  const railY = r.range(70, 100)
+  for (let i = 0; i < n; i++) {
+    const x = (i / n) * 400 + r.range(-6, 6)
+    const w = r.range(6, 11)
+    const top = railY + r.range(-8, 4)
+    d += `M ${x} 200 L ${x} ${top} L ${x + w} ${top} L ${x + w} 200 Z `
+    // a stub of cross-rail off each post
+    d += `M ${x + w} ${top + 4} L ${x + w + 26} ${top + r.range(-2, 6)} L ${x + w + 26} ${top + 8} L ${x + w} ${top + 8} Z `
+  }
+  return d
+}
+
+/** bare, branching dead trees — the snow country */
+function deadtrees(seed: number, n: number): string {
+  const r = new Rng(seed)
+  let d = ''
+  for (let i = 0; i < n; i++) {
+    const x = (i / n) * 400 + r.range(-16, 16)
+    const th = r.range(60, 130)
+    const top = 200 - th
+    d += `M ${x - 1.5} 200 L ${x - 2.5} ${top} L ${x + 2.5} ${top} L ${x + 1.5} 200 Z `
+    // a few bare branches forking off
+    const branches = r.int(2, 5)
+    for (let b = 0; b < branches; b++) {
+      const by = top + r.range(4, th * 0.6)
+      const dir = r.range(-1, 1) > 0 ? 1 : -1
+      const bl = r.range(10, 24)
+      d += `M ${x} ${by} L ${x + dir * bl} ${by - r.range(6, 16)} L ${x + dir * bl} ${by - r.range(6, 16) + 2.2} L ${x} ${by + 2.2} Z `
+    }
+  }
+  return d
+}
+
+/** furnace stacks — the iron wastes, cold chimneys with a cap */
+function stacks(seed: number, n: number): string {
+  const r = new Rng(seed)
+  let d = ''
+  for (let i = 0; i < n; i++) {
+    const x = (i / n) * 400 + r.range(-12, 12)
+    const top = r.range(24, 120)
+    const w = r.range(9, 18)
+    d += `M ${x} 200 L ${x + r.range(-2, 2)} ${top} L ${x + w} ${top + r.range(-3, 3)} L ${x + w} 200 Z `
+    // a wider cap at the top
+    d += `M ${x - 3} ${top} L ${x + w + 3} ${top} L ${x + w + 3} ${top + 6} L ${x - 3} ${top + 6} Z `
+  }
+  return d
+}
+
 function motif(kind: Region['motif'], seed: number, n: number, h: number): string {
   switch (kind) {
     case 'bamboo': return bamboo(seed, n, h)
@@ -193,6 +293,11 @@ function motif(kind: Region['motif'], seed: number, n: number, h: number): strin
     case 'lanterns': return lanterns(seed, n)
     case 'stones': return stones(seed, n)
     case 'pillars': return pillars(seed, n)
+    case 'trees': return trees(seed, n)
+    case 'reeds': return reeds(seed, n)
+    case 'posts': return posts(seed, n)
+    case 'deadtrees': return deadtrees(seed, n)
+    case 'stacks': return stacks(seed, n)
     default: return ''
   }
 }
