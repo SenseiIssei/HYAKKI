@@ -1,8 +1,9 @@
 # Roadmap — 50 more yōkai, new biomes, and music that changes with the road
 
-_Status: plan. Nothing here is built yet. This is the shape of the next content
-push, grounded in the systems that already exist so each piece is a small,
-mechanical addition rather than a rewrite._
+_Status: **SHIPPED.** All six phases below are built and merged — per-biome
+music modes, six new biomes, fifty new yōkai across three waves, and the
+lore/i18n pass. This document is kept as the design record. Counts as shipped:
+**74 species**, **12 biomes**, each biome with its own musical mode._
 
 ## The three systems this touches (and why it's cheap)
 
