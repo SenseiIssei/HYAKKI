@@ -46,6 +46,7 @@ export function startAudio() {
   buildDrone()
   initMusic(ctx, master)
   setMusicEnabled(enabled && musicOn)
+  startBiomeOneShots()
 }
 
 let musicOn = true
@@ -313,6 +314,174 @@ export function sfxBell(base = 440, gain = 0.13, decay = 2.6) {
     osc.start()
     osc.stop(t + decay + 0.2)
   }
+}
+
+// ── biome one-shots ─────────────────────────────────────────────────────
+//
+// Sparse, synthesised sounds that belong to a place — a drip on the river, a
+// forge clang in the iron, a wooden knock in the bamboo. Scheduled at random on
+// a slow tick, keyed to the current ambience region, so each biome sounds like
+// itself without any files. Kept quiet and rare: an idle game runs for hours.
+
+/** a water drop, somewhere in the dark */
+function sfxDrip() {
+  if (!ctx || !enabled) return
+  const t = now()
+  const o = ctx.createOscillator()
+  o.type = 'sine'
+  o.frequency.setValueAtTime(760 + Math.random() * 500, t)
+  o.frequency.exponentialRampToValueAtTime(280, t + 0.12)
+  env(o, 0.05, 0.001, 0.14)
+  o.start()
+  o.stop(t + 0.3)
+}
+
+/** cooling metal, struck far off — inharmonic partials + a bright transient */
+function sfxClang() {
+  if (!ctx || !enabled || !master) return
+  const t = now()
+  const base = 170 + Math.random() * 90
+  for (const [m, l] of [[1, 1], [2.4, 0.5], [4.1, 0.28], [6.3, 0.14]] as const) {
+    const o = ctx.createOscillator()
+    o.type = 'sine'
+    o.frequency.value = base * m
+    env(o, 0.045 * l, 0.001, 0.55 * (1 / m))
+    o.start()
+    o.stop(t + 0.8)
+  }
+  const n = noise()
+  if (n) {
+    const f = ctx.createBiquadFilter()
+    f.type = 'bandpass'
+    f.frequency.value = 2600
+    f.Q.value = 1.4
+    n.connect(f)
+    env(f, 0.045, 0.001, 0.05)
+    n.start()
+    n.stop(t + 0.12)
+  }
+}
+
+/** a wooden knock — sōzu, a shutter, a staff on stone */
+function sfxKnock() {
+  if (!ctx || !enabled) return
+  const t = now()
+  const n = noise()
+  if (n) {
+    const f = ctx.createBiquadFilter()
+    f.type = 'bandpass'
+    f.frequency.value = 500 + Math.random() * 180
+    f.Q.value = 3
+    n.connect(f)
+    env(f, 0.08, 0.001, 0.05)
+    n.start()
+    n.stop(t + 0.12)
+  }
+  const o = ctx.createOscillator()
+  o.type = 'sine'
+  o.frequency.setValueAtTime(300, t)
+  o.frequency.exponentialRampToValueAtTime(120, t + 0.05)
+  env(o, 0.045, 0.001, 0.07)
+  o.start()
+  o.stop(t + 0.16)
+}
+
+/** old timber taking a breath — a slow band-passed groan */
+function sfxCreak() {
+  if (!ctx || !enabled) return
+  const t = now()
+  const n = noise()
+  if (!n) return
+  const f = ctx.createBiquadFilter()
+  f.type = 'bandpass'
+  f.frequency.setValueAtTime(280, t)
+  f.frequency.linearRampToValueAtTime(540, t + 0.5)
+  f.Q.value = 6
+  n.connect(f)
+  env(f, 0.035, 0.06, 0.5)
+  n.start()
+  n.stop(t + 0.7)
+}
+
+/** a gust picking up and dying — for the snow country */
+function sfxGust() {
+  if (!ctx || !enabled) return
+  const t = now()
+  const n = noise()
+  if (!n) return
+  const f = ctx.createBiquadFilter()
+  f.type = 'bandpass'
+  f.frequency.setValueAtTime(600, t)
+  f.frequency.linearRampToValueAtTime(1700, t + 0.8)
+  f.Q.value = 0.8
+  n.connect(f)
+  env(f, 0.045, 0.4, 0.9)
+  n.start()
+  n.stop(t + 1.5)
+}
+
+/** a lone crow, twice — the sea of trees, the white country */
+function sfxCrow() {
+  if (!ctx || !enabled || !master) return
+  const t = now()
+  for (let k = 0; k < 2; k++) {
+    const st = t + k * 0.19
+    const o = ctx.createOscillator()
+    o.type = 'sawtooth'
+    o.frequency.setValueAtTime(880, st)
+    o.frequency.linearRampToValueAtTime(680, st + 0.1)
+    const f = ctx.createBiquadFilter()
+    f.type = 'bandpass'
+    f.frequency.value = 1000
+    f.Q.value = 4
+    o.connect(f)
+    const g = ctx.createGain()
+    g.gain.setValueAtTime(0, st)
+    g.gain.linearRampToValueAtTime(0.035, st + 0.01)
+    g.gain.exponentialRampToValueAtTime(0.0001, st + 0.13)
+    f.connect(g).connect(master)
+    o.start(st)
+    o.stop(st + 0.15)
+  }
+}
+
+/** a deep swell out of nothing — Without Interval */
+function sfxSub() {
+  if (!ctx || !enabled) return
+  const t = now()
+  const o = ctx.createOscillator()
+  o.type = 'sine'
+  o.frequency.value = 38
+  env(o, 0.08, 0.6, 2.2)
+  o.start()
+  o.stop(t + 3)
+}
+
+const BIOME_ONESHOTS: Record<string, Array<() => void>> = {
+  bamboo: [sfxKnock],
+  paddies: [sfxDrip, sfxDrip, sfxCreak],
+  village: [sfxCreak, sfxKnock],
+  market: [sfxKnock, () => sfxBell(660, 0.05, 1.2)],
+  shrine: [() => sfxBell(180, 0.12, 4)],
+  snow: [sfxGust, sfxCrow],
+  sanzu: [sfxDrip],
+  aokigahara: [sfxCreak, sfxCrow],
+  jigoku: [sfxClang],
+  bridges: [sfxDrip, sfxCreak],
+  iron: [sfxClang, sfxKnock],
+  muken: [sfxSub],
+}
+
+let ambientTimer: number | null = null
+/** Slow scheduler: about one one-shot every ~7s, from the current region. */
+function startBiomeOneShots() {
+  if (ambientTimer !== null) return
+  ambientTimer = window.setInterval(() => {
+    if (!ctx || !enabled) return
+    const set = BIOME_ONESHOTS[ambienceRegion]
+    if (!set || !set.length) return
+    if (Math.random() < 0.2) set[Math.floor(Math.random() * set.length)]()
+  }, 1400)
 }
 
 /**
