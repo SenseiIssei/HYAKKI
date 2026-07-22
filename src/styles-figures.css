@@ -451,3 +451,57 @@
     animation: none !important;
   }
 }
+
+/* ── biome weather ─────────────────────────────────────────── */
+.bd-weather { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+
+/* rain: thin streaks falling fast, slightly angled */
+.weather-rain span {
+  position: absolute;
+  top: -12%;
+  width: 1px;
+  height: var(--h, 14px);
+  background: linear-gradient(to bottom, transparent, #9fb3c088);
+  animation: rain-fall var(--dur, 0.6s) linear infinite;
+  animation-delay: var(--del, 0s);
+}
+@keyframes rain-fall {
+  from { transform: translate(0, -12vh); opacity: 0; }
+  10% { opacity: 0.7; }
+  to { transform: translate(-24px, 112vh); opacity: 0.7; }
+}
+
+/* fog: slow soft banks drifting sideways */
+.weather-fog span {
+  position: absolute;
+  left: -30%;
+  width: 160%;
+  height: 26%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, #cdd8dd22, transparent 70%);
+  filter: blur(6px);
+  animation: fog-drift calc(46s + var(--i) * 12s) linear infinite;
+  animation-delay: calc(var(--i) * -14s);
+}
+@keyframes fog-drift {
+  from { transform: translateX(-12%); }
+  to { transform: translateX(12%); }
+}
+
+/* haze: a faint upward shimmer over the lower scene */
+.weather-haze {
+  background: linear-gradient(to top, #e8934a10 0%, transparent 42%);
+  animation: haze-shimmer 4.5s ease-in-out infinite;
+  transform-origin: bottom;
+}
+@keyframes haze-shimmer {
+  0%, 100% { opacity: 0.6; transform: scaleY(1) skewX(0deg); }
+  50% { opacity: 0.9; transform: scaleY(1.03) skewX(0.6deg); }
+}
+
+.backdrop.still .bd-weather span,
+.backdrop.still .weather-haze { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .bd-weather span, .weather-haze { animation: none; }
+  .weather-rain { display: none; }
+}

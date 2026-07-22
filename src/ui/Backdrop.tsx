@@ -38,6 +38,8 @@ export type Region = {
     | 'none'
   /** ambient particles: petals, ash, embers, snow, none */
   motes: 'petals' | 'ash' | 'embers' | 'snow' | 'none'
+  /** an atmosphere layer over the whole scene */
+  weather?: 'rain' | 'fog' | 'haze'
 }
 
 export const REGIONS: Region[] = [
@@ -49,7 +51,7 @@ export const REGIONS: Region[] = [
   {
     id: 'paddies', from: 30, name: 'The Drowned Paddies',
     sky: ['#0c130f', '#0a0908'], far: '#122019', mid: '#152a20', near: '#0a120d',
-    motif: 'reeds', motes: 'none',
+    motif: 'reeds', motes: 'none', weather: 'rain',
   },
   {
     id: 'village', from: 60, name: 'The Emptied Village',
@@ -74,27 +76,27 @@ export const REGIONS: Region[] = [
   {
     id: 'sanzu', from: 320, name: 'The River',
     sky: ['#0c1416', '#0a0908'], far: '#122024', mid: '#16292e', near: '#0a1113',
-    motif: 'stones', motes: 'none',
+    motif: 'stones', motes: 'none', weather: 'fog',
   },
   {
     id: 'aokigahara', from: 460, name: 'The Sea of Trees',
     sky: ['#0b110c', '#070a07'], far: '#111c12', mid: '#152615', near: '#0a110a',
-    motif: 'trees', motes: 'none',
+    motif: 'trees', motes: 'none', weather: 'fog',
   },
   {
     id: 'jigoku', from: 700, name: 'The Burning Ground',
     sky: ['#1a0c08', '#0a0908'], far: '#2c1109', mid: '#3d160a', near: '#160806',
-    motif: 'pillars', motes: 'embers',
+    motif: 'pillars', motes: 'embers', weather: 'haze',
   },
   {
     id: 'bridges', from: 900, name: 'The Hundred-Bridge Marsh',
     sky: ['#0b1013', '#080a0b'], far: '#101a1f', mid: '#152329', near: '#0a1013',
-    motif: 'posts', motes: 'none',
+    motif: 'posts', motes: 'none', weather: 'rain',
   },
   {
     id: 'iron', from: 1400, name: 'The Iron Wastes',
     sky: ['#14100c', '#0a0806'], far: '#231a12', mid: '#2f2116', near: '#130d09',
-    motif: 'stacks', motes: 'embers',
+    motif: 'stacks', motes: 'embers', weather: 'haze',
   },
   {
     id: 'muken', from: 2000, name: 'Without Interval',
@@ -355,6 +357,42 @@ function Band({
 }
 
 /**
+ * An atmosphere layer over the whole scene — rain streaking down, fog drifting
+ * in slow banks, or a heat-haze shimmering off the burning ground. Pure CSS,
+ * generated per kind, so a biome gets its weather for one line in REGIONS.
+ */
+function Weather({ kind }: { kind: 'rain' | 'fog' | 'haze' }) {
+  if (kind === 'fog') {
+    return (
+      <div className="bd-weather weather-fog" aria-hidden="true">
+        {[0, 1, 2].map((i) => (
+          <span key={i} style={{ ['--i' as string]: i, bottom: `${4 + i * 14}%` }} />
+        ))}
+      </div>
+    )
+  }
+  if (kind === 'haze') {
+    return <div className="bd-weather weather-haze" aria-hidden="true" />
+  }
+  // rain
+  return (
+    <div className="bd-weather weather-rain" aria-hidden="true">
+      {Array.from({ length: 34 }).map((_, i) => (
+        <span
+          key={i}
+          style={{
+            left: `${(i * 3.01) % 100}%`,
+            ['--dur' as string]: `${0.5 + ((i * 7) % 5) * 0.12}s`,
+            ['--del' as string]: `${-((i * 13) % 20) * 0.1}s`,
+            ['--h' as string]: `${12 + ((i * 5) % 10)}px`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+/**
  * How defilement discolours the world.
  *
  * Kegare is pollution, so the world does not get *darker* — it goes sallow and
@@ -444,6 +482,8 @@ export function Backdrop({
 
       {/* the ground he actually walks on */}
       <div className="bd-ground" style={{ background: region.near }} />
+
+      {region.weather && <Weather kind={region.weather} />}
 
       {region.motes !== 'none' && (
         <div className={`bd-motes motes-${region.motes}`}>
