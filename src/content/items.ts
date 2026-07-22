@@ -1,3 +1,4 @@
+import type { StatKey } from './upgrades'
 import type { EquipSlot, Rarity } from './relics'
 
 /**
@@ -157,4 +158,75 @@ export function baseFor(slot: EquipSlot, tier: ItemBase['tier'], seed: number): 
   const pool = exact.length ? exact : ITEM_BASES.filter((b) => b.slot === slot)
   if (!pool.length) return null
   return pool[(seed >>> 0) % pool.length]
+}
+
+// ═══════════ P7 — the stats these things actually carry ═══════════
+//
+// Each base grants a SIGNATURE stat matched to its slot, on top of whatever
+// affixes rolled. Crucially these never touch income (bone/ash find): a
+// multiplicative income modifier feeds its own income and goes superexponential,
+// which is the one mistake this project has made twice. Signature stats are pure
+// combat power — the same risk class as an affix, which the economy already
+// tolerates and the harness already covers.
+
+/** The stat a slot's items lean into. Never `bf`/`af`/`omen`. */
+export const SLOT_STAT: Record<EquipSlot, StatKey> = {
+  weapon: 'atk',
+  body: 'hp',
+  head: 'hp',
+  hands: 'cc',
+  legs: 'spd',
+  charm: 'res',
+}
+
+/** How big the signature is, by tier — as a fraction added to the stat. */
+const TIER_SIGNATURE: Record<ItemBase['tier'], number> = {
+  issued: 0.05,
+  kept: 0.08,
+  named: 0.12,
+  blessed: 0.18,
+  cursed: 0.18,
+}
+
+export function baseSignature(base: ItemBase): { stat: StatKey; value: number } {
+  return { stat: SLOT_STAT[base.slot], value: TIER_SIGNATURE[base.tier] }
+}
+
+/**
+ * Weapon classes — how a blade feels in the hand. Light blades swing faster;
+ * heavy ones land far harder when they crit; balanced blades split the
+ * difference. This is combat feel, not income, so it is safe to make it real.
+ */
+export type WeaponClass = 'light' | 'balanced' | 'heavy'
+
+const HEAVY_WEAPONS = new Set([
+  'w_kanabo',
+  'w_nodachi',
+  'w_odachi',
+  'w_ono',
+  'w_naginata',
+  'w_bo',
+  'w_namakubi',
+])
+const LIGHT_WEAPONS = new Set([
+  'w_tanto',
+  'w_hocho',
+  'w_kama',
+  'w_wakizashi',
+  'w_tessen',
+  'w_kusarigama',
+  'w_nuribo',
+])
+
+export function weaponClass(baseId: string): WeaponClass {
+  if (HEAVY_WEAPONS.has(baseId)) return 'heavy'
+  if (LIGHT_WEAPONS.has(baseId)) return 'light'
+  return 'balanced'
+}
+
+/** Multipliers a weapon class applies while equipped. Feel, not income. */
+export const WEAPON_CLASS_MODS: Record<WeaponClass, { spd?: number; cm?: number }> = {
+  light: { spd: 1.15 },
+  heavy: { cm: 1.35 },
+  balanced: { spd: 1.06, cm: 1.12 },
 }

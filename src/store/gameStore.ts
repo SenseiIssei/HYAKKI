@@ -17,6 +17,7 @@ import {
   abilityLevel,
   abilityTier,
 } from '../content/abilities'
+import { weaponClass } from '../content/items'
 import {
   concurrentCap,
   descentReady,
@@ -239,6 +240,12 @@ function pushLog(text: string) {
   log = [{ id: logId++, text }, ...log].slice(0, 40)
 }
 
+/** The class of blade currently worn, so hits sound like the weapon looks. */
+function playerWeaponWeight(): 'light' | 'balanced' | 'heavy' {
+  const w = G.equipped[SLOT_ORDER.indexOf('weapon')]
+  return w?.base ? weaponClass(w.base) : 'balanced'
+}
+
 /** Turn sim events into presentation. Called once per rendered frame. */
 export function drainEvents(now: number) {
   const evts: SimEvent[] = G.events
@@ -253,7 +260,7 @@ export function drainEvents(now: number) {
             pushFloater(now, fmt(e.amount), e.crit ? 'crit' : 'hit', e.target)
           }
           if (e.target === 'enemy') {
-            sfxHit(e.crit)
+            sfxHit(e.crit, playerWeaponWeight())
             // a swing throws the walker forward; a crit shakes the frame
             impact = {
               ...impact,

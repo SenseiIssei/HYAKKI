@@ -239,22 +239,35 @@ function env(node: AudioNode, peak: number, attack: number, decay: number) {
 
 let lastHit = 0
 /** Rate-limited: at high attack speed this fires many times a second. */
-export function sfxHit(crit = false) {
+/** `weight` shifts the hit by weapon class: 'light' rings high, 'heavy' thuds. */
+export function sfxHit(crit = false, weight: 'light' | 'balanced' | 'heavy' = 'balanced') {
   if (!ctx || !enabled) return
   const t = now()
   if (t - lastHit < 0.07) return
   lastHit = t
 
+  const pitch = weight === 'light' ? 1.4 : weight === 'heavy' ? 0.62 : 1
   const src = noise()
   if (!src) return
   const filter = ctx.createBiquadFilter()
   filter.type = 'bandpass'
-  filter.frequency.value = crit ? 1800 : 900
+  filter.frequency.value = (crit ? 1800 : 900) * pitch
   filter.Q.value = crit ? 2.4 : 1.1
   src.connect(filter)
   env(filter, crit ? 0.16 : 0.075, 0.001, crit ? 0.14 : 0.06)
   src.start()
   src.stop(t + 0.3)
+
+  // a heavy weapon also drops a low body thump under the strike
+  if (weight === 'heavy') {
+    const osc = ctx.createOscillator()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(150, t)
+    osc.frequency.exponentialRampToValueAtTime(48, t + 0.14)
+    env(osc, crit ? 0.12 : 0.07, 0.001, 0.16)
+    osc.start(t)
+    osc.stop(t + 0.4)
+  }
 }
 
 export function sfxTaken() {

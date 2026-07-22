@@ -4,6 +4,7 @@ import { BONE_UPGRADE_BY_ID } from '../content/upgrades'
 import { CLASS_BY_ID } from '../content/classes'
 import { TREE, keystoneFlags } from '../content/tree'
 import { AFFIX_BY_ID } from '../content/relics'
+import { ITEM_BASE_BY_ID, baseSignature, weaponClass, WEAPON_CLASS_MODS } from '../content/items'
 import { bandFor } from '../content/kegare'
 import { equippedFlags, uniqueOf } from './relics'
 import type { GameState, StatBlock } from './types'
@@ -71,6 +72,21 @@ export function computeStats(s: GameState): StatBlock {
     if (u?.mods) {
       for (const [k, v] of Object.entries(u.mods)) {
         mult[k as BaseKey] = (mult[k as BaseKey] ?? 1) * (v as number)
+      }
+    }
+    // ── P7: the item's own signature and weapon class ──
+    // Common bases carry a slot-appropriate stat (weapon→atk, body→hp, …) and,
+    // for weapons, a class that shifts speed or crit. Never income.
+    if (r.base) {
+      const b = ITEM_BASE_BY_ID[r.base]
+      if (b) {
+        const sig = baseSignature(b)
+        add[sig.stat as BaseKey] = (add[sig.stat as BaseKey] ?? 0) + sig.value
+        if (b.slot === 'weapon') {
+          const cm = WEAPON_CLASS_MODS[weaponClass(b.id)]
+          if (cm.spd) mult.spd = (mult.spd ?? 1) * cm.spd
+          if (cm.cm) mult.cm = (mult.cm ?? 1) * cm.cm
+        }
       }
     }
   }

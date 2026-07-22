@@ -12,7 +12,7 @@ import { SPECIES } from '../pixel/species'
 import { yokaiFrame } from '../pixel/yokai'
 import { SLOT_ORDER, STAT_SLOT, RARITIES, RARITY_ORDER, CURSES } from '../content/relics'
 import { slotForRelic, emptyEquip } from '../sim/relics'
-import { ITEM_BASES, ITEM_BASE_BY_ID, baseFor } from '../content/items'
+import { ITEM_BASES, ITEM_BASE_BY_ID, baseFor, SLOT_STAT, weaponClass, WEAPON_CLASS_MODS } from '../content/items'
 import { lookFromEquipment, equipGlow, RARITY_GEAR } from '../render/figure'
 import { migrate } from '../save/serialize'
 import { worldStage, worldHue, worldSat } from '../content/worldStage'
@@ -1949,5 +1949,60 @@ describe('dungeon loot', () => {
       }
     }
     expect(sawClearedWithLoot).toBe(true)
+  })
+})
+
+describe('gear stats (P7)', () => {
+  it('every slot signature is combat power, never income', () => {
+    for (const slot of SLOT_ORDER) {
+      expect(['bf', 'af', 'omen']).not.toContain(SLOT_STAT[slot])
+    }
+  })
+
+  it('weapon classes are assigned, and light/heavy differ', () => {
+    expect(weaponClass('w_kanabo')).toBe('heavy')
+    expect(weaponClass('w_wakizashi')).toBe('light')
+    expect(weaponClass('w_katana')).toBe('balanced')
+    // heavy trades speed for crit, light the reverse
+    expect(WEAPON_CLASS_MODS.heavy.cm).toBeGreaterThan(1)
+    expect(WEAPON_CLASS_MODS.light.spd).toBeGreaterThan(1)
+  })
+
+  it('a based weapon lifts attack; a heavy one lifts crit damage', () => {
+    const bare = computeStats(createInitialState('hoplite', 5))
+    const s = createInitialState('hoplite', 5)
+    s.bestRankEver = 3000
+    const eq = emptyEquip()
+    // a heavy weapon base (kanabō) at Blessed tier
+    eq[SLOT_ORDER.indexOf('weapon')] = {
+      ...rollRelic(1, 100),
+      slot: 'weapon',
+      rarity: 'blessed',
+      base: 'w_kanabo',
+      affixes: [],
+    }
+    s.equipped = eq
+    const armed = computeStats(s)
+    expect(armed.atk.gt(bare.atk)).toBe(true) // signature atk
+    expect(armed.cm).toBeGreaterThan(bare.cm) // heavy → crit damage
+  })
+
+  it('gear never touches income — bone/ash find are unchanged by a based item', () => {
+    const s = createInitialState('hoplite', 9)
+    const bare = computeStats(s)
+    const eq = emptyEquip()
+    eq[SLOT_ORDER.indexOf('body')] = {
+      ...rollRelic(2, 100),
+      slot: 'body',
+      rarity: 'blessed',
+      base: 'b_oyoroi',
+      affixes: [], // no economy affixes rolled
+    }
+    s.equipped = eq
+    const armed = computeStats(s)
+    // the signature lifted hp, but bone/ash find are identical
+    expect(armed.hp.gt(bare.hp)).toBe(true)
+    expect(armed.bf).toBe(bare.bf)
+    expect(armed.af).toBe(bare.af)
   })
 })
