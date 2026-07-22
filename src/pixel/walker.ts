@@ -224,24 +224,34 @@ export function walkerFrame(
   if (look.head >= 5) blit(s, ONI_MASK, cx, hy - 1)
 
   // ── front arm and the blade ──
+  // The blade grip sits at the hand and the blade rises FROM it. A long blade
+  // (tier 3–5) is nearly as tall as the whole figure, so it must always point
+  // up-and-forward — pointing it down runs it straight through the legs and off
+  // the bottom of the frame. The body's lunge (done in CSS over this frame) is
+  // what sells the swing; the sprite just has to hold the weapon believably.
   const bl = blade(look.weapon, look.weapon >= 5)
+  // where the grip meets the hand, so the blade always rises out of the fist
+  const gripFromHand = (ay: number) => ay - bl.h + 7
   let ax = cx + 9 - armSwing
   let ay = baseY + 2
   let bx = ax + 1
   let by = ay - bl.h + 6
 
   if (pose === 'strike') {
-    // brought down and across
-    ax = cx + 11
+    // raised for an overhead cut: grip at the hand, blade up and leaning hard
+    // toward the enemy — a wind-up, never a spear through his own shins
+    ax = cx + 10
     ay = baseY + 1
-    bx = ax - 2
-    by = ay + 2
-    blit(s, bl, bx, by, { shear: 6 })
+    bx = ax
+    by = gripFromHand(ay)
+    blit(s, bl, bx, by, { shear: 11 })
   } else if (pose === 'brace') {
-    // held level, both hands
-    bx = ax - 1
-    by = ay + 3
-    blit(s, bl, bx, by, { shear: 9 })
+    // held upright as a guard, close in, only a slight forward cant
+    ax = cx + 9
+    ay = baseY + 2
+    bx = ax
+    by = gripFromHand(ay)
+    blit(s, bl, bx, by, { shear: 3 })
   } else {
     blit(s, bl, bx, by)
   }
