@@ -178,6 +178,8 @@ export type SimEvent =
       seed: number
       speciesId?: string
       warden: boolean
+      /** true the first time this species is ever put down — for the discovery card */
+      firstFell?: boolean
     }
   | { t: 'rank'; rank: number }
   | { t: 'stand'; warden: string }

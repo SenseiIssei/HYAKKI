@@ -2847,3 +2847,61 @@ button {
 .mon-lore { font-size: 11px; line-height: 1.4; color: var(--bone-dim); margin-top: 3px; }
 .mon-unmet { font-style: italic; color: var(--ash); }
 .mon-count { font-size: 11px; color: var(--gold); margin-top: 4px; letter-spacing: 0.04em; }
+
+/* ═══════════ FIRST-FELLED DISCOVERY CARD ═══════════ */
+.discovery {
+  position: fixed;
+  top: 14%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  min-width: 240px;
+  max-width: min(90vw, 420px);
+  padding: 14px 22px 12px;
+  text-align: center;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--void-lift) 92%, transparent), color-mix(in srgb, var(--void) 92%, transparent));
+  border: 1px solid var(--void-edge);
+  border-top: 2px solid var(--ichor);
+  box-shadow: 0 8px 40px #000a, inset 0 0 22px #0006;
+  pointer-events: none;
+  animation: discovery-in 4.2s ease-out forwards;
+}
+.discovery-boss { border-top-color: var(--gold); }
+.discovery-eyebrow {
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ichor);
+}
+.discovery-boss .discovery-eyebrow { color: var(--gold); }
+.discovery-name {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 10px;
+  margin: 4px 0 6px;
+}
+.discovery-name .kanji { font-family: var(--jp); font-size: 30px; color: var(--gold); line-height: 1; }
+.discovery-name > span:last-child {
+  font-size: 17px;
+  letter-spacing: 0.06em;
+  color: var(--bone);
+}
+.discovery-lore { font-size: 12px; line-height: 1.5; color: var(--bone-dim); }
+.discovery-foot {
+  margin-top: 8px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+@keyframes discovery-in {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-14px) scale(0.96); }
+  8% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  85% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-6px) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .discovery { animation: discovery-hold 4.2s linear forwards; }
+  @keyframes discovery-hold { 0%,90% { opacity: 1; } 100% { opacity: 0; } }
+}

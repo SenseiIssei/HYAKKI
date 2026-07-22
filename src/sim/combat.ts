@@ -517,6 +517,7 @@ function onEnemyKilled(s: GameState, st: StatBlock, f: Flags, overkill: Decimal,
   s.killsThisRun += 1
   s.totalKills += 1
   // remember it for the Bestiary — art only, never touches the economy
+  const firstFell = !!e.speciesId && !s.speciesSeen[e.speciesId]
   if (e.speciesId) s.speciesSeen[e.speciesId] = (s.speciesSeen[e.speciesId] ?? 0) + 1
 
   // What you put down leaves something on you. Wardens and the Mu stain worst;
@@ -534,6 +535,7 @@ function onEnemyKilled(s: GameState, st: StatBlock, f: Flags, overkill: Decimal,
     seed: e.seed >>> 0,
     speciesId: e.speciesId,
     warden: wasWarden,
+    firstFell,
   })
 
   // you put down something wearing your own coat number

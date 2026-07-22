@@ -7,6 +7,7 @@ import { MainMenu } from './MainMenu'
 import { WindowBar } from './WindowBar'
 import { ActionButton } from './ActionButton'
 import { Bestiary } from './Bestiary'
+import { Discovery } from './Discovery'
 import { EquipPrompt } from './EquipPrompt'
 import { useGameLoop } from '../loop/useGameLoop'
 import { CLASS_BY_ID } from '../content/classes'
@@ -327,6 +328,7 @@ export function App() {
       {wardsOpen && <Wards />}
       {storiesOpen && <Hyakumonogatari />}
       {bestiaryOpen && <Bestiary />}
+      <Discovery />
       <EquipPrompt />
       {/* A finished Descent announces itself rather than waiting to be noticed. */}
       {!report && !descendOpen && readyDescents()[0] && (

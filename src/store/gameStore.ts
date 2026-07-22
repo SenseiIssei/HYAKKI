@@ -18,6 +18,7 @@ import {
   abilityTier,
 } from '../content/abilities'
 import { weaponClass } from '../content/items'
+import { SPECIES_BY_ID, isBoss } from '../pixel/species'
 import { getLocale, persistLocale, translate, type Locale } from '../i18n'
 import {
   concurrentCap,
@@ -272,6 +273,13 @@ let deaths: DeathAnim[] = []
 export const getDeaths = () => deaths
 export const DEATH_MS = 620
 
+/** The card shown the first time a species is ever put down. */
+export type Discovery = { id: number; speciesId: string; name: string; kanji: string; lore: string; boss: boolean; born: number }
+let discoveryId = 0
+let discovery: Discovery | null = null
+export const getDiscovery = () => discovery
+export const DISCOVERY_MS = 4200
+
 /**
  * Impact. Bumped on every kill and every crit so the view can shake and
  * hit-stop. A monotonic counter rather than a boolean, so the reader can tell
@@ -398,6 +406,20 @@ export function drainEvents(now: number) {
           impact = e.warden
             ? { ...impact, warden: impact.warden + 1, kill: impact.kill + 1 }
             : { ...impact, kill: impact.kill + 1 }
+          // the first time a species is ever felled, name it
+          if (e.firstFell && e.speciesId) {
+            const sp = SPECIES_BY_ID[e.speciesId]
+            if (sp)
+              discovery = {
+                id: discoveryId++,
+                speciesId: sp.id,
+                name: sp.name,
+                kanji: sp.kanji,
+                lore: sp.lore,
+                boss: isBoss(sp.id),
+                born: now,
+              }
+          }
           break
         case 'rank':
           pushLog(`Ri ${e.rank}.`)
@@ -462,6 +484,7 @@ export function drainEvents(now: number) {
   casts = casts.filter((c) => now - c.born < CAST_MS)
   const sparksBefore = sparks.length
   sparks = sparks.filter((sp) => now - sp.born < SPARK_MS)
+  if (discovery && now - discovery.born >= DISCOVERY_MS) discovery = null
   return (
     floaters.length !== before ||
     deaths.length !== deathsBefore ||
