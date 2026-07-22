@@ -154,6 +154,7 @@ export function Column() {
     if (impact.cast !== prevImpact.current.cast)
       next = impact.castTier >= 3 ? 'shake-hard' : impact.castTier >= 2 ? 'shake' : 'stop'
     else if (impact.warden !== prevImpact.current.warden) next = 'shake-hard'
+    else if (impact.boss !== prevImpact.current.boss) next = 'shake-hard'
     else if (impact.kill !== prevImpact.current.kill) next = 'shake'
     else if (impact.crit !== prevImpact.current.crit) next = 'stop'
     prevImpact.current = impact
@@ -161,7 +162,7 @@ export function Column() {
     setJolt(next)
     const id = window.setTimeout(() => setJolt(''), next === 'shake-hard' ? 300 : 150)
     return () => window.clearTimeout(id)
-  }, [impact.kill, impact.crit, impact.warden, impact.cast, impact.castTier, shake])
+  }, [impact.kill, impact.crit, impact.warden, impact.boss, impact.cast, impact.castTier, shake])
 
   // ── the actual fighting: the walker lunges on a swing, the struck side recoils ──
   const [lunge, setLunge] = useState(false)
@@ -338,12 +339,15 @@ export function Column() {
             <PixelYokai enemy={target} flash={enemyHurt} />
             {/* the fallen, dissolving where they stood */}
             {deaths.map((d) => (
-              <span key={d.id} className={`corpse die-${d.family}`}>
+              <span
+                key={d.id}
+                className={`corpse die-${d.family} ${isBoss(d.speciesId) ? 'die-boss' : ''}`}
+              >
                 <PixelCorpse
                   family={d.family}
                   seed={d.seed}
                   speciesId={d.speciesId}
-                  scale={d.warden ? 6 : 5}
+                  scale={d.warden || isBoss(d.speciesId) ? 6 : 5}
                 />
               </span>
             ))}

@@ -285,7 +285,7 @@ export const DISCOVERY_MS = 4200
  * hit-stop. A monotonic counter rather than a boolean, so the reader can tell
  * a fresh impact from a stale one without a reset handshake.
  */
-let impact = { kill: 0, crit: 0, warden: 0, swing: 0, struck: 0, cast: 0, castTier: 0 }
+let impact = { kill: 0, crit: 0, warden: 0, boss: 0, swing: 0, struck: 0, cast: 0, castTier: 0 }
 export const getImpact = () => impact
 
 // ── the log strip ──
@@ -405,7 +405,9 @@ export function drainEvents(now: number) {
           if (deaths.length > 6) deaths = deaths.slice(-6)
           impact = e.warden
             ? { ...impact, warden: impact.warden + 1, kill: impact.kill + 1 }
-            : { ...impact, kill: impact.kill + 1 }
+            : isBoss(e.speciesId)
+              ? { ...impact, boss: impact.boss + 1, kill: impact.kill + 1 }
+              : { ...impact, kill: impact.kill + 1 }
           // the first time a species is ever felled, name it
           if (e.firstFell && e.speciesId) {
             const sp = SPECIES_BY_ID[e.speciesId]
