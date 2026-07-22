@@ -11,7 +11,7 @@ You march. You never stop. The Parade does not stop because you looked away.
 
 ![Platform](https://img.shields.io/badge/platform-Windows-0a0908?style=for-the-badge&labelColor=c1372b)
 ![Built with](https://img.shields.io/badge/React_·_TypeScript_·_Tauri-14110f?style=for-the-badge&labelColor=46707a)
-![Tests](https://img.shields.io/badge/tests-138_passing-4a6b3f?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-167_passing-4a6b3f?style=for-the-badge)
 ![Assets](https://img.shields.io/badge/art_%26_audio-0_asset_files-b8912f?style=for-the-badge)
 
 [![Download](https://img.shields.io/badge/⬇_Download-Windows_Installer-c1372b?style=for-the-badge)](https://github.com/SenseiIssei/HYAKKI/releases)
@@ -94,47 +94,48 @@ pie showData
 | Stories in the Hyakumonogatari | **100** |
 | Playable classes | **7** |
 | Equippable items (6 slots, 7 rarities) | **120** |
-| Tests passing | **138** |
+| Tests passing | **167** |
 | Art & audio asset files | **0** |
 
 ---
 
 ## 界 Roadmap — *The Descent Rebuilt*
 
-The next chapter turns the idle walk into a full RPG: World-Stage levels, a hundred and twenty equippable items across six slots, dungeons that drop loot, gear that changes how the soldier looks, five languages, and a game-like front menu.
+*The Descent Rebuilt* turned the idle walk into a full RPG: World-Stage levels, a hundred and twenty equippable items across six slots, dungeons that drop loot, gear that changes how the soldier looks, five languages, and a game-like front menu. Every phase below shipped and is playable.
 
 **📜 Read the full design bible → [The Descent Rebuilt](https://claude.ai/code/artifact/35e33d40-f417-4a79-915a-94c90d102493)**
 
+**All ten phases are shipped.** ✅
+
 ```mermaid
 flowchart LR
-    P0([P0 · The Door]):::done --> P1([P1 · World–Stage]):::next
-    P1 --> P2([P2 · Six Slots])
-    P2 --> P3([P3 · Seven Rarities])
-    P3 --> P4([P4 · 120 Items])
-    P4 --> P5([P5 · Visual Gear])
-    P4 --> P6([P6 · The Dungeon])
-    P5 --> P7([P7 · Damage & Sound])
+    P0([P0 · The Door]):::done --> P1([P1 · World–Stage]):::done
+    P1 --> P2([P2 · Six Slots]):::done
+    P2 --> P3([P3 · Seven Rarities]):::done
+    P3 --> P4([P4 · 120 Items]):::done
+    P4 --> P5([P5 · Visual Gear]):::done
+    P4 --> P6([P6 · The Dungeon]):::done
+    P5 --> P7([P7 · Damage & Sound]):::done
     P6 --> P7
-    P7 --> P8([P8 · Creepier Music])
-    P8 --> P9([P9 · Five Tongues])
-    P9 --> P10([P10 · The Front Gate])
+    P7 --> P8([P8 · Creepier Music]):::done
+    P8 --> P9([P9 · Five Tongues]):::done
+    P9 --> P10([P10 · The Front Gate]):::done
     classDef done fill:#1a2e18,stroke:#4a6b3f,color:#cfe0c9;
-    classDef next fill:#2a1210,stroke:#c1372b,color:#f0d8d4;
 ```
 
-| | Phase | Delivers |
+| | Phase | Delivered |
 |:--:|---|---|
-| ✅ | **The Door** | ✕ quits the app; minimize minimizes; the tray is now opt-in |
-| ▶ | **World–Stage** | `0-0, 0-1, 1-0…` infinite, each World procedurally themed |
-| | **Six Slots** | Head · Body · Legs · Hands · Weapon · Charm |
-| | **Seven Rarities** | Issued → Kept → Named → Blessed → Cursed → Myth → True-Name |
-| | **120 Items** | a full equippable catalogue with folklore lore |
-| | **Visual Gear** | equipped gear drives the walker's actual sprite |
-| | **The Dungeon** | delve with your loadout → tiered loot |
-| | **Damage & Sound** | weapon classes, richer maths, per-weapon sfx |
-| | **Creepier Music** | the score curdles as you descend |
-| | **Five Tongues** | English · Deutsch · 日本語 · Français · Español |
-| | **The Front Gate** | Continue / New Game / Enter Dungeon / … |
+| ✅ | **The Door** | ✕ quits the app; minimize minimizes; the tray is opt-in |
+| ✅ | **World–Stage** | `0-0, 0-1, 1-0…` infinite, each World procedurally themed |
+| ✅ | **Six Slots** | Weapon · Body · Head · Hands · Legs · Charm, typed |
+| ✅ | **Seven Rarities** | Issued → Kept → Named → Blessed → Cursed → Myth → True-Name |
+| ✅ | **120 Items** | a full equippable catalogue with folklore lore |
+| ✅ | **Visual Gear** | equipped gear drives the walker's actual sprite |
+| ✅ | **The Dungeon** | delve with your loadout → depth-scaled tiered loot |
+| ✅ | **Damage & Sound** | weapon classes, signature stats, per-weapon sfx |
+| ✅ | **Creepier Music** | the score curdles as you descend |
+| ✅ | **Five Tongues** | English · Deutsch · 日本語 · Français · Español |
+| ✅ | **The Front Gate** | Continue / New Game / Enter Dungeon / Inventory / … |
 
 ---
 
@@ -145,7 +146,7 @@ flowchart LR
 npm install
 
 npm run dev      # play in the browser at localhost:5180
-npm test         # run the 138-test suite (balance + compounding + content)
+npm test         # run the 167-test suite (balance + compounding + content)
 npm run build    # production web bundle
 
 # desktop installer (Windows) → src-tauri/target/release/bundle/
