@@ -1,4 +1,5 @@
 import type { GameState } from '../sim/types'
+import { SPECIES, BOSS_SPECIES } from '../pixel/species'
 
 /**
  * Never "Kill 1,000 enemies." Always a statement, in voice, unlocked silently.
@@ -112,6 +113,53 @@ export const OBSERVATIONS: Observation[] = [
     id: 'onerelic',
     text: 'Six slots and you filled every one. Somebody carried all of that in here.',
     when: (s) => s.equipped.length >= 6 && s.equipped.every(Boolean),
+  },
+  {
+    id: 'firstfelled',
+    text: 'You put down something you had never met before, and the Register opened a new page for it, and closed it.',
+    when: (s) => Object.keys(s.speciesSeen ?? {}).length >= 1,
+  },
+  {
+    id: 'onefamilyrecorded',
+    text: 'You have put down every last one of a kind. There is a page with no empty lines on it now. It is the only complete thing you own.',
+    when: (s) => {
+      const fams = ['chaff', 'organs', 'returned', 'nothing']
+      const seen = s.speciesSeen ?? {}
+      return fams.some((fam) =>
+        SPECIES.filter((sp) => sp.family === fam).every((sp) => (seen[sp.id] ?? 0) > 0),
+      )
+    },
+  },
+  {
+    id: 'wholebestiary',
+    text: 'Seventy-four kinds, and not one of them still a rumour. You have met the whole hundred, which is to say all of it that there is. The road did not run out of them. You ran out first, and then you did it anyway.',
+    when: (s) => {
+      const seen = s.speciesSeen ?? {}
+      return SPECIES.every((sp) => (seen[sp.id] ?? 0) > 0)
+    },
+  },
+  {
+    id: 'felledaking',
+    text: 'You put down one of the great ones — a thing with a name the size of a court — and it went out flaring, and the ground remembered it a moment longer than it remembers you.',
+    when: (s) => {
+      const seen = s.speciesSeen ?? {}
+      return [...BOSS_SPECIES].some((id) => (seen[id] ?? 0) > 0)
+    },
+  },
+  {
+    id: 'becamehunger',
+    text: 'You were the Gaki once. You fought the way it eats — never full, never slowing, taking a little of everything you struck. It was the most like home you have felt down here.',
+    when: (s) => !!s.seen['played.gaki'],
+  },
+  {
+    id: 'snowcountry',
+    text: 'You reached the Snow Country and learned its colder cut, the one that is never a single blow. Everything past here is quieter, and none of the quiet is kind.',
+    when: (s) => s.bestRankEver >= 230,
+  },
+  {
+    id: 'ironwastes',
+    text: 'The Iron Wastes. Even the fire has gone out here; there is only the metal, still ticking as it cools, and you, still walking, for the same reason.',
+    when: (s) => s.bestRankEver >= 1400,
   },
 ]
 
