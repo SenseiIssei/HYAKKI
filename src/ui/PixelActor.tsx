@@ -259,9 +259,12 @@ export function PixelYokai({
     YOKAI_PAL,
     scale,
   )
-  // the Kings do not move, and a hole does not move
-  const still = kind === 'warden' || kind === 'nothing'
-  const fps = species?.fps ?? (kind === 'chaff' ? 12 : kind === 'organs' ? 6 : 4)
+  // Every mob is alive now — even the holes shimmer and the Kings breathe,
+  // just far slower than the living, so nothing on the road ever looks frozen.
+  const still = false
+  const fps =
+    species?.fps ??
+    (kind === 'chaff' ? 12 : kind === 'organs' ? 6 : kind === 'warden' ? 3 : kind === 'nothing' ? 3 : 4)
 
   // ── colour variants ──
   // The same species turns up in many hues, so the road never looks like a

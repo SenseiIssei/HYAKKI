@@ -334,13 +334,20 @@ export function yokaiFrame(
     }
 
     case 'warden': {
-      // The Ten Kings. Which court this is, is fixed by the seed; none of it is
-      // a function of t, because a king does not move — he waits, and reads.
+      // The Ten Kings. Which court is fixed by the seed. He does not pace — but
+      // he breathes, his robe stirs, and what he holds catches a slow light, so
+      // even a king that only waits is never a frozen picture.
       const king = KINGS[vary(seed, KINGS.length)]
-      blit(s, KING_BODY, cx - 3, 18, { remap: king.robe })
-      if (king.attr) blit(s, king.attr, cx + 12, 26)
-      blit(s, king.crown, cx + 1, 2)
-      blit(s, KING_HEAD, cx + 1, 7)
+      const breathe = Math.round(Math.sin(t) * 0.5 - 0.5) // 0 or -1, a slow swell
+      const hem = Math.round(Math.sin(t * 0.5) * 1) // the robe sways at the floor
+      blit(s, KING_BODY, cx - 3, 18, { remap: king.robe, shear: hem })
+      if (king.attr) {
+        // what he holds flickers — a lantern, a mirror, a brush catching light
+        const lit = Math.sin(t * 1.5) > 0.4
+        blit(s, king.attr, cx + 12, 26 + breathe, lit ? { tint: 'F' } : {})
+      }
+      blit(s, king.crown, cx + 1, 2 + breathe)
+      blit(s, KING_HEAD, cx + 1, 7 + breathe)
       break
     }
 

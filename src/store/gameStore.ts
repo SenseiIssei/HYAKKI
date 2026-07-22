@@ -289,7 +289,7 @@ function pushLog(text: string) {
 }
 
 /** The class of blade currently worn, so hits sound like the weapon looks. */
-function playerWeaponWeight(): 'light' | 'balanced' | 'heavy' {
+export function playerWeaponWeight(): 'light' | 'balanced' | 'heavy' {
   const w = G.equipped[SLOT_ORDER.indexOf('weapon')]
   return w?.base ? weaponClass(w.base) : 'balanced'
 }

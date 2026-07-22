@@ -1,13 +1,88 @@
 /* ═══════════ COMBAT: fighting, flying numbers, abilities, VFX ═══════════ */
 
 /* the fighters lunge and recoil so it reads as a fight, not two HP bars */
-.fighter { display: inline-block; will-change: transform; }
-.lunge-right { animation: lunge-right 160ms ease-out; }
-@keyframes lunge-right {
+.fighter { display: inline-block; will-change: transform; transform-origin: bottom center; }
+
+/* ── the basic swing is shaped by the weapon he's holding ── */
+/* light blade: a fast in-out-in flurry */
+.atk-light { animation: atk-light 240ms ease-out; }
+@keyframes atk-light {
   0% { transform: translateX(0); }
-  40% { transform: translateX(22px) scaleX(1.04); }
+  20% { transform: translateX(16px); }
+  38% { transform: translateX(5px); }
+  58% { transform: translateX(21px) scaleX(1.03); }
   100% { transform: translateX(0); }
 }
+/* balanced: one clean, committed slash with a little rotation */
+.atk-balanced { animation: atk-balanced 200ms ease-out; }
+@keyframes atk-balanced {
+  0% { transform: translateX(0) rotate(0); }
+  42% { transform: translateX(24px) rotate(4deg) scaleX(1.05); }
+  100% { transform: translateX(0) rotate(0); }
+}
+/* heavy: wind up back, then SLAM forward with a squash on the landing */
+.atk-heavy { animation: atk-heavy 340ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes atk-heavy {
+  0% { transform: translateX(0) scaleX(1); }
+  28% { transform: translateX(-9px) scaleX(0.93) scaleY(1.03); }
+  55% { transform: translateX(28px) scaleX(1.1) scaleY(0.94); }
+  72% { transform: translateX(23px); }
+  100% { transform: translateX(0) scaleX(1); }
+}
+
+/* ── an ability moves his whole body its own way ── */
+.cast-move { will-change: transform; }
+/* iai — a drawn-back crouch then an explosive draw-cut lunge */
+.cast-iai { animation: cast-iai 560ms cubic-bezier(0.2, 0.9, 0.1, 1); }
+@keyframes cast-iai {
+  0% { transform: translateX(0); }
+  28% { transform: translateX(-12px) scaleX(0.92); }
+  46% { transform: translateX(38px) scaleX(1.12); }
+  62% { transform: translateX(30px); }
+  100% { transform: translateX(0); }
+}
+/* flame — a forward thrust that leans into the fire and holds */
+.cast-flame { animation: cast-flame 620ms ease-out; }
+@keyframes cast-flame {
+  0% { transform: translateX(0) rotate(0); }
+  30% { transform: translateX(22px) rotate(-6deg); }
+  60% { transform: translateX(27px) rotate(-3deg); }
+  100% { transform: translateX(0) rotate(0); }
+}
+/* lightning — a quick coil upward, then a downward strike forward */
+.cast-lightning { animation: cast-lightning 520ms ease-in-out; }
+@keyframes cast-lightning {
+  0% { transform: translate(0, 0); }
+  26% { transform: translateY(-16px) scaleY(1.06); }
+  46% { transform: translate(22px, 4px) scaleY(0.95); }
+  100% { transform: translate(0, 0); }
+}
+/* wind — a wide sweeping arc across the front */
+.cast-wind { animation: cast-wind 600ms ease-in-out; }
+@keyframes cast-wind {
+  0% { transform: translateX(0) rotate(0); }
+  35% { transform: translateX(-8px) rotate(-12deg); }
+  65% { transform: translateX(20px) rotate(10deg); }
+  100% { transform: translateX(0) rotate(0); }
+}
+/* void — gather back and shrink, then release forward */
+.cast-void { animation: cast-void 640ms cubic-bezier(0.3, 0, 0.2, 1); }
+@keyframes cast-void {
+  0% { transform: translateX(0) scale(1); }
+  44% { transform: translateX(-15px) scale(0.88); }
+  70% { transform: translateX(17px) scale(1.06); }
+  100% { transform: translateX(0) scale(1); }
+}
+/* meteor — raise overhead, then bring the whole weight down forward */
+.cast-meteor { animation: cast-meteor 640ms cubic-bezier(0.25, 0.7, 0.15, 1); }
+@keyframes cast-meteor {
+  0% { transform: translate(0, 0) scaleY(1); }
+  36% { transform: translateY(-20px) scaleY(1.1); }
+  60% { transform: translate(18px, 7px) scaleY(0.9); }
+  74% { transform: translate(14px, 0); }
+  100% { transform: translate(0, 0) scaleY(1); }
+}
+
 .recoil-right { animation: recoil-right 130ms ease-out; }
 @keyframes recoil-right {
   0% { transform: translateX(0); }
@@ -21,7 +96,9 @@
   100% { transform: translateX(0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .lunge-right, .recoil-right, .recoil-left { animation: none; }
+  .atk-light, .atk-balanced, .atk-heavy,
+  .cast-iai, .cast-flame, .cast-lightning, .cast-wind, .cast-void, .cast-meteor,
+  .recoil-right, .recoil-left { animation: none; }
 }
 
 /* ── flying damage numbers ── */

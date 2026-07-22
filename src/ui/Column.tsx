@@ -16,6 +16,7 @@ import {
   getSparks,
   getImpact,
   getLog,
+  playerWeaponWeight,
   stats,
   useUI,
   type Floater,
@@ -198,6 +199,26 @@ export function Column() {
     return () => window.clearTimeout(id)
   }, [impact.struck])
 
+  // The swing itself is weapon-shaped: a light blade flurries, a balanced one
+  // commits to a clean slash, a heavy one winds up and SLAMS. So the same hit
+  // reads differently depending on what he's holding.
+  const weaponWeight = playerWeaponWeight()
+
+  // An ability moves the man's whole body its own way — a draw-cut lunge for
+  // iai, an overhead for the meteor, a gathered pull for the void — not just an
+  // overlay in front of a walk cycle.
+  const [castMove, setCastMove] = useState('')
+  const prevCast = useRef(impact.cast)
+  useEffect(() => {
+    if (impact.cast === prevCast.current) return
+    prevCast.current = impact.cast
+    const cs = getCasts()
+    const latest = cs.length ? cs.reduce((a, b) => (b.born > a.born ? b : a)) : null
+    setCastMove(latest ? latest.vfx : 'iai')
+    const id = window.setTimeout(() => setCastMove(''), 640)
+    return () => window.clearTimeout(id)
+  }, [impact.cast])
+
   const sparks = getSparks()
 
   if (numbersOnly) return <NumbersOnly />
@@ -242,10 +263,22 @@ export function Column() {
           <div className="floaters">
             <FloatColumn floaters={floaters} side="soldier" />
           </div>
-          <span className={`fighter ${lunge ? 'lunge-right' : ''}`}>
+          <span
+            className={`fighter ${lunge ? `atk atk-${weaponWeight}` : ''} ${
+              castMove ? `cast-move cast-${castMove}` : ''
+            }`}
+          >
             <PixelWalker
               look={lookFromEquipment(st, g.equipped, { kegare: g.kegare })}
-              pose={bracing ? 'brace' : soldierHurt ? 'hit' : lunge ? 'strike' : 'walk'}
+              pose={
+                bracing
+                  ? 'brace'
+                  : soldierHurt
+                    ? 'hit'
+                    : lunge || castMove
+                      ? 'strike'
+                      : 'walk'
+              }
               flash={soldierHurt}
               kegare={g.kegare}
               glow={equipGlow(g.equipped)}

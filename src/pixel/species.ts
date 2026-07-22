@@ -627,11 +627,28 @@ function sunakake(_seed: number, phase: number): Sprite {
 function aburasumashi(_seed: number, phase: number): Sprite {
   const s = blank(W, H)
   const t = phase * Math.PI * 2
-  const y = 20 + Math.round(Math.abs(Math.sin(t)) * -1)
+  const y = 20 + Math.round(Math.sin(t) * 1) // slow breathing bob, both directions
   const cx = 15
-  const head = sprite(['.gggggg.', 'gggggggg', 'gYggggYg', 'gggggggg', 'ggnnnngg', 'gggggggg', '.gnnnng.'])
-  const cloak = sprite(['BbBbBbBb', 'bBbBbBbB', 'BbBbBbBb', '.bBbBb..'])
-  blit(s, cloak, cx, y + 8)
+  // eyes blink once a cycle: open (Y) most of the time, a shut line near phase 0.5
+  const shut = phase > 0.44 && phase < 0.56
+  const eyeL = shut ? 'n' : 'Y'
+  const eyeR = shut ? 'n' : 'Y'
+  const head = sprite([
+    '.gggggg.',
+    'gggggggg',
+    `g${eyeL}gggg${eyeR}g`,
+    'gggggggg',
+    'ggnnnngg',
+    'gggggggg',
+    '.gnnnng.',
+  ])
+  // the straw cloak ripples: each row shears by its own phase-shifted wave, so
+  // the strands sway rather than snapping between two states
+  const rows = ['BbBbBbBb', 'bBbBbBbB', 'BbBbBbBb', '.bBbBb..']
+  rows.forEach((row, r) => {
+    const sway = Math.round(Math.sin(t + r * 0.8) * 1.5)
+    blit(s, sprite([row]), cx + sway, y + 8 + r)
+  })
   blit(s, head, cx + 1, y)
   return outline(s, 'K')
 }
@@ -668,11 +685,9 @@ function wanyudo(_seed: number, phase: number): Sprite {
 function otoroshi(_seed: number, phase: number): Sprite {
   const s = blank(W, H)
   const t = phase * Math.PI * 2
-  const bristle = Math.round(Math.abs(Math.sin(t * 2)) * 2)
   const y = 12
   const cx = 12
-  const mane = sprite([
-    'H.H.H.H.H.H.H.H.H.',
+  const bulk = sprite([
     'HHHHHHHHHHHHHHHHHH',
     'HHHHHHHHHHHHHHHHHH',
     'HHYYHHHHHHHHHHYYHH',
@@ -681,10 +696,23 @@ function otoroshi(_seed: number, phase: number): Sprite {
     'HHHHHVVVVVVHHHHHHH',
     'HHHHHVKKKKVHHHHHHH',
   ])
-  blit(s, mane, cx, y + bristle)
-  // claws below
-  blit(s, sprite(['V.V.V', '.V.V.']), cx + 2, y + 20)
-  blit(s, sprite(['V.V.V', '.V.V.']), cx + 9, y + 20)
+  blit(s, bulk, cx, y + 1)
+  // the top mane is drawn strand-by-strand so it ripples like a curtain of hair:
+  // each strand's length breathes on its own phase-shifted wave
+  for (let x = 0; x < 18; x++) {
+    const len = 1 + Math.round((Math.sin(t * 2 + x * 0.7) * 0.5 + 0.5) * 3)
+    for (let d = 0; d < len; d++) s.px[(y - d) * W + (cx + x)] = 'H'
+  }
+  // the eyes flare wider on the beat (the pupil shrinks as they widen)
+  const glare = Math.sin(t) > 0.3
+  if (glare) {
+    s.px[(y + 3) * W + cx + 3] = 'R'
+    s.px[(y + 3) * W + cx + 14] = 'R'
+  }
+  // claws open and close, reaching on the downbeat
+  const reach = Math.round(Math.abs(Math.sin(t)) * 2)
+  blit(s, sprite(['V.V.V', '.V.V.']), cx + 2, y + 20 + reach)
+  blit(s, sprite(['V.V.V', '.V.V.']), cx + 9, y + 20 + reach)
   return outline(s, 'K')
 }
 
@@ -927,6 +955,7 @@ export const SPECIES_PAL_EXTRA = {
   u: '#4d6d3e',
   v: '#b8ae95', // bone shade
   R: '#c1372b',
+  F: '#f2b24a', // flame — the wanyūdō's burning rim, a king's caught light
   Z: '#050506', // the void inside a Mu — darker than the ink black K
   e: '#2b4247', // the faint cold rim of an absence
 }
