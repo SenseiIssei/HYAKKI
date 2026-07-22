@@ -674,3 +674,56 @@
   .boss-loom, .boss-aura, .enemy-attack.boss-attack { animation: none; }
   .boss-attack::after { display: none; }
 }
+
+/* ── FUBUKI 吹雪 — the frost art ── */
+.vfx-frost-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.frost-shard {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: 3px;
+  height: 12px;
+  background: linear-gradient(to bottom, #eaf6fb, var(--vc, #bfe0ea));
+  border-radius: 1px;
+  transform-origin: center;
+  box-shadow: 0 0 6px var(--vc, #bfe0ea);
+  animation: frost-fly 620ms ease-out forwards;
+  animation-delay: var(--d, 0ms);
+  opacity: 0;
+}
+@keyframes frost-fly {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--a)) translateY(0) scale(0.5); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--a)) translateY(calc(-70px - var(--tier, 1) * 14px)) scale(1); }
+}
+.vfx-frost-ring {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #eaf6fb;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 12px var(--vc, #bfe0ea);
+  animation: frost-ring 620ms ease-out forwards;
+}
+@keyframes frost-ring {
+  0% { opacity: 0.9; width: 16px; height: 16px; }
+  100% { opacity: 0; width: calc(150px + var(--tier, 1) * 30px); height: calc(150px + var(--tier, 1) * 30px); }
+}
+
+/* the soldier's own frost cast: a rapid shivering flurry forward */
+.cast-frost { animation: cast-frost 560ms ease-out; }
+@keyframes cast-frost {
+  0% { transform: translateX(0); }
+  15% { transform: translateX(14px); }
+  30% { transform: translateX(6px); }
+  45% { transform: translateX(20px); }
+  60% { transform: translateX(10px); }
+  78% { transform: translateX(22px) scaleX(1.03); }
+  100% { transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .frost-shard, .vfx-frost-ring, .cast-frost { animation: none; }
+}

@@ -20,6 +20,7 @@ export type AbilityVfx =
   | 'wind' // a fan of cutting blades
   | 'void' // a hole that pulls in and detonates
   | 'meteor' // the sky comes down
+  | 'frost' // a flurry of ice that cuts many times
 
 export type Ability = {
   id: string
@@ -159,6 +160,24 @@ export const ABILITIES: Ability[] = [
     tier2: 3,
     tier3: 7,
     hits: 1,
+  },
+  {
+    id: 'fubuki',
+    name: 'FUBUKI',
+    kanji: '吹雪',
+    vfx: 'frost',
+    color: '#bfe0ea',
+    line: 'The snow country teaches a colder cut: not one stroke but a hundred, each too small to feel until you are already opened and freezing. It never falls as a single blow.',
+    unlockRank: 200,
+    baseCd: 7,
+    minCd: 3,
+    rankPerLevel: 44,
+    baseMult: 30,
+    multPerLevel: 11,
+    cdPerLevel: 0.4,
+    tier2: 3,
+    tier3: 8,
+    hits: 3,
   },
 ]
 

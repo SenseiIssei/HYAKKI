@@ -129,6 +129,23 @@ function Effect({ vfx, tier, color }: { vfx: string; tier: number; color: string
           <div className="vfx-meteor-flash" />
         </div>
       )
+    case 'frost':
+      // a flurry of ice slivers flung outward, and a cold ring
+      return (
+        <div className="vfx-frost-wrap">
+          {Array.from({ length: n * 8 }, (_, i) => (
+            <span
+              key={i}
+              className="frost-shard"
+              style={{
+                ['--a' as string]: `${(i / (n * 8)) * 360}deg`,
+                ['--d' as string]: `${(i % 5) * 45}ms`,
+              }}
+            />
+          ))}
+          <div className="vfx-frost-ring" />
+        </div>
+      )
     default:
       return null
   }
