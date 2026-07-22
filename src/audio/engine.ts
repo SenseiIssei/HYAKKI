@@ -9,7 +9,7 @@
  * full volume. Hits are rate-limited and sit under the drone.
  */
 
-import { bonsho, initMusic, setIntensity, setMusicEnabled } from './music'
+import { bonsho, initMusic, setIntensity, setMusicEnabled, setMusicRegion } from './music'
 
 type Ctx = AudioContext & { _unlocked?: boolean }
 
@@ -157,6 +157,18 @@ const AMBIENCE: Record<string, { type: BiquadFilterType; freq: number; q: number
   jigoku: { type: 'lowpass', freq: 240, q: 0.8, lfo: 0.2, depth: 120, gain: 0.07 },
   // muken, the deepest: almost nothing, a pressure
   muken: { type: 'lowpass', freq: 120, q: 0.9, lfo: 0.03, depth: 60, gain: 0.04 },
+  // drowned paddies: low water and a wet, croaking swell
+  paddies: { type: 'lowpass', freq: 620, q: 0.6, lfo: 0.9, depth: 260, gain: 0.055 },
+  // the night market: too many voices for how empty it is — a crowded midrange
+  market: { type: 'bandpass', freq: 1000, q: 0.5, lfo: 0.35, depth: 420, gain: 0.055 },
+  // the snow country: a white-out hiss, thin and high, barely moving
+  snow: { type: 'highpass', freq: 3200, q: 0.5, lfo: 0.04, depth: 200, gain: 0.04 },
+  // the sea of trees: no wind, no birds — a dead, close band
+  aokigahara: { type: 'bandpass', freq: 300, q: 1.6, lfo: 0.02, depth: 60, gain: 0.05 },
+  // the hundred-bridge marsh: fog over water, a broad low wash
+  bridges: { type: 'bandpass', freq: 700, q: 0.4, lfo: 0.5, depth: 360, gain: 0.06 },
+  // the iron wastes: cooling metal, a dull scraping rumble
+  iron: { type: 'lowpass', freq: 340, q: 1.1, lfo: 0.15, depth: 140, gain: 0.06 },
 }
 
 function ambienceLoop(): AudioBufferSourceNode | null {
@@ -178,6 +190,8 @@ function ambienceLoop(): AudioBufferSourceNode | null {
 export function setAmbience(regionId: string) {
   if (!ctx || !master || regionId === ambienceRegion) return
   ambienceRegion = regionId
+  // the music changes mode with the place, in the same breath as the ambience
+  setMusicRegion(regionId)
   const cfg = AMBIENCE[regionId] ?? AMBIENCE.bamboo
   const t = now()
 

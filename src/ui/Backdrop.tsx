@@ -26,7 +26,7 @@ export type Region = {
   /** what stands along the road */
   motif: 'bamboo' | 'torii' | 'lanterns' | 'stones' | 'pillars' | 'none'
   /** ambient particles: petals, ash, embers, snow, none */
-  motes: 'petals' | 'ash' | 'embers' | 'none'
+  motes: 'petals' | 'ash' | 'embers' | 'snow' | 'none'
 }
 
 export const REGIONS: Region[] = [
@@ -36,8 +36,18 @@ export const REGIONS: Region[] = [
     motif: 'bamboo', motes: 'petals',
   },
   {
+    id: 'paddies', from: 30, name: 'The Drowned Paddies',
+    sky: ['#0c130f', '#0a0908'], far: '#122019', mid: '#152a20', near: '#0a120d',
+    motif: 'stones', motes: 'none',
+  },
+  {
     id: 'village', from: 60, name: 'The Emptied Village',
     sky: ['#141013', '#0a0908'], far: '#1d181c', mid: '#251d20', near: '#100c0e',
+    motif: 'lanterns', motes: 'ash',
+  },
+  {
+    id: 'market', from: 110, name: 'The Night Market',
+    sky: ['#1a0f10', '#0a0908'], far: '#2a1412', mid: '#361a15', near: '#150b0b',
     motif: 'lanterns', motes: 'ash',
   },
   {
@@ -46,13 +56,33 @@ export const REGIONS: Region[] = [
     motif: 'torii', motes: 'ash',
   },
   {
+    id: 'snow', from: 230, name: 'The Snow Country',
+    sky: ['#161a1e', '#0b0d10'], far: '#232c34', mid: '#2e3a44', near: '#141a1f',
+    motif: 'none', motes: 'snow',
+  },
+  {
     id: 'sanzu', from: 320, name: 'The River',
     sky: ['#0c1416', '#0a0908'], far: '#122024', mid: '#16292e', near: '#0a1113',
     motif: 'stones', motes: 'none',
   },
   {
+    id: 'aokigahara', from: 460, name: 'The Sea of Trees',
+    sky: ['#0b110c', '#070a07'], far: '#111c12', mid: '#152615', near: '#0a110a',
+    motif: 'pillars', motes: 'none',
+  },
+  {
     id: 'jigoku', from: 700, name: 'The Burning Ground',
     sky: ['#1a0c08', '#0a0908'], far: '#2c1109', mid: '#3d160a', near: '#160806',
+    motif: 'pillars', motes: 'embers',
+  },
+  {
+    id: 'bridges', from: 900, name: 'The Hundred-Bridge Marsh',
+    sky: ['#0b1013', '#080a0b'], far: '#101a1f', mid: '#152329', near: '#0a1013',
+    motif: 'stones', motes: 'none',
+  },
+  {
+    id: 'iron', from: 1400, name: 'The Iron Wastes',
+    sky: ['#14100c', '#0a0806'], far: '#231a12', mid: '#2f2116', near: '#130d09',
     motif: 'pillars', motes: 'embers',
   },
   {
@@ -324,7 +354,9 @@ export function Backdrop({
                     ? COLORS.blood
                     : region.motes === 'petals'
                       ? '#C98A9B'
-                      : COLORS.ash,
+                      : region.motes === 'snow'
+                        ? '#dfe9ef'
+                        : COLORS.ash,
               }}
             />
           ))}

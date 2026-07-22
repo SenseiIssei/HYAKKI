@@ -23,10 +23,55 @@ let step = 0
 let intensity = 0
 let enabled = false
 
-/** in scale on D, two octaves */
-const IN_SCALE = [0, 1, 5, 7, 8, 12, 13, 17, 19, 20, 24]
 const ROOT = 146.83 // D3
-const note = (deg: number) => ROOT * Math.pow(2, IN_SCALE[deg % IN_SCALE.length] / 12)
+
+/**
+ * The music changes MODE with the biome. Each place gets a real Japanese scale
+ * — the _in_ of the bamboo, the brighter _yo_ of the paddies, the ceremonial
+ * _hirajōshi_ of the shrine, the fractured _iwato_ of the sea of trees — plus a
+ * transposition and how present the drum, the breath, and the wrong-note are.
+ * The scale colours the place; depth (intensity) still sets the pressure inside
+ * it. A missing region falls back to the bamboo's _in_.
+ */
+type MusicMode = {
+  scale: number[]
+  rootMul: number
+  drum: number
+  breath: number
+  diss: number
+}
+// one pentatonic octave → two octaves plus the top root, the shape `note()` wants
+const oct = (b: number[]) => [...b, ...b.map((x) => x + 12), b[0] + 24]
+const MODES: Record<string, MusicMode> = {
+  // the six original places
+  bamboo: { scale: oct([0, 1, 5, 7, 8]), rootMul: 1, drum: 1, breath: 1, diss: 1 }, // in 陰
+  village: { scale: oct([0, 1, 5, 7, 8]), rootMul: 0.94, drum: 0.8, breath: 1, diss: 1 }, // in, dry
+  shrine: { scale: oct([0, 2, 3, 7, 8]), rootMul: 1, drum: 0.7, breath: 1.1, diss: 0.9 }, // hirajōshi 平調子
+  sanzu: { scale: oct([0, 1, 5, 7, 10]), rootMul: 1, drum: 0.8, breath: 1.2, diss: 1 }, // insen 陰旋
+  jigoku: { scale: oct([0, 1, 2, 3, 7]), rootMul: 1, drum: 1.8, breath: 0.5, diss: 1.4 }, // chromatic descent
+  muken: { scale: oct([0, 1, 6, 7, 8]), rootMul: 0.5, drum: 0.4, breath: 1.4, diss: 1.5 }, // a held cluster
+  // the six new places
+  paddies: { scale: oct([0, 2, 5, 7, 9]), rootMul: 1.06, drum: 1, breath: 0.8, diss: 0.6 }, // yo 陽
+  market: { scale: oct([0, 2, 4, 7, 9]), rootMul: 1.12, drum: 1.5, breath: 0.6, diss: 0.7 }, // ryo 呂
+  snow: { scale: oct([0, 2, 3, 7, 9]), rootMul: 1.5, drum: 0.3, breath: 1.3, diss: 0.8 }, // kumoi 雲井
+  aokigahara: { scale: oct([0, 1, 5, 6, 10]), rootMul: 0.94, drum: 0, breath: 1.1, diss: 1.2 }, // iwato 岩戸
+  bridges: { scale: oct([0, 1, 5, 6, 10]), rootMul: 0.75, drum: 0.6, breath: 1.2, diss: 1.2 }, // iwato, low
+  iron: { scale: oct([0, 1, 5, 7, 8]), rootMul: 1, drum: 1.4, breath: 0.5, diss: 1.2 }, // in + anvil
+}
+
+let mode: MusicMode = MODES.bamboo
+const note = (deg: number) =>
+  ROOT * mode.rootMul * Math.pow(2, mode.scale[deg % mode.scale.length] / 12)
+
+/**
+ * Switch the musical mode to the biome. Cheap and glitch-free: only NEW notes
+ * pick up the new scale, so the change lands over the next bar or two as you
+ * walk in, never as a hard cut. Called from `setAmbience` so sound and place
+ * always move together.
+ */
+export function setMusicRegion(regionId: string) {
+  mode = MODES[regionId] ?? MODES.bamboo
+}
 
 let dreadGain: GainNode | null = null
 
@@ -254,10 +299,12 @@ function run() {
     const now = ctx.currentTime + 0.05
     step++
 
-    // the drum walks closer the deeper you are
+    // the drum walks closer the deeper you are — and its presence is the biome's
+    // (silent in the sea of trees, pounding in the burning ground)
     const drumEvery = intensity > 0.66 ? 2 : intensity > 0.33 ? 4 : 8
-    if (step % drumEvery === 0) taiko(now, 0.16 + intensity * 0.26)
-    if (intensity > 0.8 && step % drumEvery === 1) taiko(now + BEAT * 0.5, 0.1)
+    if (mode.drum > 0 && step % drumEvery === 0) taiko(now, (0.16 + intensity * 0.26) * mode.drum)
+    if (mode.drum > 0 && intensity > 0.8 && step % drumEvery === 1)
+      taiko(now + BEAT * 0.5, 0.1 * mode.drum)
 
     // koto phrases, sparse and hesitant — and more unsettled the deeper you are
     if (step % 4 === 0) {
@@ -269,18 +316,19 @@ function run() {
         koto(note(start), now, 0.2)
         if (Math.random() < 0.6) koto(note(start + 2), now + BEAT * 1.5, 0.14)
         if (Math.random() < 0.35) koto(note(start + 4), now + BEAT * 2.5, 0.1)
-        // deep in, a second string sounds a semitone off it — a wrong note held
-        if (intensity > 0.6 && Math.random() < 0.4) {
+        // deep in, a second string sounds a semitone off it — a wrong note held,
+        // more insistent in the more fractured modes
+        if (intensity > 0.6 && Math.random() < 0.4 * mode.diss) {
           koto(note(start) * Math.pow(2, 1 / 12), now + BEAT * 0.5, 0.09)
         }
-      } else if (r < dissonate) {
+      } else if (r < dissonate * mode.diss) {
         // the flat second, alone. It is the whole scale in one note.
         koto(note(1), now, 0.16)
       }
     }
 
-    // breath, rarely, and never on the beat
-    if (step % 16 === 7 && Math.random() < 0.7) {
+    // breath, rarely, and never on the beat — thicker in the cold/empty modes
+    if (step % 16 === 7 && Math.random() < 0.7 * mode.breath) {
       shakuhachi(note(Math.floor(Math.random() * 4)) * 2, now + BEAT * 0.3)
     }
 

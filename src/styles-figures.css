@@ -264,6 +264,7 @@
 }
 .motes-petals span { width: 5px; height: 4px; border-radius: 60% 40% 55% 45%; opacity: 0.32; }
 .motes-embers span { box-shadow: 0 0 5px currentColor; opacity: 0.6; }
+.motes-snow span { width: 4px; height: 4px; opacity: 0.5; box-shadow: 0 0 3px currentColor; }
 
 @keyframes fall {
   from { transform: translate(0, -10vh) rotate(0deg); }
