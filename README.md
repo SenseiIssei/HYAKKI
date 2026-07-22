@@ -31,9 +31,9 @@ It is built on a hard rule: **zero art and zero audio assets.** Every sprite is 
 
 <div align="center">
 <br/>
-<img src=".github/assets/bestiary.png" alt="The bestiary: Kozō, Karakasa, Oni, Gashadokuro, Onryō, Yuki-onna, Ushi-oni, and a Mu" width="92%" />
+<img src=".github/assets/bestiary.svg" alt="All twenty-four yōkai rendered from the game's own sprite engine" width="94%" />
 <br/>
-<sub><i>A handful of the seventeen yōkai — every one a real creature from the folklore, rendered from the game's own sprite engine.</i></sub>
+<sub><i>All <b>twenty-four</b> yōkai — every one a real creature from the folklore, every one <b>animated</b>, each rendered straight from the game's own sprite engine into this image. No two share a silhouette; not one stands still.</i></sub>
 </div>
 
 ---
@@ -57,7 +57,7 @@ It is built on a hard rule: **zero art and zero audio assets.** Every sprite is 
 ### The arts
 - **Six auto-cast abilities** with cooldowns that **level and escalate** as you descend — a tier-1 flourish becomes a tier-3 catastrophe.
 - **Iai · Hi-no-Kagura · Raijin · Kamaitachi · Meido-gaeshi · Hyakki-ō** — the sky comes down.
-- **Full-arena VFX** — slashes, fire, lightning, void, meteors — all procedural SVG/CSS.
+- **They actually fight.** The swing is shaped by the **weapon** — a light blade flurries, a heavy one winds up and slams — and every ability moves the whole body its own way. Each enemy family lunges, slams, jabs or drifts on its own attack, with **particles flying between the ranks**.
 - **Flying damage numbers** that arc off the point of impact.
 - **The Hundred Stories** — a Hyakumonogatari of 100 tales; read them and the room goes dark.
 
@@ -67,9 +67,13 @@ It is built on a hard rule: **zero art and zero audio assets.** Every sprite is 
 
 <div align="center">
 <br/>
+<img src=".github/assets/battle.svg" alt="The walker mid-swing against an oni, sparks flying between them" width="70%" />
+<br/>
+<sub><i>A soldier mid-swing against an oni — sprites, sparks, and HP bars all from the engine, no image files anywhere.</i></sub>
+<br/><br/>
 <img src=".github/assets/walker-progression.png" alt="The walker gaining gear from Ri 1 to Ri 2000" width="78%" />
 <br/>
-<sub><i>The same soldier, deeper and deeper. Gear grows with power — and soon, with what you actually equip.</i></sub>
+<sub><i>The same soldier, deeper and deeper. Gear grows with power — and with what you actually equip.</i></sub>
 </div>
 
 ---
@@ -79,17 +83,17 @@ It is built on a hard rule: **zero art and zero audio assets.** Every sprite is 
 ```mermaid
 %%{init: {'theme':'base','themeVariables':{'pie1':'#c1372b','pie2':'#b8912f','pie3':'#46707a','pie4':'#5a4663','pie5':'#4a6b3f','pieStrokeColor':'#0a0908','pieOuterStrokeColor':'#251e19','pieTitleTextColor':'#e4dccb','pieSectionTextColor':'#0a0908','pieLegendTextColor':'#9a9081'}}}%%
 pie showData
-    title Seventeen yōkai, four families
-    "Chaff — the small and many" : 5
-    "Organs — the horned and heavy" : 4
-    "Returned — the dead by how they died" : 4
-    "Nothing — the Mu, a hole in the world" : 2
+    title Twenty-four yōkai, four families
+    "Chaff — the small and many" : 7
+    "Organs — the horned and heavy" : 7
+    "Returned — the dead by how they died" : 7
+    "Nothing — the Mu, a hole in the world" : 3
     "The Ten Kings" : 10
 ```
 
 | | |
 |---|---:|
-| Yōkai species (+ 10 Kings) | **17** |
+| Yōkai species (+ 10 Kings) | **24** |
 | Auto-cast arts | **6** |
 | Stories in the Hyakumonogatari | **100** |
 | Playable classes | **7** |
