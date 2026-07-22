@@ -1096,6 +1096,88 @@ export const SPECIES: Species[] = [
     lore: 'A tree grown on a battlefield that drank so much blood it needs more. Its branches take you gently, the way roots take water.',
     build: jubokko,
   },
+
+  // ═══ wave 3 — the river, the marsh, the burning ground, and the courts ═══
+  {
+    id: 'akamanto', name: 'AKA-MANTO', kanji: '赤マント', family: 'returned', from: 130, weight: 9, fps: 5,
+    lore: 'It asks, from inside a red hood, whether you would like a red cloak or a blue one. Every answer is the wrong answer. So is silence.',
+    build: akamanto,
+  },
+  {
+    id: 'umibozu', name: 'UMI-BŌZU', kanji: '海坊主', family: 'nothing', from: 320, weight: 11, fps: 4,
+    lore: 'A calm night at sea, and then the water stands up — a smooth black mountain of a monk, asking for a barrel with no bottom to bail with.',
+    build: umibozu,
+  },
+  {
+    id: 'ayakashi', name: 'AYAKASHI', kanji: '絢', family: 'returned', from: 330, weight: 12, fps: 6,
+    lore: 'A serpent-coast of drowned sailors that takes two full days and nights to pass a boat. Bail the oil it drips, or it swamps you.',
+    build: ayakashi,
+  },
+  {
+    id: 'shokera', name: 'SHŌKERA', kanji: '精螻蛄', family: 'chaff', from: 335, weight: 13, fps: 9,
+    lore: 'On the nights of the monkey it climbs the roof and watches through the skylight to count your sins for the heavens. It has counted.',
+    build: shokera,
+  },
+  {
+    id: 'gaki', name: 'GAKI', kanji: '餓鬼', family: 'organs', from: 340, weight: 12, fps: 5,
+    lore: 'Reborn hungry for what it hoarded in life: a needle throat, a mountain belly, and no bottom to any of it. It drinks your resolve.',
+    build: gaki,
+  },
+  {
+    id: 'datsueba', name: 'DATSUE-BA', kanji: '奪衣婆', family: 'returned', from: 350, weight: 10, fps: 5,
+    lore: 'The old woman at the river of three crossings who strips the clothes from the dead to weigh their sins. She will weigh yours early.',
+    build: datsueba,
+  },
+  {
+    id: 'hoko', name: 'HŌKŌ', kanji: '彭侯', family: 'organs', from: 700, weight: 11, fps: 5,
+    lore: 'A thousand-year camphor tree with a black dog’s spirit and a human face, standing in the burning ground with its heartwood alight.',
+    build: hoko,
+  },
+  {
+    id: 'enmanotsukai', name: 'ENMA-NO-TSUKAI', kanji: '閻魔の使い', family: 'organs', from: 720, weight: 9, fps: 4,
+    lore: 'A herald of Enma, King of the courts of the dead, who arrives with a tablet already filled in. It has read your ledger. It disagrees.',
+    build: enmanotsukai,
+  },
+  {
+    id: 'okubi', name: 'ŌKUBI', kanji: '大首', family: 'nothing', from: 900, weight: 11, fps: 4,
+    lore: 'A face the size of the whole sky lowers itself into the fog, blackened teeth, and breathes on you. The breath is the attack. It is enough.',
+    build: okubi,
+  },
+  {
+    id: 'waira', name: 'WAIRA', kanji: '猥', family: 'organs', from: 905, weight: 12, fps: 6,
+    lore: 'A mud-coloured beast with a single enormous hooked foreclaw. It waits in the marsh, hooks what passes, and takes it down into the dark.',
+    build: waira,
+  },
+  {
+    id: 'yamajiji', name: 'YAMAJIJĪ', kanji: '山爺', family: 'organs', from: 910, weight: 11, fps: 4,
+    lore: 'A one-eyed giant of the deep mountains with a voice that stops a heart at forty paces. It needs only the one blow, and it knows it.',
+    build: yamajiji,
+  },
+  {
+    id: 'onibinomure', name: 'ONIBI-NO-MURE', kanji: '鬼火の群れ', family: 'nothing', from: 1400, weight: 11, fps: 6,
+    lore: 'The demon-fires of a cooling forge, arranged in a lattice no smith laid out. Each one is cold. Together they are a room with no door.',
+    build: onibinomure,
+  },
+  {
+    id: 'kanaoboni', name: 'KANABŌ-ONI', kanji: '金棒鬼', family: 'organs', from: 1405, weight: 12, fps: 6,
+    lore: 'An oni that works the iron hells, and carries the work with it: a studded club still red from the forge. To give strength to the strong.',
+    build: kanaoboni,
+  },
+  {
+    id: 'shutendoji', name: 'SHUTEN-DŌJI', kanji: '酒呑童子', family: 'organs', from: 1410, weight: 8, fps: 4,
+    lore: 'The drunken boy-demon king of Mount Ōe, who ate courtiers by the dozen and was only ever felled by poisoned wine and four borrowed gods.',
+    build: shutendoji,
+  },
+  {
+    id: 'koku', name: 'KOKŪ', kanji: '虚空', family: 'nothing', from: 2000, weight: 10, fps: 3,
+    lore: 'Not the Mu, which is where a thing is not. This is the shape left in the air after the Mu itself has gone. It is the quietest thing here.',
+    build: koku,
+  },
+  {
+    id: 'yato', name: 'YATŌ', kanji: '夜藤', family: 'nothing', from: 2000, weight: 6, fps: 4,
+    lore: 'The Night-Wisteria. A king of Without Interval grown from every road you ever walked, crowned in gold, hung with purple bloom, patient.',
+    build: yato,
+  },
 ]
 
 export const SPECIES_BY_ID: Record<string, Species> = Object.fromEntries(
@@ -1138,6 +1220,7 @@ export const SPECIES_PAL_EXTRA = {
   x: '#cfe6ee', // pale ice, snow-light, a cold glow
   m: '#5a4632', // mud, wet earth, drowned field
   j: '#7e8a3a', // a sickly yellow-green — sickness, marsh-light, decay
+  Q: '#6b4a7a', // wisteria purple — the Night-Wisteria king, deep-defilement bloom
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -1855,5 +1938,404 @@ function aonyobo(_seed: number, phase: number): Sprite {
   blit(s, robe, cx, y + 8)
   blit(s, head, cx, y)
   dissolveLegs(s, y + 15)
+  return outline(s, 'K')
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// WAVE 3 — the river, the marsh, the burning ground, without interval
+// (the deepest faces, and the courts that keep them)
+// ═══════════════════════════════════════════════════════════════════════
+
+/** UMI-BŌZU 海坊主 — the sea-monk; a rising black tide with two pale eyes. */
+function umibozu(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const rise = Math.round(Math.abs(Math.sin(t)) * -3)
+  const cx = 8
+  const y = 10 + rise
+  // a huge smooth black dome
+  for (let yy = 0; yy < 22; yy++) {
+    const half = Math.round(Math.sqrt(Math.max(0, 121 - (yy - 4) * (yy - 4))))
+    for (let x = -half; x <= half; x++) {
+      const px = cx + 14 + x
+      if (px >= 0 && px < W) s.px[(y + yy) * W + px] = 'H'
+    }
+  }
+  // two vast, calm pale eyes
+  blit(s, sprite(['WWW', 'WuW', 'WWW']), cx + 7, y + 8)
+  blit(s, sprite(['WWW', 'WuW', 'WWW']), cx + 17, y + 8)
+  return outline(s, 'K')
+}
+
+/** AYAKASHI 絢 — a coastline of drowned sailors, passing for days. */
+function ayakashi(seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  // a long low crest of pale faces
+  for (let x = 0; x < 40; x++) {
+    const yy = 24 + Math.round(Math.sin(t + x * 0.5) * 5)
+    s.px[yy * W + (2 + x)] = 'u'
+    s.px[(yy + 1) * W + (2 + x)] = 'U'
+    // faces surfacing along the crest
+    if (x % 6 === 3) {
+      s.px[(yy - 2) * W + (2 + x)] = 'W'
+      s.px[(yy - 1) * W + (2 + x)] = vary(seed + x, 2) ? 'n' : 'W'
+    }
+  }
+  return outline(s, 'K')
+}
+
+/** GAKI 餓鬼 — a hungry ghost, all belly and need; it drains and drains. */
+function gaki(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 14
+  const y = 8
+  // a tiny head on a thin neck
+  blit(s, sprite(['nSSn', 'SYYS', 'SnnS', '.SS.', '..n.']), cx + 2, y)
+  // ribs
+  blit(s, sprite(['S.S.S.S', 'SmSmSmS']), cx, y + 5)
+  // a vast swollen belly
+  for (let yy = 0; yy < 12; yy++) {
+    const half = Math.round(Math.sqrt(Math.max(0, 49 - (yy - 6) * (yy - 6))))
+    for (let x = -half; x <= half; x++) s.px[(y + 8 + yy) * W + (cx + 4 + x)] = 'm'
+  }
+  // grasping arms
+  blit(s, sprite(['S', 'S', 'n']), cx - 2, y + 8, { shear: Math.round(Math.sin(t) * 3) })
+  blit(s, sprite(['S', 'S', 'n']), cx + 11, y + 8, { flip: true, shear: Math.round(-Math.sin(t) * 3) })
+  return outline(s, 'K')
+}
+
+/** SHŌKERA 精螻蛄 — a clawed thing that peers in through the skylight for sins. */
+function shokera(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  // a square skylight frame
+  for (let i = 0; i < 24; i++) {
+    s.px[8 * W + (10 + i)] = 'l'
+    s.px[32 * W + (10 + i)] = 'l'
+    s.px[(8 + Math.min(24, i)) * W + 10] = 'l'
+    s.px[(8 + Math.min(24, i)) * W + 33] = 'l'
+  }
+  // a peering face pressed to the glass, one wide eye
+  const peer = Math.round(Math.sin(t) * 2)
+  blit(s, sprite(['.GGGG.', 'GggggG', 'GYKggG', 'GggggG', '.GnnG.']), 16 + peer, 14)
+  // claws gripping the frame
+  blit(s, sprite(['G.G.G']), 14, 10 + Math.round(Math.abs(Math.sin(t)) * 2))
+  return outline(s, 'K')
+}
+
+/** DATSUE-BA 奪衣婆 — the old woman at the river who strips what you carry. */
+function datsueba(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 12
+  const y = 8
+  const head = sprite([
+    '.nnnn.',
+    'nWWWWn',
+    'nWYYWn',
+    'nWnnWn',
+    'nWWWWn',
+    'nKKKKn',
+    '.WWWW.',
+  ])
+  const robe = sprite([
+    '.llllll.',
+    'llLLLLll',
+    'lLLLLLLl',
+    'lLLLLLLl',
+    'llLLLLll',
+    '.lLLLLl.',
+  ])
+  // long grasping hands, reaching to take
+  blit(s, sprite(['W', 'W', 'n', 'W']), cx - 2, y + 8, { shear: Math.round(Math.sin(t) * 3) })
+  blit(s, sprite(['W', 'W', 'n', 'W']), cx + 9, y + 8, { flip: true, shear: Math.round(-Math.sin(t) * 3) })
+  blit(s, robe, cx, y + 8)
+  blit(s, head, cx + 1, y)
+  dissolveLegs(s, y + 14)
+  return outline(s, 'K')
+}
+
+/** AKA-MANTO 赤マント — the red cloak that asks a question with no safe answer. */
+function akamanto(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 12
+  const y = 6
+  // a tall hood of deep red, the face all shadow
+  const hood = sprite([
+    '..RRRR..',
+    '.RRRRRR.',
+    'RRoooRRR',
+    'RoKKKKoR',
+    'RoKKKKoR',
+    'RRoKKoRR',
+    'RRRooRRR',
+  ])
+  blit(s, hood, cx, y)
+  // one cold gleam where an eye would be
+  s.px[(y + 3) * W + cx + 3] = Math.sin(t * 2) > 0 ? 'W' : 'K'
+  // the cloak billowing to the floor
+  for (let d = 0; d < 22; d++) {
+    const wob = Math.round(Math.sin(t + d * 0.4) * 3)
+    for (let x = 0; x < 8; x++) s.px[(y + 7 + d) * W + (cx + wob + x)] = x % 3 === 1 ? 'o' : 'R'
+  }
+  return outline(s, 'K')
+}
+
+/** ŌKUBI 大首 — an enormous face that fills the fog; a wide, filling pulse. */
+function okubi(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 4
+  const y = 4
+  // a huge dim face
+  for (let yy = 0; yy < 38; yy++) {
+    const half = Math.round(Math.sqrt(Math.max(0, 289 - (yy - 19) * (yy - 19))) * 0.62)
+    for (let x = -half; x <= half; x++) s.px[(y + yy) * W + (cx + 18 + x)] = 'S'
+  }
+  // eyes that widen on the beat
+  const open = Math.sin(t) > 0 ? 3 : 2
+  for (let dy = 0; dy < open; dy++) {
+    for (let dx = 0; dx < 4; dx++) {
+      s.px[(y + 12 + dy) * W + (cx + 9 + dx)] = 'K'
+      s.px[(y + 12 + dy) * W + (cx + 21 + dx)] = 'K'
+    }
+  }
+  // a wide flat mouth
+  for (let dx = 0; dx < 16; dx++) s.px[(y + 26) * W + (cx + 11 + dx)] = 'N'
+  return outline(s, 'K')
+}
+
+/** WAIRA 猥 — a one-clawed marsh-beast that hooks prey and drags it under. */
+function waira(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 8
+  const y = 18
+  const body = sprite([
+    '..mmmmmm..',
+    '.mmmmmmmm.',
+    'mmYmmmmmmm',
+    'mmmmmmmmmm',
+    '.mmmmmmmm.',
+    'mm..mm..mm',
+  ])
+  blit(s, body, cx, y)
+  // one huge hooked claw, swiping
+  const swipe = Math.round(Math.sin(t) * 4)
+  blit(s, sprite(['I....', '.I...', '..II.', '...II', '..III']), cx + 9, y - 2 + swipe)
+  return outline(s, 'K')
+}
+
+/** YAMAJIJĪ 山爺 — a one-eyed mountain giant; a single crushing blow. */
+function yamajiji(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 10
+  const y = 6
+  const heave = Math.round(Math.abs(Math.sin(t * 0.5)) * -2)
+  const body = sprite([
+    '..GGGGGGGG..',
+    '.GGgggggGGG.',
+    'GGggggggggGG',
+    'GGgYYYYgggGG',
+    'GGggKKgggggG',
+    'GGgggggggggG',
+    'GGGgggggGGGG',
+    '.GGgggggGGG.',
+    'GGGG....GGGG',
+    'GGg......gGG',
+  ])
+  blit(s, body, cx, y + heave)
+  // one great fist raised
+  blit(s, sprite(['GGG', 'GgG', 'GGG']), cx + 12, y + 4 + Math.round(Math.sin(t) * 2))
+  return outline(s, 'K')
+}
+
+/** ONIBI-NO-MURE 鬼火の群れ — demon-fires in a cooling forge; a lattice of pulses. */
+function onibinomure(seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  for (let gy = 0; gy < 4; gy++)
+    for (let gx = 0; gx < 4; gx++) {
+      const lit = ((vary(seed + gy * 4 + gx, 100) / 100 + phase) % 1) > 0.35
+      if (!lit) continue
+      const cx = 8 + gx * 8
+      const cy = 8 + gy * 9 + Math.round(Math.sin(t + gx + gy) * 1)
+      blit(s, sprite(['.F.', 'FoF', '.o.']), cx, cy)
+    }
+  return outline(s, 'K')
+}
+
+/** KANABŌ-ONI 金棒鬼 — an oni smith with a red-hot iron club. */
+function kanaoboni(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 10
+  const y = 10
+  const swing = Math.sin(t)
+  const body = sprite([
+    '.OOOOOO.',
+    'OOooooOO',
+    'OoYooYoO',
+    'OooNNooO',
+    'OOooooOO',
+    'OoooooooO',
+    'OOooooOO',
+    'OO....OO',
+    'O......O',
+  ])
+  blit(s, body, cx, y)
+  // horns
+  blit(s, sprite(['V.V', 'V.V']), cx + 2, y - 2)
+  // a glowing red-hot club, swung
+  const club = sprite(['FFF', 'FRF', 'FRF', 'FRF', '.i.', '.i.'])
+  blit(s, club, cx + 10 + Math.round(swing * 2), y + 2 + Math.round(swing * 3), { shear: Math.round(swing * 4) })
+  return outline(s, 'K')
+}
+
+/** SHUTEN-DŌJI 酒呑童子 — the drunken demon-king of Ōe; a crowned court boss. */
+function shutendoji(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 8
+  const y = 6
+  const breathe = Math.round(Math.sin(t * 0.6))
+  // a broad crowned oni-king
+  const crown = sprite(['D.D.D.D', 'DDDDDDD'])
+  const head = sprite([
+    '.OOOOOOO.',
+    'OOooooooO',
+    'OoRYoYRoO',
+    'OooNNNooO',
+    'OOoVVVVoO',
+    'OoooooooO',
+    '.OOoooOO.',
+  ])
+  const robe = sprite([
+    'TTTTTTTTTT',
+    'TtTTTTTTtT',
+    'TTtTTTTtTT',
+    'TtTDDDDtTT',
+    'TTtTTTTtTT',
+    'TtTTTTTTtT',
+    '.TTTTTTTT.',
+  ])
+  blit(s, robe, cx, y + 9 + breathe)
+  blit(s, head, cx + 1, y + 2 + breathe)
+  blit(s, crown, cx + 2, y + breathe)
+  // a sake cup raised
+  blit(s, sprite(['DDD', '.D.']), cx + 12, y + 8 + Math.round(Math.sin(t) * 1))
+  return outline(s, 'K')
+}
+
+/** HŌKŌ 彭侯 — a tree-spirit turned furnace, a face burning in the bark. */
+function hoko(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 12
+  // a thick trunk
+  for (let d = 0; d < 30; d++)
+    for (let x = 0; x < 14; x++) s.px[(8 + d) * W + (cx + x)] = x < 3 || x > 10 ? 'm' : 'H'
+  // fire glowing from within, flickering
+  for (let i = 0; i < 6; i++) {
+    const fy = 14 + i * 3 + Math.round(Math.sin(t + i) * 1)
+    s.px[fy * W + (cx + 6)] = (i + Math.round(t * 2)) % 2 ? 'F' : 'o'
+    s.px[fy * W + (cx + 7)] = 'F'
+  }
+  // a face in the bark
+  blit(s, sprite(['Y..Y', '.NN.']), cx + 4, 16)
+  return outline(s, 'K')
+}
+
+/** ENMA-NO-TSUKAI 閻魔の使い — a herald of the judge, tablet in hand. */
+function enmanotsukai(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 10
+  const y = 6
+  const head = sprite([
+    '.LLLLLL.',
+    'LLLLLLLL',
+    'LSSSSSSL',
+    'LSRSSRSL',
+    'LSSSSSSL',
+    'LSKKKKSL',
+    '.LSSSSL.',
+  ])
+  const robe = sprite([
+    '.LLLLLL.',
+    'LLllllLL',
+    'LlLLLLlL',
+    'LlLDDLlL',
+    'LlLLLLlL',
+    'LlllllLL',
+    '.LLLLLL.',
+  ])
+  blit(s, robe, cx, y + 8)
+  blit(s, head, cx + 1, y)
+  // the judge's tablet, held out, catching a slow light
+  const lit = Math.sin(t) > 0
+  blit(s, sprite(['PPP', lit ? 'PDP' : 'PpP', 'PPP', '.i.']), cx + 10, y + 9 + Math.round(Math.sin(t) * 1))
+  return outline(s, 'K')
+}
+
+/** KOKŪ 虚空 — not a hole but the space a hole leaves; a tall cold slot. */
+function koku(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 18 + Math.round(Math.sin(t * 0.5) * 1)
+  // a tall narrow absence, edged in the faintest cold
+  for (let y = 6; y < 42; y++) {
+    const half = 3 + Math.round(Math.sin((y - 6) / 6 + t) * 1)
+    for (let x = -half; x <= half; x++) {
+      const px = cx + x
+      if (px >= 0 && px < W) s.px[y * W + px] = 'Z'
+    }
+  }
+  return outline(s, 'e')
+}
+
+/** YATŌ 夜藤 — the Night-Wisteria: a king made of every road that came before. */
+function yato(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 10
+  const y = 4
+  const breathe = Math.round(Math.sin(t * 0.5))
+  // a towering void-king wreathed in wisteria, crowned, gold-eyed
+  const crown = sprite(['Q.Q.Q.Q', 'DQDQDQD'])
+  const head = sprite([
+    '.ZZZZZZ.',
+    'ZZZZZZZZ',
+    'ZYZZZZYZ',
+    'ZZZZZZZZ',
+    'ZZZDDZZZ',
+    '.ZZZZZZ.',
+  ])
+  const body = sprite([
+    '.ZZZZZZZZ.',
+    'ZZZZZZZZZZ',
+    'ZZQZZZZQZZ',
+    'ZZZZZZZZZZ',
+    'ZZZZZZZZZZ',
+    'ZZQZZZZQZZ',
+    'ZZZZZZZZZZ',
+    '.ZZZZZZZZ.',
+  ])
+  blit(s, body, cx, y + 10 + breathe)
+  blit(s, head, cx + 1, y + 2 + breathe)
+  blit(s, crown, cx + 1, y + breathe)
+  // hanging wisteria strands, swaying
+  for (let i = 0; i < 6; i++) {
+    const hx = cx - 1 + i * 4
+    const sway = Math.round(Math.sin(t + i * 0.6) * 2)
+    for (let d = 0; d < 10 + (i % 3) * 3; d++) {
+      const yy = y + 20 + d
+      if (yy < H) s.px[yy * W + (hx + Math.round((d / 10) * sway))] = d % 3 === 0 ? 'Q' : 'A'
+    }
+  }
   return outline(s, 'K')
 }
