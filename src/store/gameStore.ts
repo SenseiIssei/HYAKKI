@@ -136,6 +136,53 @@ export const getCasts = () => casts
 export const CAST_MS = 950
 
 /**
+ * Sparks — the particles that fly off where two things hit each other. Spawned
+ * in bursts on every landed blow, coloured by who threw it, and left to arc out
+ * and die on their own CSS timeline.
+ */
+export type Spark = {
+  id: number
+  side: 'enemy' | 'soldier'
+  color: string
+  /** launch vector, px */
+  vx: number
+  vy: number
+  size: number
+  born: number
+}
+let sparkId = 0
+let sparks: Spark[] = []
+export const getSparks = () => sparks
+export const SPARK_MS = 480
+
+function burst(now: number, side: 'enemy' | 'soldier', color: string, count: number, power = 1) {
+  for (let i = 0; i < count; i++) {
+    sparkId++
+    const a = (sparkId * 2.399963) % (Math.PI * 2) // golden-angle spread
+    const speed = (18 + (sparkId % 5) * 8) * power
+    sparks.push({
+      id: sparkId,
+      side,
+      color,
+      vx: Math.cos(a) * speed,
+      vy: Math.sin(a) * speed - 8, // biased upward, like a real spray
+      size: 2 + (sparkId % 3),
+      born: now,
+    })
+  }
+  if (sparks.length > 120) sparks = sparks.slice(-120)
+}
+
+/** The colour a family's blood/dust flies in. */
+const FAMILY_SPARK: Record<string, string> = {
+  chaff: '#8fae6a',
+  organs: '#c1372b',
+  returned: '#9fc6c9',
+  nothing: '#8a6ba0',
+  warden: '#c39a34',
+}
+
+/**
  * What the ability bar needs to draw: every learned art, its level, tier, and
  * how far through its cooldown it is (0 = ready, 1 = just fired).
  */
@@ -247,6 +294,44 @@ function playerWeaponWeight(): 'light' | 'balanced' | 'heavy' {
   return w?.base ? weaponClass(w.base) : 'balanced'
 }
 
+const RARITY_RANK: Record<string, number> = {
+  issued: 0,
+  kept: 1,
+  named: 2,
+  blessed: 3,
+  cursed: 4,
+  myth: 5,
+  truename: 6,
+}
+
+/**
+ * A drop just landed. If it is a genuine upgrade for an unlocked slot, either
+ * equip it (auto), raise a yes/no (ask), or leave it (off). The cheap rarity
+ * gate runs first so we only pay for the real sim comparison on plausible
+ * upgrades, not on every scrap of Issued gear.
+ */
+function considerDrop(relic: Relic) {
+  const mode = useUI.getState().autoEquip
+  if (mode === 'off') return
+  const slotIdx = SLOT_ORDER.indexOf(relic.slot)
+  if (slotIdx < 0 || slotIdx >= slotCount()) return // slot locked
+  const worn = G.equipped[slotIdx]
+  // cheap gate: an empty slot, or at least as rare as what's worn
+  const plausible = !worn || RARITY_RANK[relic.rarity] >= RARITY_RANK[worn.rarity]
+  if (!plausible) return
+  // confirm it actually helps, by the real measure
+  const cmp = compareRelic(G, relic)
+  const score = cmp.dpsDelta + cmp.survivalDelta * 0.5
+  if (score <= 0.01) return // not actually better
+  if (mode === 'auto') {
+    equipRelic(relic.uid)
+    pushLog(`Better. ${relicLabel(relic)} — on.`)
+  } else {
+    // only hold one prompt at a time; a later, better drop replaces it
+    useUI.getState().setPendingEquip(relic.uid)
+  }
+}
+
 /** Turn sim events into presentation. Called once per rendered frame. */
 export function drainEvents(now: number) {
   const evts: SimEvent[] = G.events
@@ -262,6 +347,8 @@ export function drainEvents(now: number) {
           }
           if (e.target === 'enemy') {
             sfxHit(e.crit, playerWeaponWeight())
+            // sparks fly off the thing you hit, in its own colour
+            burst(now, 'enemy', e.crit ? '#ffd98a' : FAMILY_SPARK[G.enemy.family] ?? '#c1372b', e.crit ? 12 : 6, e.crit ? 1.5 : 1)
             // a swing throws the walker forward; a crit shakes the frame
             impact = {
               ...impact,
@@ -270,6 +357,8 @@ export function drainEvents(now: number) {
             }
           } else {
             sfxTaken()
+            // it hit you back — your own blood, and the enemy lunges in
+            burst(now, 'soldier', '#c1372b', 7, 1)
             impact = { ...impact, struck: impact.struck + 1 }
           }
           break
@@ -289,6 +378,8 @@ export function drainEvents(now: number) {
             pushFloater(now, fmt(e.damage), 'ability', 'enemy', e.color, e.name)
           }
           sfxAbility(e.tier)
+          // a shower of sparks in the art's colour, bigger with tier
+          burst(now, 'enemy', e.color, 10 + e.tier * 6, 1.4 + e.tier * 0.4)
           // abilities shake with their tier; the ultimate rocks the screen
           impact = { ...impact, cast: impact.cast + 1, castTier: e.tier }
           break
@@ -334,6 +425,7 @@ export function drainEvents(now: number) {
         case 'relic':
           pushLog(`Something old. ${relicLabel(e.relic)}. It has been waiting.`)
           sfxRelic()
+          considerDrop(e.relic)
           break
         case 'echoLost':
           pushLog('One of you stops.')
@@ -368,10 +460,13 @@ export function drainEvents(now: number) {
   deaths = deaths.filter((d) => now - d.born < DEATH_MS)
   const castsBefore = casts.length
   casts = casts.filter((c) => now - c.born < CAST_MS)
+  const sparksBefore = sparks.length
+  sparks = sparks.filter((sp) => now - sp.born < SPARK_MS)
   return (
     floaters.length !== before ||
     deaths.length !== deathsBefore ||
     casts.length !== castsBefore ||
+    sparks.length !== sparksBefore ||
     evts.length > 0
   )
 }
@@ -417,6 +512,12 @@ type UIState = {
   setNumbersOnly: (v: boolean) => void
   locale: Locale
   setLocale: (l: Locale) => void
+  /** what to do when a better item drops: ask (popup), auto (equip it), off */
+  autoEquip: 'ask' | 'auto' | 'off'
+  setAutoEquip: (m: 'ask' | 'auto' | 'off') => void
+  /** uid of a dropped upgrade awaiting the player's yes/no */
+  pendingEquip: string | null
+  setPendingEquip: (uid: string | null) => void
   /** hit-stop and screen shake on impact. Off for anyone who wants it still. */
   screenShake: boolean
   setScreenShake: (v: boolean) => void
@@ -487,6 +588,14 @@ export const useUI = create<UIState>((set) => ({
     persistLocale(l)
     set({ locale: l })
   },
+  autoEquip:
+    (localStorage.getItem('hyakki.autoequip') as 'ask' | 'auto' | 'off') || 'ask',
+  setAutoEquip: (m) => {
+    localStorage.setItem('hyakki.autoequip', m)
+    set({ autoEquip: m })
+  },
+  pendingEquip: null,
+  setPendingEquip: (uid) => set({ pendingEquip: uid }),
   screenShake: localStorage.getItem('hyakki.shake') !== '0',
   setScreenShake: (v) => {
     localStorage.setItem('hyakki.shake', v ? '1' : '0')

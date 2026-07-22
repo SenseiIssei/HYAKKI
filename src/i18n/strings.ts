@@ -206,6 +206,35 @@ export const STRINGS: Record<string, Entry> = {
   },
   'opt.text_size': { en: 'Text size', de: 'Textgröße', ja: '文字の大きさ', fr: 'Taille du texte', es: 'Tamaño del texto' },
 
+  // ── the "better item, equip?" prompt ──
+  'equip.better': {
+    en: 'A better item.',
+    de: 'Ein besseres Stück.',
+    ja: 'より良い品。',
+    fr: 'Un meilleur objet.',
+    es: 'Un objeto mejor.',
+  },
+  'equip.q': { en: 'Equip it?', de: 'Anlegen?', ja: '装備する？', fr: 'L’équiper ?', es: '¿Equiparlo?' },
+  'equip.yes': { en: 'Equip', de: 'Anlegen', ja: '装備', fr: 'Équiper', es: 'Equipar' },
+  'equip.no': { en: 'Keep in bag', de: 'Im Beutel lassen', ja: '袋のまま', fr: 'Garder', es: 'Guardar' },
+  'equip.always': {
+    en: 'Always auto-equip',
+    de: 'Immer automatisch',
+    ja: '常に自動装備',
+    fr: 'Toujours automatique',
+    es: 'Siempre automático',
+  },
+  'opt.autoequip': {
+    en: 'Better items',
+    de: 'Bessere Gegenstände',
+    ja: 'より良い装備',
+    fr: 'Meilleurs objets',
+    es: 'Mejores objetos',
+  },
+  'opt.autoequip.ask': { en: 'Ask', de: 'Fragen', ja: '尋ねる', fr: 'Demander', es: 'Preguntar' },
+  'opt.autoequip.auto': { en: 'Auto-equip', de: 'Automatisch', ja: '自動装備', fr: 'Automatique', es: 'Automático' },
+  'opt.autoequip.off': { en: 'Off', de: 'Aus', ja: 'なし', fr: 'Désactivé', es: 'Apagado' },
+
   // ── the ever-present footer line ──
   'footer.tagline': {
     en: 'Nothing here was drawn by hand.',

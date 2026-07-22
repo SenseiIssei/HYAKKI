@@ -4,6 +4,8 @@ import { createInitialState } from '../sim/state'
 import { hardReset } from '../save/storage'
 import { Backdrop } from './Backdrop'
 import { MainMenu } from './MainMenu'
+import { WindowBar } from './WindowBar'
+import { EquipPrompt } from './EquipPrompt'
 import { useGameLoop } from '../loop/useGameLoop'
 import { CLASS_BY_ID } from '../content/classes'
 import {
@@ -148,6 +150,7 @@ export function App() {
   if (screen === 'menu') {
     return (
       <>
+        <WindowBar />
         <MainMenu
           onContinue={() => setScreen('game')}
           onNew={() => {
@@ -293,6 +296,7 @@ export function App() {
       {ledgerOpen && <Ledger />}
       {wardsOpen && <Wards />}
       {storiesOpen && <Hyakumonogatari />}
+      <EquipPrompt />
       {/* A finished Descent announces itself rather than waiting to be noticed. */}
       {!report && !descendOpen && readyDescents()[0] && (
         <DescentReport id={readyDescents()[0].id} />

@@ -604,6 +604,171 @@ function yukionna(_seed: number, phase: number): Sprite {
   return outline(s, 'K')
 }
 
+// ═══ a wider bestiary ═══════════════════════════════════════════════
+
+/** SUNAKAKE-BABA 砂かけ婆 — a hunched hag who flings blinding sand. */
+function sunakake(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const throwArm = Math.round(Math.sin(t) * 3)
+  const y = 18 + Math.round(Math.abs(Math.sin(t)) * -2)
+  const cx = 15
+  const head = sprite(['.HHHH.', 'HHwwHH', 'HwKKwH', 'HwwwwH', 'HKwwKH', '.wwww.'])
+  const body = sprite(['.wwwww.', 'wwWWWww', 'wWWWWWw', 'wWWWWWw', '.wWWWw.', '.w...w.'])
+  // a fistful of sand, flung
+  blit(s, sprite(['B.B', '.B.', 'B.B']), cx + 8 + throwArm, y + 4)
+  blit(s, sprite(['w', 'w', 'w', 'w']), cx + 6, y + 6, { shear: throwArm })
+  blit(s, body, cx, y + 6)
+  blit(s, head, cx + 1, y)
+  return outline(s, 'K')
+}
+
+/** ABURASUMASHI 油すまし — a squat stone head on a straw cloak, always watching. */
+function aburasumashi(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const y = 20 + Math.round(Math.abs(Math.sin(t)) * -1)
+  const cx = 15
+  const head = sprite(['.gggggg.', 'gggggggg', 'gYggggYg', 'gggggggg', 'ggnnnngg', 'gggggggg', '.gnnnng.'])
+  const cloak = sprite(['BbBbBbBb', 'bBbBbBbB', 'BbBbBbBb', '.bBbBb..'])
+  blit(s, cloak, cx, y + 8)
+  blit(s, head, cx + 1, y)
+  return outline(s, 'K')
+}
+
+/** WANYŪDŌ 輪入道 — a burning cartwheel with a screaming face at its hub. */
+function wanyudo(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const cx = 22
+  const cy = 24
+  const r = 15
+  // the rim
+  for (let a = 0; a < 360; a += 12) {
+    const rad = ((a + phase * 90) * Math.PI) / 180
+    const x = Math.round(cx + Math.cos(rad) * r)
+    const yy = Math.round(cy + Math.sin(rad) * r)
+    if (x >= 0 && x < W && yy >= 0 && yy < H) s.px[yy * W + x] = a % 24 === 0 ? 'F' : 'O'
+  }
+  // spokes flicker with fire
+  for (let a = 0; a < 360; a += 45) {
+    const rad = ((a + phase * 90) * Math.PI) / 180
+    for (let d = 4; d < r; d += 3) {
+      const x = Math.round(cx + Math.cos(rad) * d)
+      const yy = Math.round(cy + Math.sin(rad) * d)
+      if (x >= 0 && x < W && yy >= 0 && yy < H) s.px[yy * W + x] = 'o'
+    }
+  }
+  // the face at the hub
+  blit(s, sprite(['SSSS', 'SKKS', 'SSSS', 'SKKS'].map((r2) => r2)), cx - 2, cy - 2)
+  blit(s, sprite(['R.R', '.R.']), cx - 1, cy - 1)
+  return outline(s, 'K')
+}
+
+/** OTOROSHI おとろし — a mane of hair, two eyes, and claws, over a shrine gate. */
+function otoroshi(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const bristle = Math.round(Math.abs(Math.sin(t * 2)) * 2)
+  const y = 12
+  const cx = 12
+  const mane = sprite([
+    'H.H.H.H.H.H.H.H.H.',
+    'HHHHHHHHHHHHHHHHHH',
+    'HHHHHHHHHHHHHHHHHH',
+    'HHYYHHHHHHHHHHYYHH',
+    'HHYKHHHHHHHHHHKYHH',
+    'HHHHHHHHHHHHHHHHHH',
+    'HHHHHVVVVVVHHHHHHH',
+    'HHHHHVKKKKVHHHHHHH',
+  ])
+  blit(s, mane, cx, y + bristle)
+  // claws below
+  blit(s, sprite(['V.V.V', '.V.V.']), cx + 2, y + 20)
+  blit(s, sprite(['V.V.V', '.V.V.']), cx + 9, y + 20)
+  return outline(s, 'K')
+}
+
+/** UBAGABI 姥ヶ火 — a hag's face inside a hovering ball of pale fire. */
+function ubagabi(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const drift = Math.round(Math.sin(t) * 3)
+  const cx = 16 + drift
+  const y = 12 + Math.round(Math.cos(t) * 2)
+  // flame body (cold blue-white)
+  const flame = sprite([
+    '...UU...',
+    '..UUUU..',
+    '.UUUUUU.',
+    'UUUWWUUU',
+    'UUWWWWUU',
+    'UUUWWUUU',
+    '.UUUUUU.',
+    '..UuuU..',
+  ])
+  blit(s, flame, cx, y)
+  // the face in it
+  blit(s, sprite(['K.K', '.n.', 'nnn']), cx + 2, y + 3)
+  return outline(s, 'K')
+}
+
+/** WARAU-ONNA 笑い女 — she is smiling. She has been smiling for some time. */
+function warauonna(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const drift = Math.round(Math.sin(t * 0.5) * 2)
+  const cx = 15 + drift
+  const y = 8
+  const head = sprite([
+    'HHHHHHHH',
+    'HHHHHHHH',
+    'HWWWWWWH',
+    'HWKWWKWH',
+    'HWWWWWWH',
+    'HWRRRRWH',
+    'HWKKKKWH',
+    '.WWWWWW.',
+  ])
+  const body = sprite(['.WWWWWW.', 'WWwwwwWW', 'WWwwwwWW', '.WwwwwW.'])
+  blit(s, sprite(['W', 'W', 'W', 'W']), cx - 1, y + 8, { shear: drift })
+  blit(s, sprite(['W', 'W', 'W', 'W']), cx + 8, y + 8, { flip: true })
+  blit(s, body, cx, y + 8)
+  blit(s, head, cx + 1, y)
+  dissolveLegs(s, y + 12)
+  return outline(s, 'K')
+}
+
+/** KAGE 影 — not a hole like the Mu, but a shadow that stands up on its own. */
+function kage(seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const sway = Math.round(Math.sin(t) * 3)
+  const cx = 16
+  // a person-shaped smear of dark, edged faintly
+  const body = [
+    '..ZZZZ..',
+    '.ZZZZZZ.',
+    '.ZZZZZZ.',
+    '..ZZZZ..',
+    '.ZZZZZZ.',
+    'ZZZZZZZZ',
+    'ZZZZZZZZ',
+    'ZZZZZZZZ',
+    '.ZZ..ZZ.',
+    '.ZZ..ZZ.',
+  ]
+  body.forEach((row, yy) => {
+    for (let x = 0; x < row.length; x++) {
+      if (row[x] === 'Z') s.px[(14 + yy) * W + cx + x + Math.round(sway * (yy / 10))] = 'Z'
+    }
+  })
+  // two faint cold eyes
+  s.px[18 * W + cx + 2] = 'e'
+  s.px[18 * W + cx + 5] = 'e'
+  void seed
+  return outline(s, 'e')
+}
+
 export const SPECIES: Species[] = [
   {
     id: 'kozo', name: 'KOZŌ', kanji: '小僧', family: 'chaff', from: 0, weight: 34, fps: 12,
@@ -629,6 +794,26 @@ export const SPECIES: Species[] = [
     id: 'nopperabo', name: 'NOPPERABŌ', kanji: 'のっぺらぼう', family: 'chaff', from: 40, weight: 12, fps: 6,
     lore: 'You ask it what is wrong and it turns, and there is nothing on the front of its head, and then there is, and then there is not.',
     build: nopperabo,
+  },
+  {
+    id: 'sunakake', name: 'SUNAKAKE-BABA', kanji: '砂かけ婆', family: 'chaff', from: 20, weight: 14, fps: 8,
+    lore: 'An old woman who waits by lonely shrine walls and throws sand in your eyes. Nobody ever sees her. That is the complaint, and the proof.',
+    build: sunakake,
+  },
+  {
+    id: 'aburasumashi', name: 'ABURASUMASHI', kanji: '油すまし', family: 'chaff', from: 55, weight: 10, fps: 4,
+    lore: 'A squat stone-faced thing in a straw cloak. Say "they say an oil-presser used to appear here" on the mountain pass, and it answers: "I still do."',
+    build: aburasumashi,
+  },
+  {
+    id: 'wanyudo', name: 'WANYŪDŌ', kanji: '輪入道', family: 'organs', from: 110, weight: 12, fps: 10,
+    lore: 'A flaming ox-cart wheel with a damned man’s face at the hub, rolling the gate-road of a hell. Look at it and it takes something small from you, and remembers your street.',
+    build: wanyudo,
+  },
+  {
+    id: 'otoroshi', name: 'OTOROSHI', kanji: 'おとろし', family: 'organs', from: 150, weight: 11, fps: 6,
+    lore: 'A great mane of hair and claws that crouches on the shrine gate, and drops on the impious. It has been patient. You are not the impious it is waiting for, but you will do.',
+    build: otoroshi,
   },
   {
     id: 'oni', name: 'ONI', kanji: '鬼', family: 'organs', from: 15, weight: 26, fps: 6,
@@ -678,12 +863,27 @@ export const SPECIES: Species[] = [
     build: hidarugami,
   },
   {
+    id: 'ubagabi', name: 'UBAGABI', kanji: '姥ヶ火', family: 'returned', from: 90, weight: 14, fps: 7,
+    lore: 'An old woman who stole lamp-oil from a shrine and drowned for it, and rose as a hovering ball of cold fire with her face inside. She only wants a little light. She will take yours.',
+    build: ubagabi,
+  },
+  {
+    id: 'warauonna', name: 'WARAU-ONNA', kanji: '笑い女', family: 'returned', from: 130, weight: 13, fps: 4,
+    lore: 'She is smiling. She has been smiling since before you came in. Nothing has been funny for a very long time, and still, she is smiling.',
+    build: warauonna,
+  },
+  {
     id: 'yukionna', name: 'YUKI-ONNA', kanji: '雪女', family: 'returned', from: 160, weight: 15, fps: 4,
     lore: 'Froze, and stayed to do the same for others, and is beautiful about it. The cold she brings is the last warm thing you will feel.',
     build: yukionna,
   },
 
   // ── the nothing ──
+  {
+    id: 'kage', name: 'KAGE', kanji: '影', family: 'nothing', from: 120, weight: 16, fps: 4,
+    lore: 'Not a hole in the world like the Mu — a shadow that has stopped belonging to anyone, and stood up, and started keeping pace with you a little too well.',
+    build: kage,
+  },
   {
     id: 'mu', name: 'MU', kanji: '無', family: 'nothing', from: 0, weight: 24, fps: 3,
     lore: 'Not a thing that is dark. The place a thing would be, if there were one. There is not.',

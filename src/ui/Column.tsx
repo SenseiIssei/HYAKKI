@@ -13,11 +13,13 @@ import {
   getCasts,
   getDeaths,
   getFloaters,
+  getSparks,
   getImpact,
   getLog,
   stats,
   useUI,
   type Floater,
+  type Spark,
 } from '../store/gameStore'
 import { AbilityVfx } from './AbilityVfx'
 import { AbilityBar } from './AbilityBar'
@@ -185,6 +187,19 @@ export function Column() {
     return () => window.clearTimeout(id)
   }, [impact.swing, impact.struck])
 
+  // the enemy lunges IN when it attacks — it is fighting back, not just standing
+  const [enemyAttack, setEnemyAttack] = useState(false)
+  const prevStruck2 = useRef(impact.struck)
+  useEffect(() => {
+    if (impact.struck === prevStruck2.current) return
+    prevStruck2.current = impact.struck
+    setEnemyAttack(true)
+    const id = window.setTimeout(() => setEnemyAttack(false), 200)
+    return () => window.clearTimeout(id)
+  }, [impact.struck])
+
+  const sparks = getSparks()
+
   if (numbersOnly) return <NumbersOnly />
 
   return (
@@ -223,6 +238,7 @@ export function Column() {
           <AbilityVfx key={c.id} cast={c} />
         ))}
         <div className={`combatant ${recoil === 'soldier' ? 'recoil-left' : ''}`}>
+          <SparkBurst sparks={sparks} side="soldier" />
           <div className="floaters">
             <FloatColumn floaters={floaters} side="soldier" />
           </div>
@@ -264,7 +280,12 @@ export function Column() {
           </div>
         </div>
 
-        <div className={`combatant ${recoil === 'enemy' ? 'recoil-right' : ''}`}>
+        <div
+          className={`combatant ${recoil === 'enemy' ? 'recoil-right' : ''} ${
+            enemyAttack ? `enemy-attack fam-${target.family}` : ''
+          }`}
+        >
+          <SparkBurst sparks={sparks} side="enemy" />
           <div className="floaters">
             <FloatColumn floaters={floaters} side="enemy" />
           </div>
@@ -321,6 +342,30 @@ export function Column() {
  * properties, so the motion runs on the compositor at full framerate rather
  * than at the sim's 10Hz frame bump.
  */
+/** The particle spray at a combatant, from every landed blow. */
+function SparkBurst({ sparks, side }: { sparks: Spark[]; side: 'enemy' | 'soldier' }) {
+  return (
+    <div className="sparks" aria-hidden="true">
+      {sparks
+        .filter((s) => s.side === side)
+        .map((s) => (
+          <span
+            key={s.id}
+            className="spark"
+            style={{
+              ['--vx' as string]: `${s.vx}px`,
+              ['--vy' as string]: `${s.vy}px`,
+              width: `${s.size}px`,
+              height: `${s.size}px`,
+              background: s.color,
+              boxShadow: `0 0 4px ${s.color}`,
+            }}
+          />
+        ))}
+    </div>
+  )
+}
+
 function FloatColumn({ floaters, side }: { floaters: Floater[]; side: 'enemy' | 'soldier' }) {
   return (
     <>

@@ -281,8 +281,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  /* start at the top and let it scroll: with a full menu, centring + hidden
+     overflow clipped the title off the top of the window. */
+  justify-content: flex-start;
+  overflow-y: auto;
 }
 
 .menu-inner {
@@ -291,9 +293,36 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
-  padding: 20px;
+  gap: 14px;
+  /* margin:auto centres when there is room but never eats the top edge, so the
+     title is always reachable even when every button is showing */
+  margin: auto 0;
+  padding: 56px 20px 32px;
   animation: menu-in 900ms ease-out;
+}
+
+/* ── the window bar, for screens with no topbar (the menu) ── */
+.winbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  z-index: 80;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  pointer-events: none;
+}
+.winbar-drag {
+  flex: 1;
+  -webkit-app-region: drag;
+  app-region: drag;
+  pointer-events: auto;
+}
+.winbar .win-controls {
+  pointer-events: auto;
+  margin-right: 0;
 }
 
 @keyframes menu-in {

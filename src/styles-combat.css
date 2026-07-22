@@ -382,3 +382,140 @@
 
 /* language picker wraps to fit five tongues */
 .lang-row { flex-wrap: wrap; gap: 6px; }
+
+/* ── impact sparks: particles off every landed blow ── */
+.sparks {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+.spark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  animation: spark-fly 0.48s ease-out forwards;
+}
+@keyframes spark-fly {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  70% { opacity: 1; }
+  100% {
+    /* fly out along the launch vector, then fall a little (gravity) */
+    transform: translate(calc(var(--vx) * 3), calc(var(--vy) * 3 + 26px)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* ── the enemy lunges IN when it attacks — per family, its own move ── */
+.enemy-attack { will-change: transform; }
+/* default: a straight lunge toward the player (leftward) */
+.enemy-attack { animation: en-lunge 0.2s ease-out; }
+@keyframes en-lunge {
+  0% { transform: translateX(0); }
+  40% { transform: translateX(-16px); }
+  100% { transform: translateX(0); }
+}
+/* organs — heavy overhead: dips and slams */
+.enemy-attack.fam-organs { animation: en-slam 0.24s ease-out; }
+@keyframes en-slam {
+  0% { transform: translate(0,0) rotate(0); }
+  35% { transform: translate(-6px,-6px) rotate(4deg); }
+  60% { transform: translate(-20px,4px) rotate(-6deg); }
+  100% { transform: translate(0,0) rotate(0); }
+}
+/* chaff — quick little jab, twice */
+.enemy-attack.fam-chaff { animation: en-jab 0.18s steps(2, end); }
+@keyframes en-jab {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-13px); }
+  100% { transform: translateX(0); }
+}
+/* returned — drifts through, doesn't quite touch the ground */
+.enemy-attack.fam-returned { animation: en-drift 0.28s ease-in-out; }
+@keyframes en-drift {
+  0% { transform: translate(0,0); }
+  50% { transform: translate(-18px,-8px) skewX(-6deg); }
+  100% { transform: translate(0,0); }
+}
+/* nothing — no lunge, it PULSES where it stands */
+.enemy-attack.fam-nothing { animation: en-pulse 0.24s ease-out; }
+@keyframes en-pulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  40% { transform: scale(1.14); filter: brightness(1.6); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .enemy-attack, .spark { animation: none; }
+}
+
+/* ── "better item, equip?" prompt ── */
+.equip-prompt-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 96px;
+  pointer-events: none;
+}
+.equip-prompt {
+  pointer-events: auto;
+  background: var(--void-lift);
+  border: 1px solid var(--void-edge);
+  border-left-width: 4px;
+  padding: 14px 18px;
+  min-width: 280px;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 8px 30px #000a;
+  animation: ep-in 300ms ease-out;
+}
+@keyframes ep-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+.ep-head {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+}
+.ep-name { font-family: var(--serif); font-size: 18px; margin: 4px 0 2px; }
+.ep-tier {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.ep-deltas {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin: 8px 0;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+.ep-deltas .up { color: #7ba368; }
+.ep-deltas .down { color: var(--blood); }
+.ep-q { font-family: var(--serif); font-style: italic; color: var(--bone-dim); margin-bottom: 8px; }
+.ep-actions { display: flex; gap: 8px; justify-content: center; align-items: center; }
+.ep-always {
+  display: block;
+  margin: 10px auto 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ash);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.ep-always:hover { color: var(--bone-dim); }

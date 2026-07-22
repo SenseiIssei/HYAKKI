@@ -11,6 +11,8 @@ export function Settings() {
   const t = useT()
   const locale = useUI((s) => s.locale)
   const setLocale = useUI((s) => s.setLocale)
+  const autoEquip = useUI((s) => s.autoEquip)
+  const setAutoEquip = useUI((s) => s.setAutoEquip)
   const close = useUI((s) => s.setSettings)
   const numbersOnly = useUI((s) => s.numbersOnly)
   const setNumbersOnly = useUI((s) => s.setNumbersOnly)
@@ -111,6 +113,20 @@ export function Settings() {
               onClick={() => setLocale(l.id)}
             >
               {l.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="panel-row" style={{ marginTop: 4 }}>
+          <span className="hint" style={{ alignSelf: 'center' }}>{t('opt.autoequip')}</span>
+          {(['ask', 'auto', 'off'] as const).map((m) => (
+            <button
+              key={m}
+              className="small-btn"
+              data-on={autoEquip === m}
+              onClick={() => setAutoEquip(m)}
+            >
+              {t(`opt.autoequip.${m}`)}
             </button>
           ))}
         </div>

@@ -57,10 +57,10 @@
       {
         "title": "百鬼 HYAKKI",
         "label": "main",
-        "width": 1180,
-        "height": 780,
+        "width": 1200,
+        "height": 840,
         "minWidth": 900,
-        "minHeight": 620,
+        "minHeight": 640,
         "resizable": true,
         "fullscreen": false,
         "decorations": false,
