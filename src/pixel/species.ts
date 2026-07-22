@@ -922,6 +922,93 @@ export const SPECIES: Species[] = [
     lore: 'A hollow that goes down further than the room it is in. Looking into it is the last thing several accounts record.',
     build: utsuro,
   },
+
+  // ═══ wave 1 — the bamboo road, paddies, village, night market ═══
+  {
+    id: 'konakijiji', name: 'KONAKI-JIJĪ', kanji: '子泣き爺', family: 'chaff', from: 4, weight: 20, fps: 6,
+    lore: 'It cries like a lost baby until you pick it up, and then it weighs as much as the mountain it came from, and it does not let go.',
+    build: konakijiji,
+  },
+  {
+    id: 'suzurinotamashii', name: 'SUZURI-NO-TAMASHII', kanji: '硯の魂', family: 'chaff', from: 8, weight: 15, fps: 8,
+    lore: 'An inkstone ground by one hand for forty years. It kept every word, and it spits them all back as blinding black.',
+    build: suzurinotamashii,
+  },
+  {
+    id: 'kawauso', name: 'KAWAUSO', kanji: '獺', family: 'chaff', from: 30, weight: 16, fps: 12,
+    lore: 'An otter that learned to laugh like a person and found it funnier than fish. It feints left, always, and never strikes there.',
+    build: kawauso,
+  },
+  {
+    id: 'ashimagari', name: 'ASHIMAGARI', kanji: '足まがり', family: 'chaff', from: 34, weight: 14, fps: 8,
+    lore: 'Soft as cotton against the shin, and then it has climbed to the knee, and then you are on the ground and it is still climbing.',
+    build: ashimagari,
+  },
+  {
+    id: 'dorotabo', name: 'DOROTABŌ', kanji: '泥田坊', family: 'organs', from: 32, weight: 13, fps: 5,
+    lore: 'A farmer whose sons sold his field. He rises out of the mud each night with three fingers and one eye, asking for it back.',
+    build: dorotabo,
+  },
+  {
+    id: 'kazenbo', name: 'KAZENBŌ', kanji: '火前坊', family: 'returned', from: 35, weight: 13, fps: 6,
+    lore: 'A monk who walked into the funeral fire and did not finish burning. He drifts the low ground, still smoking, still praying.',
+    build: kazenbo,
+  },
+  {
+    id: 'onamazu', name: 'ŌNAMAZU', kanji: '大鯰', family: 'organs', from: 40, weight: 12, fps: 4,
+    lore: 'The great catfish that turns under the islands. When it shifts its weight the ground answers, and everything standing falls.',
+    build: onamazu,
+  },
+  {
+    id: 'kejoro', name: 'KEJŌRO', kanji: '毛倡妓', family: 'returned', from: 40, weight: 13, fps: 6,
+    lore: 'From the front, a courtesan. From every other side, and there are only other sides, a standing weight of black hair.',
+    build: kejoro,
+  },
+  {
+    id: 'kanedama', name: 'KANEDAMA', kanji: '金霊', family: 'nothing', from: 45, weight: 11, fps: 7,
+    lore: 'A spirit of money, they say, a blessing. It hangs in the air as a coin of cold light with a square hole, and the hole is the true part.',
+    build: kanedama,
+  },
+  {
+    id: 'ittanmomen', name: 'ITTAN-MOMEN', kanji: '一反木綿', family: 'chaff', from: 60, weight: 14, fps: 9,
+    lore: 'A single bolt of white cloth that flies at dusk. It wants your face, and it has all the time and all the air it needs.',
+    build: ittanmomen,
+  },
+  {
+    id: 'akaname', name: 'AKANAME', kanji: '垢嘗', family: 'chaff', from: 66, weight: 15, fps: 12,
+    lore: 'It licks the grime from an unwashed bathhouse at night. Where nobody has cleaned in a very long time, it grows bold, and hungry.',
+    build: akaname,
+  },
+  {
+    id: 'tenjoname', name: 'TENJŌNAME', kanji: '天井嘗', family: 'returned', from: 70, weight: 12, fps: 6,
+    lore: 'The chill on the back of your neck in an old house is its tongue, testing the ceiling for the taste of who lived and died below.',
+    build: tenjoname,
+  },
+  {
+    id: 'mokumokuren', name: 'MOKUMOKUREN', kanji: '目目連', family: 'nothing', from: 72, weight: 10, fps: 4,
+    lore: 'A torn paper screen in a house left too long. Every rip has become an eye, and all of them have already found you.',
+    build: mokumokuren,
+  },
+  {
+    id: 'honekarakasa', name: 'HONE-KARAKASA', kanji: '骨傘', family: 'chaff', from: 112, weight: 13, fps: 11,
+    lore: 'The shrine umbrella’s starved cousin: ribs bare, paper gone, hopping faster than a thing with one leg has any right to.',
+    build: honekarakasa,
+  },
+  {
+    id: 'omukade', name: 'ŌMUKADE', kanji: '大百足', family: 'organs', from: 110, weight: 12, fps: 10,
+    lore: 'A centipede grown long enough to loop a mountain, iron between its plates. Even the thunder god was afraid of the smaller ones.',
+    build: omukade,
+  },
+  {
+    id: 'tesso', name: 'TESSO', kanji: '鉄鼠', family: 'chaff', from: 115, weight: 14, fps: 12,
+    lore: 'A monk died with a grudge and came back as ten thousand rats with iron teeth. They ate the sutras first, then the priests.',
+    build: tesso,
+  },
+  {
+    id: 'bakeneko', name: 'BAKENEKO', kanji: '化け猫', family: 'returned', from: 118, weight: 12, fps: 7,
+    lore: 'A cat that lived long enough to split its tail in two, stand on its back legs, and remember every cruelty done under its roof.',
+    build: bakeneko,
+  },
 ]
 
 export const SPECIES_BY_ID: Record<string, Species> = Object.fromEntries(
@@ -958,4 +1045,358 @@ export const SPECIES_PAL_EXTRA = {
   F: '#f2b24a', // flame — the wanyūdō's burning rim, a king's caught light
   Z: '#050506', // the void inside a Mu — darker than the ink black K
   e: '#2b4247', // the faint cold rim of an absence
+  B: '#8a7442', // straw, rope, woven grass — the light strand
+  b: '#5c4d29', //   and its shadow
+  q: '#356b57', // wet marsh green — otters, paddy things
+  x: '#cfe6ee', // pale ice, snow-light, a cold glow
+  m: '#5a4632', // mud, wet earth, drowned field
+  j: '#7e8a3a', // a sickly yellow-green — sickness, marsh-light, decay
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// WAVE 1 — the bamboo road, the paddies, the village, the night market
+// ═══════════════════════════════════════════════════════════════════════
+
+/** KONAKI-JIJĪ 子泣き爺 — a swaddled infant that turns to stone weight. */
+function konakijiji(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 15
+  const y = 18 + Math.round(Math.sin(t) * 2)
+  const bundle = sprite([
+    '.WWWWWW.',
+    'WWwwwwWW',
+    'WwWWWWwW',
+    'WwWggWwW',
+    'WwWnnWwW',
+    'WwWvvWwW',
+    'WWwwwwWW',
+    '.WWWWWW.',
+    '..IIII..',
+  ])
+  const cry = phase > 0.5 ? sprite(['nnn', 'nRn', 'nnn']) : sprite(['...', 'nnn', '...'])
+  blit(s, bundle, cx, y)
+  blit(s, cry, cx + 3, y + 4)
+  return outline(s, 'K')
+}
+
+/** KEJŌRO 毛倡妓 — a woman who is nothing but hair, seen from behind. */
+function kejoro(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 10
+  for (let x = 0; x < 22; x++) {
+    const len = 24 + Math.round(Math.sin(t + x * 0.5) * 4)
+    for (let d = 0; d < len; d++) s.px[(8 + d) * W + (cx + x)] = 'H'
+  }
+  blit(s, sprite(['W.W', 'WWW', '.W.']), cx + 9, 22 + Math.round(Math.cos(t) * 2))
+  return outline(s, 'K')
+}
+
+/** SUZURI-NO-TAMASHII 硯の魂 — a possessed inkstone that spits blinding ink. */
+function suzurinotamashii(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 12
+  const y = 22
+  const slab = sprite([
+    'IIIIIIIIII',
+    'IiiiiiiiiI',
+    'IiKKKKKKiI',
+    'IiKZZZZKiI',
+    'IiKKKKKKiI',
+    'IiiiiiiiiI',
+    'IIIIIIIIII',
+  ])
+  blit(s, slab, cx, y)
+  blit(s, sprite(['YY', 'KK']), cx + 4, y + 3)
+  const ix = cx + 11 + Math.round(Math.abs(Math.sin(t)) * 6)
+  blit(s, sprite(['KK', 'KK']), ix, y + 1 + Math.round(Math.sin(t) * 3))
+  return outline(s, 'K')
+}
+
+/** KAWAUSO 獺 — a trickster otter, quick, feints before it strikes. */
+function kawauso(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const lean = Math.round(Math.sin(t * 2) * 3)
+  const cx = 8
+  const y = 24
+  const body = sprite([
+    '..qqqq..',
+    '.qqqqqq.',
+    'qqYqqYqq',
+    'qqqnnqqq',
+    '.qqqqqq.',
+    'qqqqqqqqqqqq',
+    'qqqqqqqqqqqqqq',
+    '.qq..qq...qqq.',
+  ])
+  blit(s, body, cx, y, { shear: lean })
+  blit(s, sprite(['q', 'q']), cx + 1, y - 2 + lean)
+  return outline(s, 'K')
+}
+
+/** KAZENBŌ 火前坊 — a burnt monk's ghost, drifting low over the water. */
+function kazenbo(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 14 + Math.round(Math.sin(t) * 2)
+  const y = 12
+  const monk = sprite([
+    '.nnnn.',
+    'nNNNNn',
+    'nNooNn',
+    'nNNNNn',
+    'nFFFFn',
+    'FnnnnF',
+    'nNNNNn',
+    'nNNNNn',
+    '.nNNn.',
+  ])
+  blit(s, monk, cx, y)
+  for (let i = 0; i < 4; i++) {
+    const ey = y - 2 - ((Math.round(t * 3) + i * 3) % 8)
+    if (ey >= 0) s.px[ey * W + cx + 1 + ((i * 2) % 4)] = 'F'
+  }
+  dissolveLegs(s, y + 9)
+  return outline(s, 'K')
+}
+
+/** ŌNAMAZU 大鯰 — the earthquake catfish; a slow, ground-shaking bulk. */
+function onamazu(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 6
+  const y = 20 + Math.round(Math.sin(t) * 1)
+  const body = sprite([
+    '...IIIIIIIIII...',
+    '..IiiiiiiiiiiI..',
+    '.IiiYiiiiiiYiiI.',
+    'IiiiiiiiiiiiiiiI',
+    '.IiiiiiiiiiiiiI.',
+    '..IiiiiiiiiiiI..',
+    '...IIIIIIIIII...',
+  ])
+  blit(s, body, cx, y)
+  const wob = Math.round(Math.sin(t * 2) * 2)
+  blit(s, sprite(['i...', '.i..', '..ii']), cx - 3, y + 2 + wob)
+  blit(s, sprite(['..ii', '.i..', 'i...']), cx - 3, y + 4 - wob)
+  return outline(s, 'K')
+}
+
+/** DOROTABŌ 泥田坊 — a one-eyed mud figure rising from a stolen field. */
+function dorotabo(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const rise = Math.round(Math.abs(Math.sin(t)) * -3)
+  const cx = 13
+  const y = 16 - rise
+  const body = sprite([
+    '..mmmm..',
+    '.mmmmmm.',
+    'mmYmmmmm',
+    'mmKmmmmm',
+    'mmmnnmmm',
+    'mmmmmmmm',
+    'mmmmmmmm',
+    'mm.mm.mm',
+    'm..m..m.',
+  ])
+  blit(s, body, cx, y)
+  blit(s, sprite(['m.m.m', '.mmm.']), cx + 8, y + 4 + Math.round(Math.sin(t) * 2))
+  return outline(s, 'K')
+}
+
+/** ASHIMAGARI 足まがり — soft cotton that wraps and climbs the legs. */
+function ashimagari(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 12
+  for (let i = 0; i < 9; i++) {
+    const yy = 30 - i * 2
+    const off = Math.round(Math.sin(t + i * 0.7) * 4)
+    blit(s, sprite(['WWWWWW']), cx + off, yy)
+    blit(s, sprite(['wwww']), cx + 1 + off, yy + 1)
+  }
+  return outline(s, 'K')
+}
+
+/** KANEDAMA 金霊 — a hovering coin of light that gives nothing and takes. */
+function kanedama(seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 20
+  const cy = 20 + Math.round(Math.sin(t) * 3)
+  const r = 9
+  for (let a = 0; a < 360; a += 18) {
+    const rad = (a * Math.PI) / 180
+    const px = Math.round(cx + Math.cos(rad) * r)
+    const py = Math.round(cy + Math.sin(rad) * r)
+    if (px >= 0 && px < W && py >= 0 && py < H) s.px[py * W + px] = (a + Math.round(t * 30)) % 72 < 36 ? 'D' : 'Y'
+  }
+  for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) s.px[(cy + dy) * W + (cx + dx)] = 'Z'
+  void seed
+  return s
+}
+
+/** ITTAN-MOMEN 一反木綿 — a flying strip of cloth that smothers. */
+function ittanmomen(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  for (let x = 0; x < 40; x++) {
+    const yy = 20 + Math.round(Math.sin(t + x * 0.35) * 6)
+    s.px[yy * W + (2 + x)] = 'W'
+    s.px[(yy + 1) * W + (2 + x)] = 'w'
+    s.px[(yy + 2) * W + (2 + x)] = 'W'
+  }
+  const ey = 20 + Math.round(Math.sin(t) * 6)
+  s.px[ey * W + 4] = 'n'
+  s.px[(ey + 2) * W + 4] = 'n'
+  return outline(s, 'K')
+}
+
+/** TENJŌNAME 天井嘗 — a ceiling-licker that drops on a long tongue. */
+function tenjoname(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 16
+  const drop = Math.round(Math.abs(Math.sin(t)) * 6)
+  const body = sprite([
+    'GGGGGGGG',
+    'GggggggG',
+    'GgYggYgG',
+    'GggggggG',
+    'GgGGGGgG',
+    '.GgggG..',
+  ])
+  blit(s, body, cx, 6 + drop)
+  for (let d = 0; d < 12 + drop; d++) s.px[(12 + drop + d) * W + (cx + 4)] = 'R'
+  blit(s, sprite(['RR', 'RR']), cx + 3, 24 + drop)
+  return outline(s, 'K')
+}
+
+/** AKANAME 垢嘗 — the filth-licker, low and scuttling, all tongue. */
+function akaname(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 12
+  const y = 26 + Math.round(Math.abs(Math.sin(t * 2)) * -2)
+  const body = sprite([
+    '..GGGG..',
+    '.GggggG.',
+    'GgYggYgG',
+    'GgggggggG',
+    'GgggggggGG',
+    '.G.GG.G..',
+  ])
+  blit(s, body, cx, y)
+  const lick = Math.round(Math.sin(t * 2) * 3)
+  blit(s, sprite(['RRR', 'RRRR', '.RR.']), cx + 3 + lick, y + 5)
+  return outline(s, 'K')
+}
+
+/** MOKUMOKUREN 目目連 — a torn paper screen that has filled up with eyes. */
+function mokumokuren(seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const cx = 8
+  const y = 8
+  for (let gx = 0; gx <= 28; gx += 7) for (let yy = 0; yy < 32; yy++) s.px[(y + yy) * W + (cx + gx)] = 'l'
+  for (let gy = 0; gy <= 32; gy += 8) for (let xx = 0; xx < 29; xx++) s.px[(y + gy) * W + (cx + xx)] = 'l'
+  let k = 0
+  for (let ry = 0; ry < 4; ry++)
+    for (let rx = 0; rx < 4; rx++) {
+      const open = ((vary(seed + k, 100) / 100 + phase) % 1) > 0.4
+      const ex = cx + 2 + rx * 7
+      const ey = y + 3 + ry * 8
+      s.px[ey * W + ex] = 'W'
+      s.px[ey * W + ex + 1] = 'W'
+      s.px[(ey + 1) * W + ex] = open ? 'Y' : 'l'
+      s.px[(ey + 1) * W + ex + 1] = open ? 'K' : 'l'
+      k++
+    }
+  return outline(s, 'K')
+}
+
+/** ŌMUKADE 大百足 — a giant centipede, iron-plated, a rolling multi-hit. */
+function omukade(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  for (let seg = 0; seg < 8; seg++) {
+    const x = 4 + seg * 4
+    const yy = 20 + Math.round(Math.sin(t + seg * 0.8) * 4)
+    blit(s, sprite(['III', 'IiI', 'III']), x, yy)
+    if (yy - 1 >= 0) s.px[(yy - 1) * W + x + 1] = 'i'
+    s.px[(yy + 3) * W + x + 1] = 'i'
+  }
+  blit(s, sprite(['OO', 'YY', 'OO']), 2, 20 + Math.round(Math.sin(t) * 4))
+  return outline(s, 'K')
+}
+
+/** TESSO 鉄鼠 — the iron-rat swarm of a wronged monk; it comes in numbers. */
+function tesso(seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  for (let i = 0; i < 6; i++) {
+    const bx = 6 + (i % 3) * 12
+    const by = 16 + Math.floor(i / 3) * 14 + Math.round(Math.sin(t + i) * 2)
+    const rat = sprite([
+      '.III.',
+      'IiYiI',
+      'IiiiI',
+      'II.II',
+    ])
+    blit(s, rat, bx, by)
+    s.px[(by + 2) * W + bx + 5] = 'i'
+    void seed
+  }
+  return outline(s, 'K')
+}
+
+/** BAKENEKO 化け猫 — a two-tailed cat that dances on the lanterns. */
+function bakeneko(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const cx = 12
+  const y = 16
+  const cat = sprite([
+    'H..H',
+    'HHHH',
+    'HYHYH',
+    'HHHHH',
+    '.HHH.',
+    'HHHHHH',
+    'HHHHHH',
+    '.H..H.',
+  ])
+  blit(s, cat, cx, y)
+  const w1 = Math.round(Math.sin(t) * 3)
+  const w2 = Math.round(Math.sin(t + Math.PI) * 3)
+  for (let d = 0; d < 7; d++) {
+    s.px[(y + 6 + d) * W + (cx + 7 + Math.round((d / 7) * w1))] = 'H'
+    s.px[(y + 6 + d) * W + (cx + 9 + Math.round((d / 7) * w2))] = 'H'
+  }
+  return outline(s, 'K')
+}
+
+/** HONE-KARAKASA 骨傘 — a broken-ribbed umbrella, faster and meaner. */
+function honekarakasa(_seed: number, phase: number): Sprite {
+  const s = blank(W, H)
+  const t = phase * Math.PI * 2
+  const hop = Math.round(Math.abs(Math.sin(t * 1.5)) * -4)
+  const cx = 12
+  const y = 14 - hop
+  const canopy = sprite([
+    '...VV...',
+    '..VvvV..',
+    '.VvKKvV.',
+    'VvKvvKvV',
+    'VK.vv.KV',
+    'V.V..V.V',
+  ])
+  blit(s, canopy, cx, y)
+  blit(s, sprite(['V.V.V', '.V.V.']), cx + 1, y + 6)
+  blit(s, sprite(['YKY']), cx + 2, y + 3)
+  blit(s, sprite(['V', 'V', 'V']), cx + 3, y + 8, { shear: Math.round(Math.sin(t) * 2) })
+  return outline(s, 'K')
 }
