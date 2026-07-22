@@ -24,6 +24,7 @@ export function MainMenu({
   const setLedger = useUI((s) => s.setLedger)
   const setWards = useUI((s) => s.setWards)
   const setStories = useUI((s) => s.setStories)
+  const setBestiary = useUI((s) => s.setBestiary)
   const setDescend = useUI((s) => s.setDescend)
   const setRelics = useUI((s) => s.setRelics)
   const t = useT()
@@ -135,6 +136,12 @@ export function MainMenu({
                 <span className="menu-sub">
                   {g.ofuda.length > 0 ? `carrying ${fmtInt(g.ofuda.length)}` : t('menu.wards_sub')}
                 </span>
+              </button>
+            )}
+            {hasWalked && (
+              <button className="menu-btn" data-kind="lore" onClick={() => setBestiary(true)}>
+                The Bestiary
+                <span className="menu-sub">the hundred demons, and your count</span>
               </button>
             )}
             {hasWalked && (

@@ -118,6 +118,7 @@ function hydrate(b: SaveBlob): GameState {
     rngState: n('rngState', base.rngState),
     events: [],
     seen: (b.seen as Record<string, boolean>) ?? {},
+    speciesSeen: (b.speciesSeen as Record<string, number>) ?? {},
   }
   // Enemies are regenerated, never stored.
   g.enemy = spawnFor(g, g.rank, g.enemyIndex)

@@ -98,6 +98,7 @@ export function serialize(g: GameState): string {
     lastSeenAt: Date.now(),
     rngState: g.rngState,
     seen: g.seen,
+    speciesSeen: g.speciesSeen,
   })
 }
 

@@ -499,6 +499,8 @@ type UIState = {
   setWards: (v: boolean) => void
   storiesOpen: boolean
   setStories: (v: boolean) => void
+  bestiaryOpen: boolean
+  setBestiary: (v: boolean) => void
   audioOn: boolean
   setAudioOn: (v: boolean) => void
   audioVolume: number
@@ -557,6 +559,8 @@ export const useUI = create<UIState>((set) => ({
   setWards: (v) => set({ wardsOpen: v }),
   storiesOpen: false,
   setStories: (v) => set({ storiesOpen: v }),
+  bestiaryOpen: false,
+  setBestiary: (v) => set({ bestiaryOpen: v }),
   // Sound is off until asked for. An idle game runs for hours.
   audioOn: localStorage.getItem('myriad.audio') === '1',
   setAudioOn: (v) => {

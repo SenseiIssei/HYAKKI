@@ -516,6 +516,8 @@ function onEnemyKilled(s: GameState, st: StatBlock, f: Flags, overkill: Decimal,
   s.bone = s.bone.add(bone)
   s.killsThisRun += 1
   s.totalKills += 1
+  // remember it for the Bestiary — art only, never touches the economy
+  if (e.speciesId) s.speciesSeen[e.speciesId] = (s.speciesSeen[e.speciesId] ?? 0) + 1
 
   // What you put down leaves something on you. Wardens and the Mu stain worst;
   // a woken sandal barely counts. Slows as you fill, so the scale doesn't

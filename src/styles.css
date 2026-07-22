@@ -2799,3 +2799,51 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .act-btn:hover { transform: none; }
 }
+
+/* ═══════════ THE BESTIARY ═══════════ */
+.panel.bestiary { max-width: 920px; width: 92vw; }
+.bestiary-head { align-items: baseline; justify-content: space-between; }
+.bestiary-fam { margin-top: 18px; }
+.bestiary-fam-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border-bottom: 1px solid var(--void-edge);
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+.bestiary-fam-count { color: var(--bone-dim); font-size: 12px; }
+.mon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.mon {
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid var(--void-edge);
+  background: color-mix(in srgb, var(--bone) 3%, transparent);
+}
+.mon-locked { opacity: 0.62; }
+.mon-art {
+  flex: none;
+  width: 66px;
+  height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0908;
+  border: 1px solid var(--void-edge);
+}
+.mon-canvas { width: 60px; height: auto; image-rendering: pixelated; }
+.mon-info { min-width: 0; }
+.mon-name { font-size: 13px; font-weight: 600; color: var(--bone); }
+.mon-name .kanji { color: var(--gold); font-family: var(--jp); }
+.mon-lore { font-size: 11px; line-height: 1.4; color: var(--bone-dim); margin-top: 3px; }
+.mon-unmet { font-style: italic; color: var(--ash); }
+.mon-count { font-size: 11px; color: var(--gold); margin-top: 4px; letter-spacing: 0.04em; }

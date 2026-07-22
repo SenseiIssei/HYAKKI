@@ -165,6 +165,7 @@ export function createInitialState(classId = DEFAULT_CLASS, seed?: number): Game
     rngState: soldierSeed,
     events: [],
     seen: {},
+    speciesSeen: {},
   }
   s.soldier.hp = computeStats(s).hp
   return s

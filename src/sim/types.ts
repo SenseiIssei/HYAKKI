@@ -388,4 +388,6 @@ export type GameState = {
   events: SimEvent[]
   /** UI reveal flags — see docs/10-UI-UX.md § Onboarding */
   seen: Record<string, boolean>
+  /** how many of each species (by id) you have put down, for the Bestiary */
+  speciesSeen: Record<string, number>
 }

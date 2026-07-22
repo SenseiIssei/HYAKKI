@@ -6,6 +6,7 @@ import { Backdrop } from './Backdrop'
 import { MainMenu } from './MainMenu'
 import { WindowBar } from './WindowBar'
 import { ActionButton } from './ActionButton'
+import { Bestiary } from './Bestiary'
 import { EquipPrompt } from './EquipPrompt'
 import { useGameLoop } from '../loop/useGameLoop'
 import { CLASS_BY_ID } from '../content/classes'
@@ -72,6 +73,7 @@ export function App() {
   const ledgerOpen = useUI((s) => s.ledgerOpen)
   const wardsOpen = useUI((s) => s.wardsOpen)
   const storiesOpen = useUI((s) => s.storiesOpen)
+  const bestiaryOpen = useUI((s) => s.bestiaryOpen)
   const report = useUI((s) => s.report)
   const fontScale = useUI((s) => s.fontScale)
 
@@ -95,6 +97,7 @@ export function App() {
         ui.setDescend(false)
         ui.setAscend(false)
         ui.setLedger(false)
+        ui.setBestiary(false)
         return
       }
       const map: Record<string, () => void> = {
@@ -165,6 +168,7 @@ export function App() {
         {ledgerOpen && <Ledger />}
         {wardsOpen && <Wards />}
         {storiesOpen && <Hyakumonogatari />}
+        {bestiaryOpen && <Bestiary />}
         <div className="grain" />
         <div className="vignette" />
       </>
@@ -296,6 +300,12 @@ export function App() {
                 onClick={() => setRelics(true)}
               />
             )}
+            <ActionButton
+              kind="lore"
+              title="Bestiary"
+              sub="Every yōkai you have met"
+              onClick={() => useUI.getState().setBestiary(true)}
+            />
             <StackButton />
           </div>
         )}
@@ -316,6 +326,7 @@ export function App() {
       {ledgerOpen && <Ledger />}
       {wardsOpen && <Wards />}
       {storiesOpen && <Hyakumonogatari />}
+      {bestiaryOpen && <Bestiary />}
       <EquipPrompt />
       {/* A finished Descent announces itself rather than waiting to be noticed. */}
       {!report && !descendOpen && readyDescents()[0] && (
