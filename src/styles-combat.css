@@ -379,3 +379,6 @@
   text-transform: uppercase;
   color: var(--ash);
 }
+
+/* language picker wraps to fit five tongues */
+.lang-row { flex-wrap: wrap; gap: 6px; }

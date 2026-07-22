@@ -80,6 +80,8 @@ import {
 } from './formulas'
 import { computeStats } from './stats'
 import { buildSigil } from '../render/sigil'
+import { STRINGS } from '../i18n/strings'
+import { translate, LOCALES } from '../i18n'
 import { FAMILY_PRESETS } from '../render/presets'
 
 describe('formulas', () => {
@@ -2004,5 +2006,28 @@ describe('gear stats (P7)', () => {
     expect(armed.hp.gt(bare.hp)).toBe(true)
     expect(armed.bf).toBe(bare.bf)
     expect(armed.af).toBe(bare.af)
+  })
+})
+
+describe('i18n', () => {
+  it('every string has all five languages, with no mojibake', () => {
+    for (const [key, entry] of Object.entries(STRINGS)) {
+      for (const loc of ['en', 'de', 'ja', 'fr', 'es'] as const) {
+        expect(entry[loc], `${key} missing ${loc}`).toBeTruthy()
+        expect(entry[loc]).not.toMatch(/Ã|â€|Â/)
+      }
+    }
+  })
+
+  it('translate returns the locale string, falls back to English, then the key', () => {
+    expect(translate('menu.options', 'de')).toBe('Optionen')
+    expect(translate('menu.options', 'ja')).toBe('設定')
+    expect(translate('menu.options', 'fr')).toBe('Options')
+    // an unknown key returns itself rather than blank
+    expect(translate('no.such.key', 'de')).toBe('no.such.key')
+  })
+
+  it('the five locales are the ones advertised', () => {
+    expect(LOCALES.map((l) => l.id)).toEqual(['en', 'de', 'ja', 'fr', 'es'])
   })
 })

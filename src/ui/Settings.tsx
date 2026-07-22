@@ -2,11 +2,15 @@ import { useEffect, useState } from 'react'
 import { audioLevel } from '../audio/engine'
 import { createInitialState } from '../sim/state'
 import { exportSave, hardReset, importSave } from '../save/storage'
-import { game, replaceGame, saveNow, useUI } from '../store/gameStore'
+import { game, replaceGame, saveNow, useT, useUI } from '../store/gameStore'
 import { fmtInt, fmtTime } from '../format'
 import { BALANCE as B } from '../content/balance'
+import { LOCALES } from '../i18n'
 
 export function Settings() {
+  const t = useT()
+  const locale = useUI((s) => s.locale)
+  const setLocale = useUI((s) => s.setLocale)
   const close = useUI((s) => s.setSettings)
   const numbersOnly = useUI((s) => s.numbersOnly)
   const setNumbersOnly = useUI((s) => s.setNumbersOnly)
@@ -52,7 +56,7 @@ export function Settings() {
           </span>
         </div>
 
-        <h2>Sound</h2>
+        <h2>{t('opt.sound')}</h2>
         <label className="orders-toggle">
           <input
             type="checkbox"
@@ -97,14 +101,28 @@ export function Settings() {
           reason there are no pictures.
         </div>
 
-        <h2>Display</h2>
+        <h2>{t('opt.language')}</h2>
+        <div className="panel-row lang-row">
+          {LOCALES.map((l) => (
+            <button
+              key={l.id}
+              className="small-btn"
+              data-on={locale === l.id}
+              onClick={() => setLocale(l.id)}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+
+        <h2>{t('opt.display')}</h2>
         <label className="orders-toggle">
           <input
             type="checkbox"
             checked={numbersOnly}
             onChange={(e) => setNumbersOnly(e.target.checked)}
           />
-          <span>Numbers only — no sigils, combat as a log</span>
+          <span>{t('opt.numbers_only')}</span>
         </label>
         <label className="orders-toggle">
           <input
@@ -112,7 +130,7 @@ export function Settings() {
             checked={damageNumbers}
             onChange={(e) => setDamageNumbers(e.target.checked)}
           />
-          <span>Floating damage numbers</span>
+          <span>{t('opt.damage_numbers')}</span>
         </label>
         <label className="orders-toggle">
           <input
@@ -120,10 +138,10 @@ export function Settings() {
             checked={screenShake}
             onChange={(e) => setScreenShake(e.target.checked)}
           />
-          <span>Impact — hit-stop and screen shake</span>
+          <span>{t('opt.impact')}</span>
         </label>
         <div className="panel-row">
-          <span className="hint" style={{ alignSelf: 'center' }}>Text size</span>
+          <span className="hint" style={{ alignSelf: 'center' }}>{t('opt.text_size')}</span>
           {[90, 100, 120].map((n) => (
             <button
               key={n}

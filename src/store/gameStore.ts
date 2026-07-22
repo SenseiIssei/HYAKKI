@@ -18,6 +18,7 @@ import {
   abilityTier,
 } from '../content/abilities'
 import { weaponClass } from '../content/items'
+import { getLocale, persistLocale, translate, type Locale } from '../i18n'
 import {
   concurrentCap,
   descentReady,
@@ -414,6 +415,8 @@ type UIState = {
   /** low-end / high-legibility mode: combat as a text log, no sigils */
   numbersOnly: boolean
   setNumbersOnly: (v: boolean) => void
+  locale: Locale
+  setLocale: (l: Locale) => void
   /** hit-stop and screen shake on impact. Off for anyone who wants it still. */
   screenShake: boolean
   setScreenShake: (v: boolean) => void
@@ -479,6 +482,11 @@ export const useUI = create<UIState>((set) => ({
     localStorage.setItem('myriad.numbersOnly', v ? '1' : '0')
     set({ numbersOnly: v })
   },
+  locale: getLocale(),
+  setLocale: (l) => {
+    persistLocale(l)
+    set({ locale: l })
+  },
   screenShake: localStorage.getItem('hyakki.shake') !== '0',
   setScreenShake: (v) => {
     localStorage.setItem('hyakki.shake', v ? '1' : '0')
@@ -498,6 +506,16 @@ export const useUI = create<UIState>((set) => ({
   buyMode: 1,
   setBuyMode: (m) => set({ buyMode: m }),
 }))
+
+/**
+ * The translator, bound to the live locale. Subscribing to `locale` means every
+ * component that calls `useT()` re-renders when the language changes, so the
+ * whole interface re-reads at once.
+ */
+export function useT() {
+  const locale = useUI((s) => s.locale)
+  return (key: string) => translate(key, locale)
+}
 
 // ── actions ──
 
