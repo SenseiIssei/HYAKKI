@@ -14,7 +14,7 @@ You march. You never stop. The Parade does not stop because you looked away.
 ![Tests](https://img.shields.io/badge/tests-167_passing-4a6b3f?style=for-the-badge)
 ![Assets](https://img.shields.io/badge/art_%26_audio-0_asset_files-b8912f?style=for-the-badge)
 
-[![Download](https://img.shields.io/badge/⬇_Download-Windows_Installer-c1372b?style=for-the-badge)](https://github.com/SenseiIssei/HYAKKI/releases)
+[![Download](https://img.shields.io/badge/⬇_Download-Windows_Installer-c1372b?style=for-the-badge)](https://github.com/SenseiIssei/HYAKKI/releases/latest)
 [![Roadmap](https://img.shields.io/badge/📜_Roadmap-The_Descent_Rebuilt-46707a?style=for-the-badge)](https://claude.ai/code/artifact/35e33d40-f417-4a79-915a-94c90d102493)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/senseiissei)
