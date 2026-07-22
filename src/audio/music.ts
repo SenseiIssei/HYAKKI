@@ -28,11 +28,59 @@ const IN_SCALE = [0, 1, 5, 7, 8, 12, 13, 17, 19, 20, 24]
 const ROOT = 146.83 // D3
 const note = (deg: number) => ROOT * Math.pow(2, IN_SCALE[deg % IN_SCALE.length] / 12)
 
+let dreadGain: GainNode | null = null
+
 export function initMusic(context: Ctx, master: GainNode) {
   ctx = context
   bus = context.createGain()
   bus.gain.value = 0.0
   bus.connect(master)
+  buildDread()
+}
+
+/**
+ * THE DREAD — a low bed that curdles the deeper you go.
+ *
+ * Two sine tones a minor second apart, an octave below the root. At that
+ * interval and that pitch they beat against each other a few times a second — a
+ * slow, physical flutter you feel more than hear. Silent near the surface; it
+ * rises with intensity, so descending literally sounds like descending.
+ */
+function buildDread() {
+  if (!ctx || !bus) return
+  const filter = ctx.createBiquadFilter()
+  filter.type = 'lowpass'
+  filter.frequency.value = 190
+  filter.Q.value = 0.7
+  dreadGain = ctx.createGain()
+  dreadGain.gain.value = 0
+  filter.connect(dreadGain).connect(bus)
+
+  const lowRoot = ROOT / 2 // D2
+  const semitone = Math.pow(2, 1 / 12)
+  for (const [mult, det, lvl] of [
+    [1, 0, 0.55],
+    [1, 6, 0.35], // a hair sharp — a second, slower beat
+    [semitone, -3, 0.45], // the minor second: the whole unease in one interval
+  ]) {
+    const o = ctx.createOscillator()
+    o.type = 'sine'
+    o.frequency.value = lowRoot * mult
+    o.detune.value = det
+    const og = ctx.createGain()
+    og.gain.value = lvl
+    o.connect(og).connect(filter)
+    o.start()
+  }
+
+  // a very slow tremor on the cutoff, so the bed is never quite still
+  const lfo = ctx.createOscillator()
+  lfo.type = 'sine'
+  lfo.frequency.value = 0.06
+  const lg = ctx.createGain()
+  lg.gain.value = 45
+  lfo.connect(lg).connect(filter.frequency)
+  lfo.start()
 }
 
 export function setMusicEnabled(on: boolean) {
@@ -49,6 +97,40 @@ export function setMusicEnabled(on: boolean) {
 /** 0..1 — how deep, how defiled, how close the drum is. */
 export function setIntensity(v: number) {
   intensity = Math.max(0, Math.min(1, v))
+  // the dread rises with depth — silent up top, a pressure by the bottom
+  if (dreadGain && ctx) {
+    dreadGain.gain.setTargetAtTime(Math.pow(intensity, 1.5) * 0.16, ctx.currentTime, 3)
+  }
+}
+
+/**
+ * A whisper — breath shaped by a moving formant so it almost, never quite,
+ * becomes a word. Only turns up deep in, and never on the beat.
+ */
+function whisper(when: number) {
+  if (!ctx || !bus) return
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 1.6, ctx.sampleRate)
+  const d = buf.getChannelData(0)
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1
+  const s = ctx.createBufferSource()
+  s.buffer = buf
+
+  const f = ctx.createBiquadFilter()
+  f.type = 'bandpass'
+  f.Q.value = 22
+  // sweep through two vowel-ish formants — the shape of almost-speech
+  f.frequency.setValueAtTime(520, when)
+  f.frequency.linearRampToValueAtTime(1100, when + 0.5)
+  f.frequency.linearRampToValueAtTime(700, when + 1.1)
+
+  const g = ctx.createGain()
+  g.gain.setValueAtTime(0, when)
+  g.gain.linearRampToValueAtTime(0.05, when + 0.3)
+  g.gain.exponentialRampToValueAtTime(0.0001, when + 1.5)
+
+  s.connect(f).connect(g).connect(bus)
+  s.start(when)
+  s.stop(when + 1.6)
 }
 
 // ── voices ─────────────────────────────────────────────────────────────
@@ -177,15 +259,21 @@ function run() {
     if (step % drumEvery === 0) taiko(now, 0.16 + intensity * 0.26)
     if (intensity > 0.8 && step % drumEvery === 1) taiko(now + BEAT * 0.5, 0.1)
 
-    // koto phrases, sparse and hesitant
+    // koto phrases, sparse and hesitant — and more unsettled the deeper you are
     if (step % 4 === 0) {
       const r = Math.random()
+      // the flat second (the creepy interval) gets more common with intensity
+      const dissonate = 0.72 - intensity * 0.22
       if (r < 0.55) {
         const start = Math.floor(Math.random() * 5)
         koto(note(start), now, 0.2)
         if (Math.random() < 0.6) koto(note(start + 2), now + BEAT * 1.5, 0.14)
         if (Math.random() < 0.35) koto(note(start + 4), now + BEAT * 2.5, 0.1)
-      } else if (r < 0.72) {
+        // deep in, a second string sounds a semitone off it — a wrong note held
+        if (intensity > 0.6 && Math.random() < 0.4) {
+          koto(note(start) * Math.pow(2, 1 / 12), now + BEAT * 0.5, 0.09)
+        }
+      } else if (r < dissonate) {
         // the flat second, alone. It is the whole scale in one note.
         koto(note(1), now, 0.16)
       }
@@ -194,6 +282,16 @@ function run() {
     // breath, rarely, and never on the beat
     if (step % 16 === 7 && Math.random() < 0.7) {
       shakuhachi(note(Math.floor(Math.random() * 4)) * 2, now + BEAT * 0.3)
+    }
+
+    // ── the deep gets its own sounds ──
+    // a whisper, only well down, off the beat
+    if (intensity > 0.45 && step % 24 === 13 && Math.random() < 0.5 + intensity * 0.3) {
+      whisper(now + BEAT * (0.2 + Math.random()))
+    }
+    // and, near the bottom, the great bell tolls under everything
+    if (intensity > 0.75 && step % 64 === 31 && Math.random() < 0.6 && ctx && bus) {
+      bonsho(bus, ctx, 0.1 + intensity * 0.08)
     }
   }, 520)
 }

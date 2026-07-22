@@ -89,8 +89,10 @@ export function useGameLoop() {
         }
       }
 
-      // the drum walks closer the deeper you are
-      setMusicIntensity(Math.min(1, Math.log10(Math.max(1, game().rank)) / 3.4))
+      // the drum walks closer the deeper you are — and a defiled walk is worse
+      setMusicIntensity(
+        Math.min(1, Math.log10(Math.max(1, game().rank)) / 3.4 + game().kegare * 0.25),
+      )
       checkFragments()
       const changed = drainEvents(now)
       if (now - lastRender >= RENDER_MS && changed) {
