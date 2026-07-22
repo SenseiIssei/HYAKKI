@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { draw } from '../pixel/engine'
 import { YOKAI_PAL } from '../pixel/yokai'
 import { SPECIES, type Species } from '../pixel/species'
-import { game, useUI } from '../store/gameStore'
+import { bestiaryCompletedFamilies, BESTIARY_ATK_PER_FAMILY } from '../sim/stats'
+import { game, getDiscovery, useUI } from '../store/gameStore'
 import { fmtInt } from '../format'
 
 /**
@@ -64,10 +65,14 @@ function MonSprite({ sp, met }: { sp: Species; met: boolean }) {
   return <canvas ref={ref} width={44 * 3} height={48 * 3} className="mon-canvas" aria-hidden="true" />
 }
 
-function Mon({ sp, count }: { sp: Species; count: number }) {
+function Mon({ sp, count, justMet }: { sp: Species; count: number; justMet?: boolean }) {
   const met = count > 0
   return (
-    <div className={`mon ${met ? '' : 'mon-locked'}`} data-family={sp.family}>
+    <div
+      className={`mon ${met ? '' : 'mon-locked'} ${justMet ? 'mon-new' : ''}`}
+      data-family={sp.family}
+    >
+      {justMet && <span className="mon-new-tag">just met</span>}
       <div className="mon-art">
         <MonSprite sp={sp} met={met} />
       </div>
@@ -89,12 +94,29 @@ function Mon({ sp, count }: { sp: Species; count: number }) {
   )
 }
 
+const FILTERS = [
+  { id: 'all', label: 'All' },
+  { id: 'met', label: 'Recorded' },
+  { id: 'unmet', label: 'Unmet' },
+] as const
+type Filter = (typeof FILTERS)[number]['id']
+
 export function Bestiary() {
   useUI((s) => s.frame)
   const close = useUI((s) => s.setBestiary)
+  const [filter, setFilter] = useState<Filter>('all')
   const g = game()
   const seen = g.speciesSeen ?? {}
   const metCount = SPECIES.filter((s) => (seen[s.id] ?? 0) > 0).length
+  const done = bestiaryCompletedFamilies(seen)
+  const boonPct = Math.round(done * BESTIARY_ATK_PER_FAMILY * 100)
+  // the species named by the most recent "first felled" gets a highlight
+  const justMetId = getDiscovery()?.speciesId
+
+  const show = (id: string) => {
+    const isMet = (seen[id] ?? 0) > 0
+    return filter === 'all' || (filter === 'met' && isMet) || (filter === 'unmet' && !isMet)
+  }
 
   return (
     <div className="overlay dark" onClick={() => close(false)}>
@@ -106,23 +128,56 @@ export function Bestiary() {
           </span>
         </div>
         <div className="hint">
-          A hundred demons, which is to say too many to count. Every one you put down is
-          written here, in its own colour. The rest wait in the dark.
+          A hundred demons, which is to say too many to count. Record every yōkai of a
+          family, end to end, and it lends a small permanent edge to your attack.
+        </div>
+
+        <div className="bestiary-controls">
+          <div className="bestiary-boon">
+            <span className="boon-label">The Bestiary’s edge</span>
+            <span className="boon-value" data-full={done >= 4}>
+              {done} / 4 families · <b>+{boonPct}% might</b>
+            </span>
+          </div>
+          <div className="bestiary-filters">
+            {FILTERS.map((f) => (
+              <button
+                key={f.id}
+                className="small-btn"
+                data-on={filter === f.id}
+                onClick={() => setFilter(f.id)}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {FAMILY_ORDER.map((fam) => {
           const list = SPECIES.filter((s) => s.family === fam)
+          const shown = list.filter((s) => show(s.id))
+          if (!shown.length) return null
+          const metInFam = list.filter((s) => (seen[s.id] ?? 0) > 0).length
+          const complete = metInFam === list.length
           return (
             <div key={fam} className="bestiary-fam">
               <div className="bestiary-fam-head">
-                {FAMILY_LABEL[fam]}
+                <span>
+                  {FAMILY_LABEL[fam]}
+                  {complete && <span className="fam-done" title="Fully recorded"> ✓</span>}
+                </span>
                 <span className="bestiary-fam-count">
-                  {list.filter((s) => (seen[s.id] ?? 0) > 0).length} / {list.length}
+                  {metInFam} / {list.length}
                 </span>
               </div>
               <div className="mon-grid">
-                {list.map((sp) => (
-                  <Mon key={sp.id} sp={sp} count={seen[sp.id] ?? 0} />
+                {shown.map((sp) => (
+                  <Mon
+                    key={sp.id}
+                    sp={sp}
+                    count={seen[sp.id] ?? 0}
+                    justMet={sp.id === justMetId}
+                  />
                 ))}
               </div>
             </div>

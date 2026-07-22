@@ -2923,3 +2923,36 @@ button {
   .corpse.die-boss { animation: die-boss-fade 600ms linear forwards; }
   @keyframes die-boss-fade { 0% { opacity: 1; } 100% { opacity: 0; } }
 }
+
+/* ── bestiary: rewards, filters, highlight ── */
+.bestiary-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 10px 0 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--void-edge);
+  background: color-mix(in srgb, var(--gold) 5%, transparent);
+}
+.bestiary-boon { display: flex; flex-direction: column; gap: 2px; }
+.boon-label { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
+.boon-value { font-size: 13px; color: var(--bone-dim); }
+.boon-value b { color: var(--bone); }
+.boon-value[data-full='true'] b { color: var(--gold); }
+.bestiary-filters { display: flex; gap: 6px; }
+.fam-done { color: var(--gold); }
+.mon-new { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold), 0 0 14px color-mix(in srgb, var(--gold) 40%, transparent); position: relative; }
+.mon-new-tag {
+  position: absolute;
+  top: -8px;
+  right: 6px;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--void);
+  background: var(--gold);
+  padding: 1px 6px;
+  z-index: 3;
+}

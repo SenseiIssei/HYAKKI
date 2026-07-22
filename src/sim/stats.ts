@@ -7,10 +7,33 @@ import { AFFIX_BY_ID } from '../content/relics'
 import { ITEM_BASE_BY_ID, baseSignature, weaponClass, WEAPON_CLASS_MODS } from '../content/items'
 import { bandFor } from '../content/kegare'
 import { equippedFlags, uniqueOf } from './relics'
+import { SPECIES } from '../pixel/species'
 import type { GameState, StatBlock } from './types'
 
 const DECIMAL_STATS = ['hp', 'reg', 'atk', 'arm'] as const
 type DecimalStat = (typeof DECIMAL_STATS)[number]
+
+// ── the Bestiary boon ────────────────────────────────────────────────────
+// Recording every yōkai of a family, end to end, teaches you how they die.
+// Each family fully recorded lends a small, permanent edge to your ATTACK —
+// combat only, never income (bf/af/omen untouched), so it sharpens the walk
+// without bending the economy's payout curve.
+const BEST_FAMILIES = ['chaff', 'organs', 'returned', 'nothing'] as const
+const BEST_IDS_BY_FAMILY: Record<string, string[]> = Object.fromEntries(
+  BEST_FAMILIES.map((f) => [f, SPECIES.filter((s) => s.family === f).map((s) => s.id)]),
+)
+/** How many families are fully recorded in `seen` (0..4). */
+export function bestiaryCompletedFamilies(seen: Record<string, number> | undefined): number {
+  if (!seen) return 0
+  let n = 0
+  for (const f of BEST_FAMILIES) if (BEST_IDS_BY_FAMILY[f].every((id) => (seen[id] ?? 0) > 0)) n++
+  return n
+}
+/** The ATTACK multiplier the Bestiary lends: +5% per family fully recorded. */
+export const BESTIARY_ATK_PER_FAMILY = 0.05
+export function bestiaryAtkMult(seen: Record<string, number> | undefined): number {
+  return 1 + BESTIARY_ATK_PER_FAMILY * bestiaryCompletedFamilies(seen)
+}
 
 function baseStats() {
   return {
@@ -162,6 +185,8 @@ export function computeStats(s: GameState): StatBlock {
   if (f.has('haste25')) out.res += out.spd
   if (f.has('tithe50')) out.atk = out.atk.mul(1 + s.bone.div(1000).toNumber() * 0.01)
   if (f.has('return25')) out.revive = Math.min(1, out.revive)
+  // the Bestiary's edge — combat only, never income
+  out.atk = out.atk.mul(bestiaryAtkMult(s.speciesSeen))
 
   // Crit overflow: SPITE 25, or the Augur's own pipeline.
   if ((f.has('spite25') || s.classId === 'augur') && out.cc > 1) {
